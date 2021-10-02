@@ -17,7 +17,7 @@ int main()
     do
     {
         uint32_t nlines, ncolumns;
-        std::cout << "Please, nter the number of lines: ";
+        std::cout << "Please, enter the number of lines: ";
         while (std::cin.peek() == '-' || !(std::cin >> nlines) || std::cin.peek() != '\n')
         {
             std::cin.clear();
