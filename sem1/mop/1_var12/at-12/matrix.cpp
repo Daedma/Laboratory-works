@@ -12,7 +12,7 @@
 
 int main()
 {
-    using value_type = long double;
+    using value_type = int;
     char choice;
     do
     {
@@ -33,15 +33,18 @@ int main()
         }
         std::vector<std::vector<value_type>> matrix;
         matrix.reserve(nlines);
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
         for (uint32_t i = 0; i != nlines; ++i)
         {
-            bool valid = true;
+            bool valid;
             do
             {
+                valid = true;
                 std::cout << "Enter " << i + 1 << "st line: ";
                 std::stringstream ss;
                 std::string rdline;
-                std::getline(std::cin, rdline);
+                std::getline(std::cin, rdline, '\n');
                 ss.str(rdline);
                 std::vector<value_type> line;
                 value_type t;
@@ -58,7 +61,6 @@ int main()
                     matrix.emplace_back(std::move(line));
                 else
                     std::cout << "Oops! You entered something wrong. Try again.\n";
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             } while (!valid);
         }
 
@@ -82,7 +84,7 @@ int main()
         {
             for (auto i = matrix.cbegin(); i != matrix.cend(); ++i)
             {
-                for (auto j = i->cbegin(); j != i->cend(); ++i)
+                for (auto j = i->cbegin(); j != i->cend(); ++j)
                 {
                     if (*j < min)
                         min = *j;
@@ -100,8 +102,9 @@ int main()
             std::cout << "Elements in your matrix is equal: " << max;
         else
             std::cout << "Maximum value is: " << max
-                      << "\nMinimum value is: " << min;
+            << "\nMinimum value is: " << min;
         std::cout << '\n';
+        std::cout << "Do you want to continue? (Y/N): ";
         std::cin >> choice;
         while (choice != 'Y' && choice != 'N' || std::cin.peek() != '\n') //пока не будут переданы правильные значения в choice
         {
