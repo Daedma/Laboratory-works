@@ -7,9 +7,8 @@
 */
 
 #include <iostream>
-#include <algorithm>
+#include <limits>
 #include <vector>
-#include <numeric>
 
 int main()
 {
@@ -26,10 +25,10 @@ int main()
         {
             if (std::cin >> num && num >= 0.0L) //если ввод произошел успешно
             {
-                if (num == 0.0L)//если пользователь введет ноль, то прервать чтение
-                {                   
-                    status = false; //выйти из цикла ввода
-                    error = (std::cin.peek() != '\n');//если после 0 оказались посторонние значения
+                if (num == 0.0L) //если пользователь введет ноль, то прервать чтение
+                {
+                    status = false;                    //выйти из цикла ввода
+                    error = (std::cin.peek() != '\n'); //если после 0 оказались посторонние значения
                 }
                 else
                     row.push_back(num); //иначе добавить в вектор
@@ -47,18 +46,28 @@ int main()
         {
             if (row.size()) //если вектор не пустой
             {
-                auto min_max = std::minmax_element(row.cbegin(), row.cend()); //найти минимальное и максимальное значения введенной последовательности
+                long double min, max;//минимальное и максимальное значения
+                min = max = row[0];
+                long double sum = 0;//сумма элементов вектора
+                for (auto i : row)
+                {
+                    sum += i;
+                    if (i > max)
+                        max = i;
+                    else if (i < min)
+                        min = i;
+                }
                 std::cout << "In the sequence you entered: \n";
-                if (*min_max.first != *min_max.second) //если все значения различны
+                if (min != max) //если все значения различны
                 {
                     //выведем оценку характеристик последовательности чисел...
-                    std::cout << "minimum element value is " << *min_max.first << ",\n"                                //минимальное значение
-                              << "maximum element value is " << *min_max.second << ",\n";                              //максимальное значение
-                    std::cout << "arithmetic mean is " << std::accumulate(row.cbegin(), row.cend(), 0.0L) / row.size() //среднее арифметическое
+                    std::cout << "minimum element value is " << min << ",\n"  //минимальное значение
+                              << "maximum element value is " << max << ",\n"; //максимальное значение
+                    std::cout << "arithmetic mean is " << sum / row.size()    //среднее арифметическое
                               << ".\n\n";
                 }
-                else                                                                    //если все значение одинаковы
-                    std::cout << "all elements are equal: " << *min_max.first << ".\n"; //сообщить об этом пользователю
+                else                                                         //если все значение одинаковы
+                    std::cout << "all elements are equal: " << min << ".\n\n"; //сообщить об этом пользователю
             }
             else
                 std::cout << "The sequence you entered contains no elements.\n\n"; //ряд чисел пуст
