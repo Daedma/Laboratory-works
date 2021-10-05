@@ -7,5 +7,4 @@
 int main()
 {
     std::cout << "Hello, World!" << std::endl;
-    system("pause");//чтобы консоль не закрывалась сразу после вывода
 }
