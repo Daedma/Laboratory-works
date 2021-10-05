@@ -56,7 +56,7 @@ int main()
                     else//если нет, то записать в valid информацию о том, что произошла ошибка
                         valid = false;
                 }
-                if (valid && ss.str().find_first_not_of(' ', ss.tellg()) != std::string::npos)
+                if (valid && ss.str().find_first_not_of(' ', ss.tellg()) != std::string::npos)//если в считанной строке остались символы
                     valid = false;
                 if (valid)//если ошибок не было, то добавить строку в матрицу
                     matrix.emplace_back(std::move(line));

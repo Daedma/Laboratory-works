@@ -46,13 +46,16 @@ int main()
             {
                 auto min_max = std::minmax_element(row.cbegin(), row.cend());//найти минимальное и максимальное значения введенной последовательности
                 std::cout << "In the sequence you entered: \n";
-                if (min_max.first == min_max.second)//если все числа ряда равны
-                    std::cout << "all elements are equal,\n";//сообщить об этом пользователю
-                else//иначе выведем оценку характеристик последовательности чисел...
-                    std::cout << "minimum element value is " << *(min_max.first) << ",\n"//минимальное значение
-                    << "maximum element value is " << *(min_max.second) << ",\n";//максимальное значение
-                std::cout << "arithmetic mean is " << std::accumulate(row.cbegin(), row.cend(), 0.0L) / row.size()//среднее арифметическое
-                    << ".\n\n";
+                if (*min_max.first != *min_max.second)//если все значения различны
+                {
+                    //выведем оценку характеристик последовательности чисел...
+                    std::cout << "minimum element value is " << *min_max.first << ",\n"//минимальное значение
+                        << "maximum element value is " << *min_max.second << ",\n";//максимальное значение
+                    std::cout << "arithmetic mean is " << std::accumulate(row.cbegin(), row.cend(), 0.0L) / row.size()//среднее арифметическое
+                        << ".\n\n";
+                }
+                else//если все значение одинаковы
+                    std::cout << "all elements are equal: " << *min_max.first << ".\n";//сообщить об этом пользователю
             }
             else
                 std::cout << "The sequence you entered contains no elements.\n\n";//ряд чисел пуст
