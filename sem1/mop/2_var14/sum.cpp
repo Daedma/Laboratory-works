@@ -2,32 +2,40 @@
 #include <stdexcept>
 #include <cmath>
 #include <iostream>
+#include <iomanip>
 #include <fstream>
-#define INDEX_N char(252) 
-#define ALPHA char(224)
+#define INDEX_N 'n' 
+#define ALPHA "alpha"
 
 Sum::Sum(std::function<value_type(size_t)> member) noexcept :
     NumMember { std::move(member) }, nStart { 0ULL }, nIteration { 0ULL },
-    LastMember { 0.L }, PartialSum { 0.L }, Precision { 0.L }, Print { true }{}
+    LastMember { 0.L }, PartialSum { 0.L }, Precision { 0.L }{}
 
 Sum::value_type Sum::calc(size_t from, size_t to)
 {
     if (from > to) throw std::invalid_argument { "from greater than to" };
     nStart = from;
-    nIteration = to;
-    value_type result = 0;
-    value_type curMemb, nextMemb, curPrecision;
-    curMemb = NumMember(from);
+    nIteration = to + 1;
+    value_type result = 0;//текущая частичная сумма
+    value_type curMemb,//текущий член последовательности
+        nextMemb,//следующий член последовательности
+        curPrecision;//текущая точность вычислений
+    curMemb = NumMember(from);//подсчитаем первый член последовательности
     std::cout << "Current values:\n";
     while (from <= to)
     {
-        nextMemb = NumMember(from + 1);
-        result += curMemb;
-        curPrecision = std::abs(nextMemb / result);
-        if (Print)
-            std::cout << "n = " << from << " a" << INDEX_N << "= " << curMemb << " S" << INDEX_N
-            << " = " << result << ' ' << ALPHA << INDEX_N << " = " << curPrecision << '\n';
-        curMemb = nextMemb;
+        nextMemb = NumMember(from + 1);//найдём следующий член последовательности
+        result += curMemb;//прибавим текущий член к частичной сумме
+        curPrecision = std::abs(nextMemb / result);//вычислим текущую точность
+        //выведем текущие значения
+        std::cout << "n = " << from << " a" << INDEX_N << "= " << curMemb << " S" << INDEX_N
+            << " = " << result << ' ' << ALPHA << INDEX_N << " = ";
+        if (std::isinf(curPrecision))//для первой итерации 
+            std::cout << "-\n";
+        else//для последующих
+            std::cout << curPrecision << '\n';
+        if (from != to)//для последней итерации не выполнять
+            curMemb = nextMemb;
         ++from;
     }
     LastMember = curMemb;
@@ -45,19 +53,28 @@ Sum::value_type Sum::calc(size_t from, value_type precision)
 {
     if (precision <= 0) throw std::invalid_argument { "Precision is no-positive" };
     nStart = from;
-    value_type result = 0;
-    value_type curMemb, nextMemb, curPrecision = INFINITY;
-    curMemb = NumMember(from);
+    value_type result = 0;//текущая частичная сумма
+    value_type curMemb,//текущий член последовательности
+        nextMemb,//следующий член последовательности
+        curPrecision = INFINITY;//текущая точность вычислений
+    curMemb = NumMember(from);//подсчитаем первый член последовательности
     std::cout << "Current values:\n";
-    while (curPrecision > precision)
+    while (curPrecision > precision)//пока текущая точность больше заданной
     {
-        nextMemb = NumMember(from + 1);
-        result += curMemb;
-        curPrecision = std::abs(nextMemb / result);
-        if (Print)
-            std::cout << "n = " << from << " a" << INDEX_N << "= " << curMemb << " S" << INDEX_N
-            << " = " << result << ' ' << ALPHA << INDEX_N << " = " << curPrecision << '\n';
-        curMemb = nextMemb;
+        nextMemb = NumMember(from + 1);//найдём следующий член последовательности
+        result += curMemb;//прибавим текущий член к частичной сумме
+        if (result)
+        {
+            curPrecision = std::abs(nextMemb / result);//вычислим текущую точность
+        }
+        std::cout << "n = " << from << " a" << INDEX_N << "= " << curMemb << " S" << INDEX_N
+            << " = " << result << ' ' << ALPHA << INDEX_N << " = ";
+        if (!result)//для первой итерации 
+            std::cout << "-\n";
+        else//для последующих
+            std::cout << curPrecision << '\n';
+        if (curPrecision > precision)//для последней итерации не выполнять
+            curMemb = nextMemb;
         ++from;
     }
     nIteration = from;
@@ -105,13 +122,13 @@ Sum::value_type Sum::calc_n(size_t n) const
 Sum::Cache::Cache(const std::filesystem::path& Path) noexcept :
     SumCache {}, CachePath { Path }, error { false }
 {
-    upload();
+    upload();//загрузим данные из файла кэша
 }
 
 void Sum::Cache::add(const cache_type::key_type& Args, const Sum& CalcSum)
 {
     SumCache[Args] = { CalcSum.get_range().second, CalcSum.get_last(), CalcSum.get_sum(), CalcSum.get_precision() };
-    unload();
+    unload();//выгрузим данные в кэш файл
 }
 
 bool Sum::Cache::contains(const cache_type::key_type& Args) const noexcept
@@ -147,7 +164,7 @@ void Sum::Cache::upload()
         fs.close();
         fs.clear();
         fs.open(CachePath, std::ios::out);
-        if (!fs)
+        if (!fs)//если не удалось создать файл
             error = true;
         return;
     }
@@ -159,8 +176,10 @@ void Sum::Cache::upload()
         size_t nit;//количество просуммированных членов
         value_type lastm,//последний просуммированный член
             res;//частичная сумма
+        fs >> std::setprecision(16);
         while (fs >> std::ws && !fs.eof())//пока не достигнем конца файла
         {
+            //в начале стоит параметр, указывающий тип второго аргумента
             bool second_arg_is_int;
             fs >> second_arg_is_int;
             fs >> x;
@@ -194,16 +213,17 @@ void Sum::Cache::unload() const noexcept
 {
     if (error) return;
     std::ofstream ofs { CachePath, std::ios::out | std::ios::trunc };
-    if (!ofs)
+    if (!ofs)//если не удалось открыть или создать файл
     {
         error = true;
         return;
     }
+    ofs << std::setprecision(16);
     for (const auto& i : SumCache)
     {
         const auto& [nit, lastm, res, aplha] = i.second;
         bool second_arg_is_int = std::holds_alternative<size_t>(i.first.second);
-        ofs << second_arg_is_int << ' ' << i.first.first << ' ';
+        ofs << second_arg_is_int << ' ' << i.first.first << ' ';//в начале ставим единицу для того, чтобы узнать тип второго аргумента
         if (second_arg_is_int)
             ofs << std::get<size_t>(i.first.second);
         else
