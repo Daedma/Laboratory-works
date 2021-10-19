@@ -3,11 +3,9 @@
 #include <cmath>
 #include <array>
 #include <iomanip>
-#include <string>
 #include <algorithm>
+#include "table_print.hpp"
 #include "sum.hpp"
-#define INDEX_N 'n' 
-#define ALPHA "alpha"
 
 //функция для подсчёта факториала числа
 uint64_t factorial(uint64_t n) noexcept
@@ -25,12 +23,13 @@ uint64_t factorial(uint64_t n) noexcept
 auto create_an(long double x) noexcept
 {
     return [x](size_t n) noexcept{
-        static const auto pi = std::acosl(-1);
-        return (std::powl(2.l, n / 2.l) * std::sinl((pi * n) / 4) * std::powl(x, n)) / factorial(n);//вариант 11
+        static const auto pi = std::acos(-1.l);
+        return (std::pow(2.l, n / 2.l) * std::sin((pi * n) / 4.l) * std::pow(x, n)) / factorial(n);//вариант 11
     };
 }
 
-void badInputMessage()//сообщить о некорректном вводе и привести std::cin в "порядок"
+//сообщить о некорректном вводе и привести std::cin в "порядок"
+void badInputMessage()
 {
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -66,8 +65,8 @@ std::string getstr(Func&&... UnPred)
 //Узнает о намерениях пользователя о продолжении работы программы через консоль
 bool keep_on()
 {
-    static const std::array<std::string, 8> choices = { "Yes", "yes", "y", "Y", "No", "no", "n", "N" };//допустимые ответы
-    std::array<std::string, 8>::const_iterator find_result;//указывает на введенный пользователем допустимый ответ
+    static const std::array<std::string, 10> choices = { "Yes", "yes", "y", "Y", "YES", "NO", "No", "no", "n", "N" };//допустимые ответы
+    std::array<std::string, 10>::const_iterator find_result;//указывает на введенный пользователем допустимый ответ
     auto valid = [&find_result](const std::string& str){
         return (find_result = std::find(choices.cbegin(), choices.cend(), str)) != choices.cend();//если строка не соответсвует формату
     };
@@ -94,18 +93,11 @@ std::variant<size_t, Sum::value_type> getAlpha()
 //вывести результаты в виде красивой таблички
 void print_results(size_t nIteration, Sum::value_type LastMember, Sum::value_type PartialSum, Sum::value_type Precision)
 {
-    size_t max_width = 20;
-    short max_name = 37;
-    std::cout << char(218) << std::setfill(char(196)) << std::setw(max_name) << char(194) << std::setw(max_width + 2) << char(191) << '\n' << std::setfill(' ');
-    std::cout << char(179) << "Iteration number" << std::setw(max_name - 16) << char(179) << std::setw(max_width + 1) << nIteration << char(179) << '\n';
-    std::cout << char(179) << "The last summed term of the series" << std::setw(max_name - 34) << char(179) << std::setw(max_width + 1) << LastMember << char(179) << '\n';
-    std::cout << char(179) << "Current partial amount" << std::setw(max_name - 22) << char(179) << std::setw(max_width + 1) << PartialSum << char(179) << '\n';
-    std::cout << char(179) << "Calculation accuracy" << std::setw(max_name - 20) << char(179) << std::setw(max_width + 1);
-    if (!std::isnormal(Precision))
-        std::cout << '-' << char(179) << '\n';
-    else
-        std::cout << Precision << char(179) << '\n';
-    std::cout << char(192) << std::setfill(char(196)) << std::setw(max_name) << char(193) << std::setw(max_width + 2) << char(217) << '\n' << std::setfill(' ');
+    print_head({ { "Iteration number", 37 }, { tostr(nIteration), 25 } });
+    print_line({ { "The last summed term of the series", 37 }, { tostr(LastMember), 25 } });
+    print_line({ { "Current partial amount", 37 }, { tostr(PartialSum), 25 } });
+    print_line({ { "Calculation accuracy", 37 }, { tostr(Precision), 25 } });
+    print_end({ 37, 25 });
 }
 
 int main()
@@ -117,7 +109,7 @@ int main()
     {
         std::cout << "Please, enter parameters:\nX = ";
         const Sum::value_type X = getld();//считываем параметр X
-        std::cout << ALPHA << " = ";
+        std::cout << "Alpha" << " = ";
         auto alpha = getAlpha();//считываем параметр alpha
         if (std::holds_alternative<size_t>(alpha) && !std::get<size_t>(alpha))//если в alpha целое число и оно равно нулю
             std::cout << "Null iteration = no result\n";
@@ -145,11 +137,8 @@ int main()
                 if (std::holds_alternative<size_t>(alpha))//если в alpha целое число (число итераций)
                     sum.calc(0ULL, std::get<size_t>(alpha) - 1);
                 else//если в alpha дробное число (точность вычисления)
-                {
                     sum.calc(0ULL, std::get<Sum::value_type>(alpha));
-                }
                 cache.add({ X, alpha }, sum);//загрузим результаты вычисления в кэш
-                const auto& result = cache.get({ X, alpha });
                 nIteration = sum.get_range().second;
                 LastMember = sum.get_last();
                 PartialSum = sum.get_sum();

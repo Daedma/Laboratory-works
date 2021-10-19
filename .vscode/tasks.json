@@ -3,10 +3,10 @@
 	"tasks": [
 		{
 			"type": "cppbuild",
-			"label": "C/C++: g++ сборка активного файла",
+			"label": "Linux g++",
 			"command": "/usr/bin/g++",
 			"args": [
-				"${file}",
+				"${fileDirname}/*.cpp",
 				"-o",
 				"${fileDirname}/${fileBasenameNoExtension}",
 				"-O3",
@@ -23,7 +23,7 @@
 		},
 		{
 			"type": "cppbuild",
-			"label": "C/C++: clang++ сборка активного файла",
+			"label": "Windows clang++",
 			"command": "C:/LLVM/bin/clang++",
 			"args": [
 				"${fileDirname}/*.cpp",

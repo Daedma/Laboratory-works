@@ -1,11 +1,11 @@
 #include "sum.hpp"
+#include "table_print.hpp"
 #include <stdexcept>
 #include <cmath>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
-#define INDEX_N 'n' 
-#define ALPHA "alpha"
+#include <initializer_list>
 
 Sum::Sum(std::function<value_type(size_t)> member) noexcept :
     NumMember { std::move(member) }, nStart { 0ULL }, nIteration { 0ULL },
@@ -15,29 +15,29 @@ Sum::value_type Sum::calc(size_t from, size_t to)
 {
     if (from > to) throw std::invalid_argument { "from greater than to" };
     nStart = from;
-    nIteration = to + 1;
+    nIteration = to - from + 1;
     value_type result = 0;//текущая частичная сумма
     value_type curMemb,//текущий член последовательности
         nextMemb,//следующий член последовательности
-        curPrecision;//текущая точность вычислений
+        curPrecision = 0;//текущая точность вычислений
     curMemb = NumMember(from);//подсчитаем первый член последовательности
     std::cout << "Current values:\n";
+    print_head({ { "n", 4 }, { "an", 25 }, { "Sn", 25 }, { "ALPHAn", 25 } });
     while (from <= to)
     {
         nextMemb = NumMember(from + 1);//найдём следующий член последовательности
         result += curMemb;//прибавим текущий член к частичной сумме
-        curPrecision = std::abs(nextMemb / result);//вычислим текущую точность
+        if (result)
+        {
+            curPrecision = std::abs(nextMemb / result);//вычислим текущую точность
+        }
         //выведем текущие значения
-        std::cout << "n = " << from << " a" << INDEX_N << "= " << curMemb << " S" << INDEX_N
-            << " = " << result << ' ' << ALPHA << INDEX_N << " = ";
-        if (std::isinf(curPrecision))//для первой итерации 
-            std::cout << "-\n";
-        else//для последующих
-            std::cout << curPrecision << '\n';
+        print_line({ { from, 4 }, { curMemb, 25 }, { result, 25 }, { curPrecision, 25 } });
         if (from != to)//для последней итерации не выполнять
             curMemb = nextMemb;
         ++from;
     }
+    print_end({ 4, 25, 25, 25 });
     LastMember = curMemb;
     PartialSum = result;
     Precision = curPrecision;
@@ -59,6 +59,7 @@ Sum::value_type Sum::calc(size_t from, value_type precision)
         curPrecision = INFINITY;//текущая точность вычислений
     curMemb = NumMember(from);//подсчитаем первый член последовательности
     std::cout << "Current values:\n";
+    print_head({ { "n", 4 }, { "an", 25 }, { "Sn", 25 }, { "ALPHAn", 25 } });
     while (curPrecision > precision)//пока текущая точность больше заданной
     {
         nextMemb = NumMember(from + 1);//найдём следующий член последовательности
@@ -67,17 +68,14 @@ Sum::value_type Sum::calc(size_t from, value_type precision)
         {
             curPrecision = std::abs(nextMemb / result);//вычислим текущую точность
         }
-        std::cout << "n = " << from << " a" << INDEX_N << "= " << curMemb << " S" << INDEX_N
-            << " = " << result << ' ' << ALPHA << INDEX_N << " = ";
-        if (!result)//для первой итерации 
-            std::cout << "-\n";
-        else//для последующих
-            std::cout << curPrecision << '\n';
+        //выведем текущие значения
+        print_line({ { from, 4 }, { curMemb, 25 }, { result, 25 }, { curPrecision, 25 } });
         if (curPrecision > precision)//для последней итерации не выполнять
             curMemb = nextMemb;
         ++from;
     }
-    nIteration = from;
+    print_end({ 4, 25, 25, 25 });
+    nIteration = from - nStart;
     LastMember = curMemb;
     PartialSum = result;
     Precision = curPrecision;
