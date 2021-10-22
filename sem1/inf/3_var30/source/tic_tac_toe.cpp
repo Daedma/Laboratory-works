@@ -8,14 +8,14 @@
 #define CLEAR_CONSOLE system("clear")
 #endif
 
-void print(const ttField& _Arena)
+void print(const gameField& _Arena)
 {
     CLEAR_CONSOLE;
     std::cout << "**************** Tic tac toe ******************" << std::endl;
     std::cout << _Arena;
 }
 
-bool exodus(ttField& arena)
+bool exodus(gameField& arena)
 {
     if (!arena.valid())
     {
@@ -24,15 +24,15 @@ bool exodus(ttField& arena)
         return true;
     }
     auto vict = arena.check();
-    if (vict == ttObjType::EMPTY)
+    if (vict == fieldObjects::EMPTY)
         return false;
-    if (vict == ttObjType::CROSS)
+    if (vict == fieldObjects::CROSS)
     {
         std::cout << "Congratulations! CROSS win!" << std::endl;
         arena.reset();
         return true;
     }
-    if (vict == ttObjType::NOUGHT)
+    if (vict == fieldObjects::NOUGHT)
     {
         std::cout << "Congratulations! NOUGHT win!" << std::endl;
         arena.reset();
@@ -43,7 +43,7 @@ bool exodus(ttField& arena)
 
 int run()
 {
-    ttField arena;
+    gameField arena;
     auto validX = [&arena](const std::pair<uint16_t, uint16_t>& val) noexcept{
         return arena.setX(val.second, val.first);
     };

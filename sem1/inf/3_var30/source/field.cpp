@@ -3,70 +3,70 @@
 #define FILLING_CUP 9
 #define AGGREGATE char(176)
 
-ttField::ttField() :
+gameField::gameField() :
     _Valid { true }, _Filling { 0 }
 {
     for (auto& y : _Arena)
         for (auto& x : y)
-            x = ttObjType::EMPTY;
+            x = fieldObjects::EMPTY;
 }
 
-bool ttField::setO(size_t _X, size_t _Y)
+bool gameField::setO(size_t _X, size_t _Y)
 {
-    if (_X > 2 || _Y > 2 || _Arena[_Y][_X] != ttObjType::EMPTY)
+    if (_X > 2 || _Y > 2 || _Arena[_Y][_X] != fieldObjects::EMPTY)
         return false;
-    _Arena[_Y][_X] = ttObjType::NOUGHT;
+    _Arena[_Y][_X] = fieldObjects::NOUGHT;
     ++_Filling;
     if (_Filling == FILLING_CUP)
         _Valid = false;
     return true;
 }
 
-bool ttField::setX(size_t _X, size_t _Y)
+bool gameField::setX(size_t _X, size_t _Y)
 {
-    if (_X > 2 || _Y > 2 || _Arena[_Y][_X] != ttObjType::EMPTY)
+    if (_X > 2 || _Y > 2 || _Arena[_Y][_X] != fieldObjects::EMPTY)
         return false;
-    _Arena[_Y][_X] = ttObjType::CROSS;
+    _Arena[_Y][_X] = fieldObjects::CROSS;
     ++_Filling;
     if (_Filling == FILLING_CUP)
         _Valid = false;
     return true;
 }
 
-bool ttField::clear(size_t _X, size_t _Y)
+bool gameField::clear(size_t _X, size_t _Y)
 {
-    if (_X > 2 || _Y > 2 || _Arena[_Y][_X] == ttObjType::EMPTY)
+    if (_X > 2 || _Y > 2 || _Arena[_Y][_X] == fieldObjects::EMPTY)
         return false;
-    _Arena[_Y][_X] = ttObjType::EMPTY;
+    _Arena[_Y][_X] = fieldObjects::EMPTY;
     --_Filling;
     if (_Filling != FILLING_CUP)
         _Valid = true;
     return true;
 }
 
-void ttField::reset()
+void gameField::reset()
 {
     for (auto& y : _Arena)
         for (auto& x : y)
-            x = ttObjType::EMPTY;
+            x = fieldObjects::EMPTY;
     _Filling = 0;
     _Valid = true;
 }
 
-ttObjType ttField::check() const
+fieldObjects gameField::check() const
 {
     struct counter
     {
         size_t nought, cross;
 
-        size_t add(ttObjType _Obj)
+        size_t add(fieldObjects _Obj)
         {
-            if (_Obj == ttObjType::NOUGHT)
+            if (_Obj == fieldObjects::NOUGHT)
             {
                 ++nought;
                 return nought;
             }
-            if (_Obj == ttObjType::CROSS)
+            if (_Obj == fieldObjects::CROSS)
             {
                 ++cross;
                 return cross;
@@ -74,13 +74,13 @@ ttObjType ttField::check() const
             return 0;
         }
 
-        ttObjType goal() const
+        fieldObjects goal() const
         {
             if (nought == 3)
-                return ttObjType::NOUGHT;
+                return fieldObjects::NOUGHT;
             if (cross == 3)
-                return ttObjType::CROSS;
-            return ttObjType::EMPTY;
+                return fieldObjects::CROSS;
+            return fieldObjects::EMPTY;
         }
 
         void reset()
@@ -99,7 +99,7 @@ ttObjType ttField::check() const
         {
             _Count.add(x);
         }
-        if (_Count.goal() != ttObjType::EMPTY)
+        if (_Count.goal() != fieldObjects::EMPTY)
             return _Count.goal();
         else
             _Count.reset();
@@ -112,7 +112,7 @@ ttObjType ttField::check() const
         {
             _Count.add(_Arena[y][x]);
         }
-        if (_Count.goal() != ttObjType::EMPTY)
+        if (_Count.goal() != fieldObjects::EMPTY)
             return _Count.goal();
         else
             _Count.reset();
@@ -123,7 +123,7 @@ ttObjType ttField::check() const
     {
         _Count.add(_Arena[d][d]);
     }
-    if (_Count.goal() != ttObjType::EMPTY)
+    if (_Count.goal() != fieldObjects::EMPTY)
         return _Count.goal();
     else
         _Count.reset();
@@ -133,17 +133,17 @@ ttObjType ttField::check() const
     {
         _Count.add(_Arena[dy][dx]);
     }
-    if (_Count.goal() != ttObjType::EMPTY)
+    if (_Count.goal() != fieldObjects::EMPTY)
         return _Count.goal();
 
-    return ttObjType::EMPTY;
+    return fieldObjects::EMPTY;
 }
 
-char ttField::sym(size_t _X, size_t _Y) const
+char gameField::sym(size_t _X, size_t _Y) const
 {
-    if (_Arena[_Y][_X] == ttObjType::CROSS)
+    if (_Arena[_Y][_X] == fieldObjects::CROSS)
         return 'X';
-    if (_Arena[_Y][_X] == ttObjType::NOUGHT)
+    if (_Arena[_Y][_X] == fieldObjects::NOUGHT)
         return 'O';
     return AGGREGATE;
 }
@@ -151,7 +151,7 @@ char ttField::sym(size_t _X, size_t _Y) const
 //|0| | | |
 //|1| | | |
 //|2| | | |
-std::ostream& operator<<(std::ostream& os, const ttField& _Field)
+std::ostream& operator<<(std::ostream& os, const gameField& _Field)
 {
     os << '|' << char(219) << "|0|1|2|" << std::endl;
     os << "|0|" << _Field.sym(0, 0) << '|' << _Field.sym(1, 0) << '|' << _Field.sym(2, 0) << '|' << std::endl;

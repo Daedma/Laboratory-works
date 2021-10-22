@@ -7,21 +7,22 @@
 //0 1 2
 //1 * *
 //2 * *
-class ttField
+class gameField
 {
-    using ttFieldType = std::array<std::array<ttObjType, 3>, 3>;
-    ttFieldType _Arena;
+    using gameFieldType = std::array<std::array<fieldObjects, 3>, 3>;
+    gameFieldType _Arena;
     bool _Valid;
     size_t _Filling;
 public:
-    ttField();
+    gameField();
     bool setO(size_t, size_t);
     bool setX(size_t, size_t);
     bool clear(size_t, size_t);
     bool valid() const { return _Valid; }
     char sym(size_t, size_t) const;
+    fieldObjects at(size_t, size_t) const;
     void reset();
-    ttObjType check() const;
+    fieldObjects check() const;
 };
 
-std::ostream& operator<<(std::ostream&, const ttField&);
+std::ostream& operator<<(std::ostream&, const gameField&);
