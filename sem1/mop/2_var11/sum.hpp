@@ -11,10 +11,10 @@ public:
     using value_type = long double;//тип членов последовательности
 
     Sum(std::function<value_type(size_t)>) noexcept;//инициализация функцией, по которой можно подсчитать члены последовательности по их номерам
-    value_type calc(size_t, size_t, value_type);//подсчитать частичную сумму при n принадлежит [from, to]
-    value_type calc(size_t, value_type);//эквивалентно calc(1, to)
-    value_type calc(size_t, value_type, value_type);//подсчитать частичную сумму, пока не будет достигнута определенная точность
-    value_type calc(value_type, value_type);//эквивалентно calc(1, precision)
+    value_type calc(size_t, size_t);//подсчитать частичную сумму при n принадлежит [from, to]
+    value_type calc(size_t);//эквивалентно calc(1, to)
+    value_type calc(size_t, value_type);//подсчитать частичную сумму, пока не будет достигнута определенная точность
+    value_type calc(value_type);//эквивалентно calc(1, precision)
     bool is_avail() const noexcept;//проверяет, нет ли среди полей бесконечностей или не чисел
     std::pair<size_t, size_t> get_range() const noexcept;//получить диапозон n, в котором производились вычисления
     value_type get_last() const noexcept;//получить последний просуммированный член 

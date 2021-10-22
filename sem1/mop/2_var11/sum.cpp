@@ -11,7 +11,7 @@ Sum::Sum(std::function<value_type(size_t)> member) noexcept :
     NumMember { std::move(member) }, nStart { 0ULL }, nIteration { 0ULL },
     LastMember { 0.L }, PartialSum { 0.L }, Precision { 0.L }{}
 
-Sum::value_type Sum::calc(size_t from, size_t to, Sum::value_type X)
+Sum::value_type Sum::calc(size_t from, size_t to)
 {
     if (from > to) throw std::invalid_argument { "from greater than to" };
     nStart = from;
