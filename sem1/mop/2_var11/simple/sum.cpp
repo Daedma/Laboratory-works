@@ -166,36 +166,35 @@ std::pair<value_type, value_type> SumN(value_type X, uint64_t nIteration, bool P
     value_type PartialSum = 0,//текущая частичная сумма
         CurMember;//текущий суммированый член последовательности
     uint64_t start = 0;//номер, с которого стоит просуммировать члены последовательности
-    std::vector<std::pair<value_type, value_type>>* pX;//указатель на вектор, содержащий результаты вычислений для данного X
-    if (cache.count(X))//если вычисления с данным параметром уже проводились
+    auto pX = cache.emplace(X, std::vector<std::pair<value_type, value_type>>{});
+    auto& refX = pX.first->second;//для краткости
+    if (!pX.second)//если вычисления с данным параметром уже проводились
     {
         if (Print)//вывод сообщения о том, что данные были подгружены из кэша
             print_line({ { "**", columns[0] },
                 { "upload", columns[1] },
                 { "from", columns[2] },
                 { "cache", columns[3] } });
-        pX = &cache[X];//в целях повышения производительности будем обращаться к вектору X через pX, а не []
-        if (pX->size() >= nIteration)//если вектор содержит результаты для данного номера
-            return (*pX)[nIteration - 1];
-        start = pX->size();//начнём суммировать члены с последнего вычисленного
-        PartialSum = (*pX)[start - 1].first;
+        if (refX.size() >= nIteration)//если вектор содержит результаты для данного номера
+            return refX[nIteration - 1];
+        start = refX.size();//начнём суммировать члены с последнего вычисленного
+        PartialSum = refX[start - 1].first;
     }
-    if (!pX) pX = &cache[X];
     CurMember = SumMember(++start, X);//найдем следующий член последовательности
     PartialSum += CurMember;//прибавим его к текущей частичной сумме
-    pX->emplace_back(PartialSum, CurMember);//добавим результат в кэш
+    refX.emplace_back(PartialSum, CurMember);//добавим результат в кэш
     for (uint64_t i = start + 1; i <= nIteration + 1; ++i)
     {
         CurMember = SumMember(i, X);
         PartialSum += CurMember;
-        pX->emplace_back(PartialSum, CurMember);
+        refX.emplace_back(PartialSum, CurMember);
         if (Print)//вывод результата предыдущего вычисления
             print_line({ { i - 1, columns[0] },
-                { (*pX)[i - 2].second, columns[1] },
-                { (*pX)[i - 2].first, columns[2] },
-                { std::abs((*pX)[i - 1].second / (*pX)[i - 2].first), columns[3] } });
+                { refX[i - 2].second, columns[1] },
+                { refX[i - 2].first, columns[2] },
+                { std::abs(refX[i - 1].second / refX[i - 2].first), columns[3] } });
     }
-    return (*pX)[nIteration - 1];
+    return refX[nIteration - 1];
 }
 
 //Подсчет и вывод результатов на экран для целочисленного параметра Alpha
