@@ -74,6 +74,7 @@
         "xlocbuf": "cpp",
         "xlocmes": "cpp",
         "queue": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "set": "cpp"
     }
 }

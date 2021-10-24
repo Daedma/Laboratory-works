@@ -15,14 +15,16 @@ class gameField
     size_t _Filling;
 public:
     gameField();
-    bool setO(size_t, size_t);
-    bool setX(size_t, size_t);
-    bool clear(size_t, size_t);
+    bool setO(size_t, size_t) noexcept;
+    bool setX(size_t, size_t) noexcept;
+    bool clear(size_t, size_t) noexcept;
     bool valid() const { return _Valid; }
     char sym(size_t, size_t) const;
-    fieldObjects at(size_t, size_t) const;
+    fieldObjects at(size_t, size_t) const noexcept;//row, column 
     void reset();
     fieldObjects check() const;
+private:
+    bool setObj(fieldObjects, size_t, size_t) noexcept;
 };
 
 std::ostream& operator<<(std::ostream&, const gameField&);

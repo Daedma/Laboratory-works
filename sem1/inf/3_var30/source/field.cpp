@@ -1,7 +1,13 @@
 #include "..\headers\field.hpp"
 #include <iostream>
 #define FILLING_CUP 9
+
+#if (defined (_WIN32) || defined (_WIN64))
 #define AGGREGATE char(176)
+#endif
+#if (defined (LINUX) || defined (__linux__))
+#define AGGREGATE ' '
+#endif
 
 gameField::gameField() :
     _Valid { true }, _Filling { 0 }
@@ -11,33 +17,37 @@ gameField::gameField() :
             x = fieldObjects::EMPTY;
 }
 
-bool gameField::setO(size_t _X, size_t _Y)
+fieldObjects gameField::at(size_t nRow, size_t nColumn) const noexcept
 {
-    if (_X > 2 || _Y > 2 || _Arena[_Y][_X] != fieldObjects::EMPTY)
+    return _Arena[nRow][nColumn];
+}
+
+bool gameField::setObj(fieldObjects Obj, size_t nRow, size_t nColumn) noexcept
+{
+    if (nRow > 2 || nColumn > 2 || _Arena[nRow][nColumn] != fieldObjects::EMPTY)
         return false;
-    _Arena[_Y][_X] = fieldObjects::NOUGHT;
+    _Arena[nRow][nColumn] = Obj;
     ++_Filling;
     if (_Filling == FILLING_CUP)
         _Valid = false;
     return true;
 }
 
-bool gameField::setX(size_t _X, size_t _Y)
+bool gameField::setO(size_t nRow, size_t nColumn) noexcept
 {
-    if (_X > 2 || _Y > 2 || _Arena[_Y][_X] != fieldObjects::EMPTY)
-        return false;
-    _Arena[_Y][_X] = fieldObjects::CROSS;
-    ++_Filling;
-    if (_Filling == FILLING_CUP)
-        _Valid = false;
-    return true;
+    return setObj(fieldObjects::NOUGHT, nRow, nColumn);
 }
 
-bool gameField::clear(size_t _X, size_t _Y)
+bool gameField::setX(size_t nRow, size_t nColumn) noexcept
 {
-    if (_X > 2 || _Y > 2 || _Arena[_Y][_X] == fieldObjects::EMPTY)
+    return setObj(fieldObjects::CROSS, nRow, nColumn);
+}
+
+bool gameField::clear(size_t nRow, size_t nColumn) noexcept
+{
+    if (nRow > 2 || nColumn > 2 || _Arena[nRow][nColumn] == fieldObjects::EMPTY)
         return false;
-    _Arena[_Y][_X] = fieldObjects::EMPTY;
+    _Arena[nRow][nColumn] = fieldObjects::EMPTY;
     --_Filling;
     if (_Filling != FILLING_CUP)
         _Valid = true;
@@ -139,11 +149,11 @@ fieldObjects gameField::check() const
     return fieldObjects::EMPTY;
 }
 
-char gameField::sym(size_t _X, size_t _Y) const
+char gameField::sym(size_t nRow, size_t nColumn) const
 {
-    if (_Arena[_Y][_X] == fieldObjects::CROSS)
+    if (_Arena[nRow][nColumn] == fieldObjects::CROSS)
         return 'X';
-    if (_Arena[_Y][_X] == fieldObjects::NOUGHT)
+    if (_Arena[nRow][nColumn] == fieldObjects::NOUGHT)
         return 'O';
     return AGGREGATE;
 }
@@ -153,9 +163,9 @@ char gameField::sym(size_t _X, size_t _Y) const
 //|2| | | |
 std::ostream& operator<<(std::ostream& os, const gameField& _Field)
 {
-    os << '|' << char(219) << "|0|1|2|" << std::endl;
-    os << "|0|" << _Field.sym(0, 0) << '|' << _Field.sym(1, 0) << '|' << _Field.sym(2, 0) << '|' << std::endl;
-    os << "|1|" << _Field.sym(0, 1) << '|' << _Field.sym(1, 1) << '|' << _Field.sym(2, 1) << '|' << std::endl;
-    os << "|2|" << _Field.sym(0, 2) << '|' << _Field.sym(1, 2) << '|' << _Field.sym(2, 2) << '|' << std::endl;
+    os << '|' << char(219) << "|1|2|3|" << std::endl;
+    os << "|1|" << _Field.sym(0, 0) << '|' << _Field.sym(0, 1) << '|' << _Field.sym(0, 2) << '|' << std::endl;
+    os << "|2|" << _Field.sym(1, 0) << '|' << _Field.sym(1, 1) << '|' << _Field.sym(1, 2) << '|' << std::endl;
+    os << "|3|" << _Field.sym(2, 0) << '|' << _Field.sym(2, 1) << '|' << _Field.sym(2, 2) << '|' << std::endl;
     return os;
 }

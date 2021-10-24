@@ -34,7 +34,7 @@ namespace{
     }
 
     template<typename... Func>
-    std::pair<uint16_t, uint16_t> getXY(Func&&... UnPred)
+    std::pair<uint16_t, uint16_t> getCoords(Func&&... UnPred)
     {
         return getValue<std::pair<uint16_t, uint16_t>>(std::forward<Func>(UnPred)...);
     }

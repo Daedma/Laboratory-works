@@ -6,6 +6,7 @@
 #include <array>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 
 using value_type = long double;
 

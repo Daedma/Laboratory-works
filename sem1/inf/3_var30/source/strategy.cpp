@@ -1,151 +1,148 @@
 #include "..\headers\strategy.hpp"
 #include "..\headers\field.hpp"
 #include <algorithm>
+#include <vector>
 #include <random>
 #include <iterator>
+#include <set>
 
-void gameStrategy::strategy_type::shuffle(std::initializer_list<steps_type::value_type> coords, steps_type& dest)
+const std::array<std::array<gameStrategy::steps_type::value_type, 3>, 8> gameStrategy::Intents =
 {
-    std::vector<steps_type::value_type> temp;
-    std::move(coords.begin(), coords.end(), std::back_inserter(temp));
-    std::shuffle(temp.begin(), temp.end(), std::random_device {});
-    for (auto& i : temp)
+    //rows
+    std::array<gameStrategy::steps_type::value_type, 3>{ gameStrategy::steps_type::value_type { 0U, 0U }, gameStrategy::steps_type::value_type { 0U, 1U }, gameStrategy::steps_type::value_type { 0U, 2U } },
+    std::array<gameStrategy::steps_type::value_type, 3>{ gameStrategy::steps_type::value_type { 1U, 0U }, gameStrategy::steps_type::value_type { 1U, 1U }, gameStrategy::steps_type::value_type { 1U, 2U } },
+    std::array<gameStrategy::steps_type::value_type, 3>{ gameStrategy::steps_type::value_type { 2U, 0U }, gameStrategy::steps_type::value_type { 2U, 1U }, gameStrategy::steps_type::value_type { 2U, 2U } },
+    //columns
+    std::array<gameStrategy::steps_type::value_type, 3>{ gameStrategy::steps_type::value_type { 0U, 0U }, gameStrategy::steps_type::value_type { 1U, 0U }, gameStrategy::steps_type::value_type { 2U, 0U } },
+    std::array<gameStrategy::steps_type::value_type, 3>{ gameStrategy::steps_type::value_type { 0U, 1U }, gameStrategy::steps_type::value_type { 1U, 1U }, gameStrategy::steps_type::value_type { 2U, 1U } },
+    std::array<gameStrategy::steps_type::value_type, 3>{ gameStrategy::steps_type::value_type { 0U, 2U }, gameStrategy::steps_type::value_type { 1U, 2U }, gameStrategy::steps_type::value_type { 2U, 2U } },
+    //diagonals
+    std::array<gameStrategy::steps_type::value_type, 3>{ gameStrategy::steps_type::value_type { 0U, 0U }, gameStrategy::steps_type::value_type { 1U, 1U }, gameStrategy::steps_type::value_type { 2U, 2U } },
+    std::array<gameStrategy::steps_type::value_type, 3>{ gameStrategy::steps_type::value_type { 0U, 2U }, gameStrategy::steps_type::value_type { 1U, 1U }, gameStrategy::steps_type::value_type { 2U, 0U } }
+};
+
+bool gameStrategy::random() const noexcept
+{
+    return CurStrat == randval;
+}
+
+void gameStrategy::clear() noexcept
+{
+    while (!StepsQueue.empty()) StepsQueue.pop();
+}
+
+void gameStrategy::randfill()
+{
+    std::vector<steps_type::value_type> FreePlaces;
+    clear();
+    for (uint16_t i = 0U; i != 3U; ++i)
+        for (uint16_t j = 0U; j != 3U; ++j)
+            if (Arena.at(i, j) == fieldObjects::EMPTY)
+                FreePlaces.emplace_back(i, j);
+    std::shuffle(FreePlaces.begin(), FreePlaces.end(), std::random_device {});
+    for (auto& i : FreePlaces)
+        StepsQueue.emplace(i);
+}
+
+void gameStrategy::fill()
+{
+    if (random()) return randfill();
+    static std::array<uint16_t, 3> buff { 0, 1, 2 };
+    clear();
+    std::shuffle(buff.begin(), buff.end(), std::random_device {});
+    for (auto i : buff)
+        StepsQueue.emplace(Intents[CurStrat][i]);
+}
+
+bool gameStrategy::fit() const noexcept
+{
+    if (random()) return true;
+    fieldObjects EnemySide = Side == fieldObjects::CROSS ? fieldObjects::NOUGHT : fieldObjects::CROSS;
+    for (auto& i : Intents[CurStrat])
+        if (Arena.at(i.first, i.second) == EnemySide)
+            return false;
+    return true;
+}
+
+std::pair<bool, uint16_t> gameStrategy::priority(size_t nStrat) const noexcept
+{
+    uint16_t Count = 0U;
+    fieldObjects EnemySide = Side == fieldObjects::CROSS ? fieldObjects::NOUGHT : fieldObjects::CROSS;
+    for (auto& i : Intents[nStrat])
     {
-        dest.emplace(std::move(i));
+        if (Arena.at(i.first, i.second) == EnemySide)
+            return { false, -1 };
+        else if (Arena.at(i.first, i.second) == Side)
+            ++Count;
     }
+    return { true, Count };
 }
 
-std::vector<gameStrategy::steps_type::value_type> gameStrategy::strategy_type::enemy_pos(const gameField& arena) const
+void gameStrategy::change()
 {
-    std::vector<steps_type::value_type> result;
-    fieldObjects enemy = Side == fieldObjects::CROSS ? fieldObjects::NOUGHT : fieldObjects::CROSS;
-    for (uint16_t i = 0; i != 3; ++i)
-        for (uint16_t j = 0; j != 3; ++j)
-            if (arena.at(i, j) == enemy)
-                result.emplace_back(i, j);
-    return result;
-}
-
-gameStrategy::strategy_type::strategy_type(fieldObjects myside) :
-    Side { myside } {}
-
-gameStrategy::row::row(uint16_t n, fieldObjects myside) :
-    strategy_type { myside }, nRow { n } {}
-
-gameStrategy::row::row(fieldObjects myside) :
-    strategy_type { myside }
-{
-    std::uniform_int_distribution<uint16_t> d { 0, 2 };
-    nRow = d(std::random_device {});
-}
-
-void gameStrategy::row::fill(gameStrategy::steps_type& dest) const
-{
-    shuffle({ { nRow, 0 }, { nRow, 1 }, { nRow, 2 } }, dest);
-}
-
-bool gameStrategy::row::fit(const gameField& field) const
-{
-    std::vector<steps_type::value_type> steps { { nRow, 0 }, { nRow, 1 }, { nRow, 2 } };
-    auto enemy = enemy_pos(field);
-    return std::find_first_of(enemy.cbegin(), enemy.cend(), steps.cbegin(), steps.cend()) == enemy.cend();
-}
-
-std::pair<uint16_t, std::unique_ptr<gameStrategy::strategy_type>> gameStrategy::row::suit(const gameField& field, fieldObjects myside)
-{
-    uint16_t max_count = 0, max_row = 0;
-    fieldObjects enemy = myside == fieldObjects::CROSS ? fieldObjects::NOUGHT : fieldObjects::CROSS;
-    for (uint16_t i = 0; i != 3; ++i)
+    std::multiset < std::pair<uint16_t, size_t>, std::greater<std::pair<uint16_t, size_t>>> Priorities;
+    std::pair<bool, uint16_t> curval;
+    for (size_t i = 0; i != Intents.size(); ++i)
     {
-        uint16_t enemy_count = 0, my_count = 0;
-        for (uint16_t j = 0; j != 3; ++j)
-        {
-            if (field.at(i, j) == enemy)
-            {
-                ++enemy_count;
-                break;
-            }
-            else if (field.at(i, j) == myside)
-                ++my_count;
-        }
-        if (!enemy_count)
-        {
-            if (my_count > max_count)
-            {
-                max_row = i;
-                max_count = my_count;
-            }
-        }
+        curval = priority(i);
+        if (curval.first)
+            Priorities.emplace(curval.second, i);
     }
-    if (max_count)
-    {
-        return { max_count, std::make_unique<row>(max_row, myside) };
-    }
+    if (!Priorities.empty())
+        CurStrat = Priorities.begin()->second;
     else
-        return { 0, nullptr };
+        CurStrat = randval;
 }
 
-gameStrategy::column::column(uint16_t n, fieldObjects myside) :
-    strategy_type { myside }, nColumn { n } {}
-
-gameStrategy::column::column(fieldObjects myside) :
-    strategy_type { myside }
+size_t gameStrategy::select()
 {
-    std::uniform_int_distribution<uint16_t> d { 0, 2 };
-    nColumn = d(std::random_device {});
-}
-
-void gameStrategy::column::fill(gameStrategy::steps_type& dest) const
-{
-    shuffle({ { 0, nColumn }, { 1, nColumn }, { 2, nColumn } }, dest);
-}
-
-bool gameStrategy::column::fit(const gameField& field) const
-{
-    std::vector<steps_type::value_type> steps { { 0, nColumn }, { 1, nColumn }, { 2, nColumn } };
-    auto enemy = enemy_pos(field);
-    return std::find_first_of(enemy.cbegin(), enemy.cend(), steps.cbegin(), steps.cend()) == enemy.cend();
-}
-
-std::pair<uint16_t, std::unique_ptr<gameStrategy::strategy_type>> gameStrategy::column::suit(const gameField& field, fieldObjects myside)
-{
-    uint16_t max_count = 0, max_column = 0;
-    fieldObjects enemy = myside == fieldObjects::CROSS ? fieldObjects::NOUGHT : fieldObjects::CROSS;
-    for (uint16_t i = 0; i != 3; ++i)
+    static std::default_random_engine e { std::random_device {}() };
+    std::vector<size_t> pool;
+    for (size_t i = 0; i != Intents.size(); ++i)
     {
-        uint16_t enemy_count = 0, my_count = 0;
-        for (uint16_t j = 0; j != 3; ++j)
-        {
-            if (field.at(j, i) == enemy)
-            {
-                ++enemy_count;
-                break;
-            }
-            else if (field.at(j, i) == myside)
-                ++my_count;
-        }
-        if (!enemy_count)
-        {
-            if (my_count > max_count)
-            {
-                max_column = i;
-                max_count = my_count;
-            }
-        }
+        if (priority(i).first)
+            pool.emplace_back(i);
     }
-    if (max_count)
-    {
-        return { max_count, std::make_unique<column>(max_column, myside) };
-    }
-    else
-        return { 0, nullptr };
+    if (pool.empty()) return randval;
+    std::uniform_int_distribution<size_t> d { 0, pool.size() - 1 };
+    return pool[d(e)];
 }
 
-gameStrategy::diagonal::diagonal(gameStrategy::diagonal::types type, fieldObjects) :
-    Type { type }
+gameStrategy::steps_type::value_type gameStrategy::step() noexcept
 {
-    if (Type == types::MAIN)
-        Steps = { { 0, 0 }, { 1, 1 }, { 2, 2 } };
-    else
-        Steps = 
+    if (!fit())
+    {
+        change();
+        fill();
+    }
+    steps_type::value_type NextStep;
+    do
+    {
+        NextStep = StepsQueue.top();
+        StepsQueue.pop();
+    } while (Arena.at(NextStep.first, NextStep.second) != fieldObjects::EMPTY);
+    return NextStep;
+}
+
+uint16_t gameStrategy::left() const noexcept
+{
+    if (random()) return static_cast<uint16_t>(-1);
+    uint16_t Count = 0U;
+    for (const auto& i : Intents[CurStrat])
+        if (Arena.at(i.first, i.second) == Side)
+            ++Count;
+    return 3U - Count;
+}
+
+void gameStrategy::reset(fieldObjects _MySide)
+{
+    Side = _MySide;
+    CurStrat = select();
+    fill();
+}
+
+gameStrategy::gameStrategy(const gameField& _Field, fieldObjects _MySide) :
+    Arena { _Field }, Side { _MySide }, CurStrat { select() }
+{
+    fill();
 }

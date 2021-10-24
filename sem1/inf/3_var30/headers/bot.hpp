@@ -1,17 +1,21 @@
 #pragma once
 #include "objects.hpp"
+#include "strategy.hpp"
 
 class gameField;
 
-class ttBot final
+class gameBot final
 {
 public:
-    ttBot(gameField&, fieldObjects = fieldObjects::NOUGHT);
+    gameBot(gameField&, fieldObjects = fieldObjects::NOUGHT);
     void step();
-    void reset(gameField&);
+    void reset(fieldObjects);
     void reset();
 private:
-    gameField& arena;
-    //ttStrategy curStrat;
+    using coord_type = decltype(std::declval<gameStrategy>().step());
+    gameField& Arena;
+    fieldObjects Side;
+    gameStrategy curStrat;
 
+    std::pair<bool, coord_type> danger() const noexcept;
 };
