@@ -110,11 +110,6 @@ size_t gameStrategy::select()
 
 gameStrategy::steps_type::value_type gameStrategy::step() noexcept
 {
-    if (!fit())
-    {
-        change();
-        fill();
-    }
     steps_type::value_type NextStep;
     do
     {
@@ -139,6 +134,17 @@ void gameStrategy::reset(fieldObjects _MySide)
     Side = _MySide;
     CurStrat = select();
     fill();
+}
+
+void gameStrategy::update()
+{
+    if (!random())
+    {
+        size_t OldStrat = CurStrat;
+        change();
+        if (OldStrat != CurStrat)
+            fill();
+    }
 }
 
 gameStrategy::gameStrategy(const gameField& _Field, fieldObjects _MySide) :

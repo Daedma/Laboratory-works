@@ -1,5 +1,6 @@
 #include "..\headers\bot.hpp"
 #include "..\headers\field.hpp"
+#include <iostream>
 
 gameBot::gameBot(gameField& Field, fieldObjects BotSide) :
     Arena { Field }, Side { BotSide }, curStrat { Arena, Side } {}
@@ -39,7 +40,7 @@ std::pair<bool, gameBot::coord_type> gameBot::danger() const noexcept
         {
             if (Arena.at(j.first, j.second) == EnemySide)
             {
-                if (++Count == 2)
+                if (++Count == 2 && Arena.at(LastClear.first, LastClear.second) == fieldObjects::EMPTY)
                     return { true, LastClear };
             }
             else if (Arena.at(j.first, j.second) == Side)
@@ -55,6 +56,7 @@ void gameBot::step()
 {
     auto setObject = Side == fieldObjects::CROSS ? &gameField::setX : &gameField::setO;
     auto is_dungerous = danger();
+    curStrat.update();
     if (is_dungerous.first && curStrat.left() != 1)
         (Arena.*setObject)(is_dungerous.second.first, is_dungerous.second.second);
     else

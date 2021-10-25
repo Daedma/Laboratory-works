@@ -18,15 +18,7 @@ void print(const gameField& _Arena)
 
 bool exodus(gameField& arena)
 {
-    if (!arena.valid())
-    {
-        std::cout << "Oops! Draw!" << std::endl;
-        arena.reset();
-        return true;
-    }
     auto vict = arena.check();
-    if (vict == fieldObjects::EMPTY)
-        return false;
     if (vict == fieldObjects::CROSS)
     {
         std::cout << "Congratulations! CROSS win!" << std::endl;
@@ -36,6 +28,12 @@ bool exodus(gameField& arena)
     if (vict == fieldObjects::NOUGHT)
     {
         std::cout << "Congratulations! NOUGHT win!" << std::endl;
+        arena.reset();
+        return true;
+    }
+    if (!arena.valid())
+    {
+        std::cout << "Oops! Draw!" << std::endl;
         arena.reset();
         return true;
     }

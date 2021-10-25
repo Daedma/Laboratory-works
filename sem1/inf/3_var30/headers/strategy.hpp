@@ -13,6 +13,7 @@ public:
     gameStrategy(const gameField&, fieldObjects);
     steps_type::value_type step() noexcept;
     uint16_t left() const noexcept;
+    void update();
     void reset(fieldObjects);
 private:
     static constexpr size_t randval = static_cast<size_t>(-1);
