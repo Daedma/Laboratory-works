@@ -31,6 +31,6 @@ private:
     std::pair<bool, uint16_t> priority(size_t) const noexcept;
     void change();
     inline bool random() const noexcept;
-    void clear() noexcept;
-    size_t select();
+    inline void clear() noexcept;
+    size_t select() const;
 };

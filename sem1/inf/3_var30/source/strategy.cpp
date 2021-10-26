@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <vector>
 #include <random>
-#include <iterator>
 #include <set>
 
 const std::array<std::array<gameStrategy::steps_type::value_type, 3>, 8> gameStrategy::Intents =
@@ -80,21 +79,29 @@ std::pair<bool, uint16_t> gameStrategy::priority(size_t nStrat) const noexcept
 
 void gameStrategy::change()
 {
-    std::multiset < std::pair<uint16_t, size_t>, std::greater<std::pair<uint16_t, size_t>>> Priorities;
+    std::set < std::pair<uint16_t, size_t>, std::greater<std::pair<uint16_t, size_t>>> Priorities;
     std::pair<bool, uint16_t> curval;
+    std::pair<bool, uint16_t> curStratPriority;
     for (size_t i = 0; i != Intents.size(); ++i)
     {
         curval = priority(i);
+        if (i == CurStrat)
+            curStratPriority = curval;
         if (curval.first)
             Priorities.emplace(curval.second, i);
     }
     if (!Priorities.empty())
-        CurStrat = Priorities.begin()->second;
+    {
+        if (curStratPriority.first && curStratPriority.second >= Priorities.begin()->second)
+            return;
+        else
+            CurStrat = Priorities.begin()->second;
+    }
     else
         CurStrat = randval;
 }
 
-size_t gameStrategy::select()
+size_t gameStrategy::select() const
 {
     static std::default_random_engine e { std::random_device {}() };
     std::vector<size_t> pool;

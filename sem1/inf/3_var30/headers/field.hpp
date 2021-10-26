@@ -15,14 +15,23 @@ class gameField
     size_t _Filling;
 public:
     gameField();
-    bool setO(size_t, size_t) noexcept;
-    bool setX(size_t, size_t) noexcept;
     bool clear(size_t, size_t) noexcept;
     bool valid() const { return _Valid; }
     char sym(size_t, size_t) const;
-    fieldObjects at(size_t, size_t) const noexcept;//row, column 
     void reset();
     fieldObjects check() const;
+    fieldObjects at(size_t nRow, size_t nColumn) const noexcept//row, column 
+    {
+        return _Arena[nRow][nColumn];
+    }
+    bool setO(size_t nRow, size_t nColumn) noexcept
+    {
+        return setObj(fieldObjects::NOUGHT, nRow, nColumn);
+    }
+    bool setX(size_t nRow, size_t nColumn) noexcept
+    {
+        return setObj(fieldObjects::CROSS, nRow, nColumn);
+    }
 private:
     bool setObj(fieldObjects, size_t, size_t) noexcept;
 };

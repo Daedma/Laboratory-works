@@ -9,13 +9,14 @@
 #define CLEAR_CONSOLE system("clear")
 #endif
 
-void print(const gameField& _Arena)
+void print(const gameField& _Arena) noexcept
 {
     CLEAR_CONSOLE;
     std::cout << "**************** Tic tac toe ******************" << std::endl;
     std::cout << _Arena;
 }
 
+//TODO make unique messages for bot
 bool exodus(gameField& arena)
 {
     auto vict = arena.check();
@@ -40,6 +41,7 @@ bool exodus(gameField& arena)
     return false;
 }
 
+//TODO make beautifuly
 void GameWithBot()
 {
     fieldObjects BotSide, PlayerSide;
@@ -116,6 +118,7 @@ void GameWith2Players()
     }
 }
 
+//TODO make extend user interface
 int run()
 {
     std::cout << "**************** Tic tac toe ******************\n\n"

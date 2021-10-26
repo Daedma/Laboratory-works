@@ -17,11 +17,6 @@ gameField::gameField() :
             x = fieldObjects::EMPTY;
 }
 
-fieldObjects gameField::at(size_t nRow, size_t nColumn) const noexcept
-{
-    return _Arena[nRow][nColumn];
-}
-
 bool gameField::setObj(fieldObjects Obj, size_t nRow, size_t nColumn) noexcept
 {
     if (nRow > 2 || nColumn > 2 || _Arena[nRow][nColumn] != fieldObjects::EMPTY)
@@ -33,24 +28,13 @@ bool gameField::setObj(fieldObjects Obj, size_t nRow, size_t nColumn) noexcept
     return true;
 }
 
-bool gameField::setO(size_t nRow, size_t nColumn) noexcept
-{
-    return setObj(fieldObjects::NOUGHT, nRow, nColumn);
-}
-
-bool gameField::setX(size_t nRow, size_t nColumn) noexcept
-{
-    return setObj(fieldObjects::CROSS, nRow, nColumn);
-}
-
 bool gameField::clear(size_t nRow, size_t nColumn) noexcept
 {
     if (nRow > 2 || nColumn > 2 || _Arena[nRow][nColumn] == fieldObjects::EMPTY)
         return false;
     _Arena[nRow][nColumn] = fieldObjects::EMPTY;
     --_Filling;
-    if (_Filling != FILLING_CUP)
-        _Valid = true;
+    _Valid = true;
     return true;
 }
 
@@ -157,13 +141,10 @@ char gameField::sym(size_t nRow, size_t nColumn) const
         return 'O';
     return AGGREGATE;
 }
-//| |0|1|2|
-//|0| | | |
-//|1| | | |
-//|2| | | |
+
 std::ostream& operator<<(std::ostream& os, const gameField& _Field)
 {
-    os << '|' << char(219) << "|1|2|3|" << std::endl;
+    os << '|' << '\\' << "|1|2|3|" << std::endl;
     os << "|1|" << _Field.sym(0, 0) << '|' << _Field.sym(0, 1) << '|' << _Field.sym(0, 2) << '|' << std::endl;
     os << "|2|" << _Field.sym(1, 0) << '|' << _Field.sym(1, 1) << '|' << _Field.sym(1, 2) << '|' << std::endl;
     os << "|3|" << _Field.sym(2, 0) << '|' << _Field.sym(2, 1) << '|' << _Field.sym(2, 2) << '|' << std::endl;
