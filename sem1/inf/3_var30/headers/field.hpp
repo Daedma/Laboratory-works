@@ -20,19 +20,9 @@ public:
     char sym(size_t, size_t) const;
     void reset();
     fieldObjects check() const;
-    fieldObjects at(size_t nRow, size_t nColumn) const noexcept//row, column 
-    {
-        return _Arena[nRow][nColumn];
-    }
-    bool setO(size_t nRow, size_t nColumn) noexcept
-    {
-        return setObj(fieldObjects::NOUGHT, nRow, nColumn);
-    }
-    bool setX(size_t nRow, size_t nColumn) noexcept
-    {
-        return setObj(fieldObjects::CROSS, nRow, nColumn);
-    }
-private:
+    fieldObjects at(size_t nRow, size_t nColumn) const noexcept { return _Arena[nRow][nColumn]; }
+    bool setO(size_t nRow, size_t nColumn) noexcept { return setObj(fieldObjects::NOUGHT, nRow, nColumn); }
+    bool setX(size_t nRow, size_t nColumn) noexcept { return setObj(fieldObjects::CROSS, nRow, nColumn); }
     bool setObj(fieldObjects, size_t, size_t) noexcept;
 };
 

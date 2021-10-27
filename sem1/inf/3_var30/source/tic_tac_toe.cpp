@@ -2,6 +2,11 @@
 #include "..\headers\field.hpp"
 #include "..\headers\iotools.hpp"
 #include "..\headers\bot.hpp"
+#include <algorithm>
+#include <random>
+#include <functional>
+#include <thread>
+#include <chrono>
 #if (defined (_WIN32) || defined (_WIN64))
 #define CLEAR_CONSOLE system("cls")
 #endif
@@ -9,116 +14,177 @@
 #define CLEAR_CONSOLE system("clear")
 #endif
 
-void print(const gameField& _Arena) noexcept
-{
-    CLEAR_CONSOLE;
-    std::cout << "**************** Tic tac toe ******************" << std::endl;
-    std::cout << _Arena;
-}
+namespace{
+    void print(const gameField& _Arena) noexcept
+    {
+        CLEAR_CONSOLE;
+        std::cout << "**************** Tic tac toe ******************" << std::endl;
+        std::cout << _Arena;
+    }
 
-//TODO make unique messages for bot
-bool exodus(gameField& arena)
-{
-    auto vict = arena.check();
-    if (vict == fieldObjects::CROSS)
+    bool exodus(gameField& arena)
     {
-        std::cout << "Congratulations! CROSS win!" << std::endl;
-        arena.reset();
-        return true;
+        auto vict = arena.check();
+        if (vict == fieldObjects::CROSS)
+        {
+            std::cout << "Congratulations! CROSS win!" << std::endl;
+            return true;
+        }
+        if (vict == fieldObjects::NOUGHT)
+        {
+            std::cout << "Congratulations! NOUGHT win!" << std::endl;
+            return true;
+        }
+        if (!arena.valid())
+        {
+            std::cout << "Oops! Draw!" << std::endl;
+            return true;
+        }
+        return false;
     }
-    if (vict == fieldObjects::NOUGHT)
-    {
-        std::cout << "Congratulations! NOUGHT win!" << std::endl;
-        arena.reset();
-        return true;
-    }
-    if (!arena.valid())
-    {
-        std::cout << "Oops! Draw!" << std::endl;
-        arena.reset();
-        return true;
-    }
-    return false;
-}
 
-//TODO make beautifuly
-void GameWithBot()
-{
-    fieldObjects BotSide, PlayerSide;
-    std::cout << "Choose your side (1 - crosses, 2 - noughts)\n>";
-    if (getstr([](const std::string& val){
-        return val == "1" || val == "2";
-        }) == "1")
+    template<typename Rep, typename Period >
+    void slow_print(const std::string& aMessage, const std::chrono::duration<Rep, Period>& aInterval) noexcept
     {
-        PlayerSide = fieldObjects::CROSS;
-        BotSide = fieldObjects::NOUGHT;
+        for (auto i : aMessage)
+        {
+            std::this_thread::sleep_for(aInterval);
+            std::cout << i;
+        }
     }
-    else
+
+    auto create_ex_checker(const gameBot& aBot, const gameField& aArena) noexcept
     {
-        BotSide = fieldObjects::CROSS;
-        PlayerSide = fieldObjects::NOUGHT;
+        return[&aBot, &aArena]() noexcept{
+            auto winner = aArena.check();
+            if (aBot.get_side() == winner)
+            {
+                std::cout << "The bot won you!\nThe bot says: ";
+                using namespace std::chrono_literals;
+                slow_print("Ha ha ha! I'm smarter than you! I have 16 megabytes of memory!\n", 50ms);
+                return true;
+            }
+            else if (winner != fieldObjects::EMPTY)
+            {
+                std::cout << "Congratulations, you won! You are smarter than a computer!\n";
+                return true;
+            }
+            else if (!aArena.valid())
+            {
+                std::cout << "Draw!\n";
+                return true;
+            }
+            return false;
+        };
     }
-    bool ex = false;
-    gameField arena;
-    gameBot bot { arena, BotSide };
-    auto PlayerTurn = [&arena, PlayerSide](){
-        std::cout << "Your turn, enter row and column number\n>";
-        auto PlayerCoords = getCoords([&arena](const std::pair<uint16_t, uint16_t>& val){
-            return val.first && val.second && val.first < 4 && val.second < 4 && arena.at(val.first - 1, val.second - 1) == fieldObjects::EMPTY;
+
+    fieldObjects rand_distribute() noexcept
+    {
+        static std::default_random_engine e { std::random_device {}() };
+        static std::uniform_int_distribution<> d { 0, 1 };
+        return static_cast<fieldObjects>(d(e));
+    }
+
+    void distribute(fieldObjects& botSide, fieldObjects& playerSide) noexcept
+    {
+        static const std::array<std::string, 23> answers = {
+            "1", "Crosses", "crosses", "X", "x", "cross", "Cross", "CROSS", "CROSSES",
+            "Rand", "rand", "random", "Random",
+            "2", "Nought", "nought", "O", "o", "0", "nought", "Nought", "NOUGHT", "NOUGHT" };
+        static const auto endCross = std::find(answers.cbegin(), answers.cend(), "Rand");
+        static const auto endRand = std::find(answers.cbegin(), answers.cend(), "2");
+
+        std::cout << "Choose your side (1 - crosses, 2 - noughts)\n>";
+        decltype(answers)::const_iterator choice;
+        getstr([&choice](const std::string& val)  noexcept{
+            choice = std::find(answers.cbegin(), answers.cend(), val);
+            return choice != answers.cend();
             });
-        if (PlayerSide == fieldObjects::CROSS)
-            arena.setX(PlayerCoords.first - 1, PlayerCoords.second - 1);
-        else
-            arena.setO(PlayerCoords.first - 1, PlayerCoords.second - 1);
-    };
-    print(arena);
-    while (!ex)
-    {
-        if (PlayerSide == fieldObjects::NOUGHT)
+        if (choice < endCross)
         {
-            PlayerTurn();
-            print(arena);
-            if ((ex = exodus(arena))) return;
-            bot.step();
-            print(arena);
-            ex = exodus(arena);
+            playerSide = fieldObjects::CROSS;
+            botSide = fieldObjects::NOUGHT;
+        }
+        else if (choice < endRand)
+        {
+            playerSide = rand_distribute();
+            botSide = playerSide == fieldObjects::CROSS ? fieldObjects::NOUGHT : fieldObjects::CROSS;
         }
         else
         {
-            bot.step();
-            print(arena);
-            if ((ex = exodus(arena))) return;
-            PlayerTurn();
-            print(arena);
-            ex = exodus(arena);
+            playerSide = fieldObjects::NOUGHT;
+            playerSide = fieldObjects::CROSS;
         }
     }
-}
-void GameWith2Players()
-{
-    gameField arena;
-    auto validX = [&arena](const std::pair<uint16_t, uint16_t>& val) noexcept{
-        return arena.setX(val.first - 1, val.second - 1);
-    };
-    auto validO = [&arena](const std::pair<uint16_t, uint16_t>& val) noexcept{
-        return arena.setO(val.first - 1, val.second - 1);
-    };
-    bool ex = false;
-    while (!ex)
-    {
-        print(arena);
-        std::cout << "Move NOUGHT. Enter row and column number\n>";
-        getCoords(validO);
-        print(arena);
-        if ((ex = exodus(arena))) break;
-        std::cout << "Move CROSS.  Enter row and column number\n>";
-        getCoords(validX);
-        print(arena);
-        ex = exodus(arena);
-    }
-}
 
-//TODO make extend user interface
+    template<fieldObjects ObjT>
+    std::enable_if_t<ObjT != fieldObjects::EMPTY, std::function<void(void)>> get_move(gameBot& aBot, gameField& aArena) noexcept
+    {
+        if (aBot.get_side() == ObjT)
+        {
+            return [&aBot](){ aBot.step(); };
+        }
+        else
+        {
+            return [&aArena](){
+                std::cout << "Your turn, enter row and column number\n>";
+                auto PlayerCoords = getCoords([&aArena](const std::pair<uint16_t, uint16_t>& val){
+                    return val.first && val.second && val.first < 4
+                        && val.second < 4 && aArena.at(val.first - 1, val.second - 1) == fieldObjects::EMPTY;
+                    });
+                aArena.setObj(ObjT, PlayerCoords.first - 1, PlayerCoords.second - 1);
+            };
+        }
+    }
+
+    void GameWithBot()
+    {
+        using namespace std::chrono_literals;
+        fieldObjects BotSide, PlayerSide;
+        distribute(BotSide, PlayerSide);
+        gameField arena;
+        gameBot bot { arena, BotSide };
+        auto nought_move = get_move<fieldObjects::NOUGHT>(bot, arena);
+        auto cross_move = get_move<fieldObjects::CROSS>(bot, arena);
+        auto has_winner = create_ex_checker(bot, arena);
+        std::cout << "The bot says: ";
+        slow_print("I will beat you meat brains! Ha ha!\n", 40ms);
+        print(arena);
+        while (true)
+        {
+            nought_move();
+            print(arena);
+            if (has_winner()) return;
+            cross_move();
+            print(arena);
+            if (has_winner()) return;
+        }
+    }
+
+    void GameWith2Players()
+    {
+        using namespace std::chrono_literals;
+        gameField arena;
+        auto validX = [&arena](const std::pair<uint16_t, uint16_t>& val) noexcept{
+            return arena.setX(val.first - 1, val.second - 1);
+        };
+        auto validO = [&arena](const std::pair<uint16_t, uint16_t>& val) noexcept{
+            return arena.setO(val.first - 1, val.second - 1);
+        };
+        print(arena);
+        while (true)
+        {
+            std::cout << "Move NOUGHT. Enter row and column number\n>";
+            getCoords(validO);
+            print(arena);
+            if (exodus(arena)) return;
+            std::cout << "Move CROSS.  Enter row and column number\n>";
+            getCoords(validX);
+            print(arena);
+            if (exodus(arena)) return;
+        }
+    }
+}
 int run()
 {
     std::cout << "**************** Tic tac toe ******************\n\n"

@@ -30,7 +30,7 @@ private:
     bool fit() const noexcept;
     std::pair<bool, uint16_t> priority(size_t) const noexcept;
     void change();
-    inline bool random() const noexcept;
-    inline void clear() noexcept;
+    bool random() const noexcept { return CurStrat == randval; }
+    void clear() noexcept { while (!StepsQueue.empty()) StepsQueue.pop(); }
     size_t select() const;
 };

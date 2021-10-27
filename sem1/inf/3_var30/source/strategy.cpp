@@ -20,16 +20,6 @@ const std::array<std::array<gameStrategy::steps_type::value_type, 3>, 8> gameStr
     std::array<gameStrategy::steps_type::value_type, 3>{ gameStrategy::steps_type::value_type { 0U, 2U }, gameStrategy::steps_type::value_type { 1U, 1U }, gameStrategy::steps_type::value_type { 2U, 0U } }
 };
 
-bool gameStrategy::random() const noexcept
-{
-    return CurStrat == randval;
-}
-
-void gameStrategy::clear() noexcept
-{
-    while (!StepsQueue.empty()) StepsQueue.pop();
-}
-
 void gameStrategy::randfill()
 {
     std::vector<steps_type::value_type> FreePlaces;

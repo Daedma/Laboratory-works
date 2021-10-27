@@ -4,7 +4,7 @@
 gameBot::gameBot(gameField& Field, fieldObjects BotSide) :
     Arena { Field }, Side { BotSide }, curStrat { Arena, Side } {}
 
-std::pair<bool, gameBot::coord_type> gameBot::danger() const noexcept
+std::pair<bool, gameBot::coord_type> gameBot::is_danger() const noexcept
 {
     static constexpr std::array<std::array<coord_type, 3>, 16> enemyTactics =
     {
@@ -56,7 +56,7 @@ std::pair<bool, gameBot::coord_type> gameBot::danger() const noexcept
 void gameBot::step()
 {
     auto setObject = Side == fieldObjects::CROSS ? &gameField::setX : &gameField::setO;
-    auto is_dungerous = danger();
+    auto is_dungerous = is_danger();
     curStrat.update();
     if (is_dungerous.first && curStrat.left() != 1)
         (Arena.*setObject)(is_dungerous.second.first, is_dungerous.second.second);
