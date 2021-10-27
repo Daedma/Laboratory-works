@@ -22,6 +22,7 @@ namespace{
         std::cout << _Arena;
     }
 
+    //проверить поле на наличие победителя
     bool exodus(gameField& arena)
     {
         auto vict = arena.check();
@@ -43,6 +44,7 @@ namespace{
         return false;
     }
 
+    //вывести текст с задержкой между выводами отдельных сиволов строки
     template<typename Rep, typename Period >
     void slow_print(const std::string& aMessage, const std::chrono::duration<Rep, Period>& aInterval) noexcept
     {
@@ -53,20 +55,22 @@ namespace{
         }
     }
 
+    //создать функцию для проверки поля на наличие победителя
     auto create_ex_checker(const gameBot& aBot, const gameField& aArena) noexcept
     {
         return[&aBot, &aArena]() noexcept{
+            using namespace std::chrono_literals;
             auto winner = aArena.check();
             if (aBot.get_side() == winner)
             {
                 std::cout << "The bot won you!\nThe bot says: ";
-                using namespace std::chrono_literals;
                 slow_print("Ha ha ha! I'm smarter than you! I have 16 megabytes of memory!\n", 50ms);
                 return true;
             }
             else if (winner != fieldObjects::EMPTY)
             {
-                std::cout << "Congratulations, you won! You are smarter than a computer!\n";
+                std::cout << "Congratulations, you won! You are smarter than a computer!\nThe bot says: ";
+                slow_print("No! You defeated me! I'm sure it’s foul play or your luck involved.", 50ms);
                 return true;
             }
             else if (!aArena.valid())
@@ -78,6 +82,7 @@ namespace{
         };
     }
 
+    //случайное распределение сторон
     fieldObjects rand_distribute() noexcept
     {
         static std::default_random_engine e { std::random_device {}() };
@@ -85,6 +90,7 @@ namespace{
         return static_cast<fieldObjects>(d(e));
     }
 
+    //распределить стороны
     void distribute(fieldObjects& botSide, fieldObjects& playerSide) noexcept
     {
         static const std::array<std::string, 23> answers = {
@@ -117,6 +123,7 @@ namespace{
         }
     }
 
+    //создать функцию для проведения хода определенной стороны
     template<fieldObjects ObjT>
     std::enable_if_t<ObjT != fieldObjects::EMPTY, std::function<void(void)>> get_move(gameBot& aBot, gameField& aArena) noexcept
     {

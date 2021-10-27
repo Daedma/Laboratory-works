@@ -85,7 +85,7 @@ fieldObjects gameField::check() const
     };
 
     counter _Count;
-
+    //перебор всех вариантов
     //1nd case
     for (auto& y : _Arena)
     {
