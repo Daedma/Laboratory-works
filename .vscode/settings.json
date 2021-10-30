@@ -75,6 +75,7 @@
         "xlocmes": "cpp",
         "queue": "cpp",
         "stack": "cpp",
-        "set": "cpp"
+        "set": "cpp",
+        "thread": "cpp"
     }
 }
