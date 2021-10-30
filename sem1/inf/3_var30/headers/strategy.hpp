@@ -1,5 +1,5 @@
 #pragma once
-#include "..\headers\objects.hpp"
+#include "objects.hpp"
 #include <array>
 #include <stack>
 #include <utility>
@@ -10,8 +10,9 @@ class gameField;
 class gameStrategy
 {
     using steps_type = std::stack<std::pair<uint16_t, uint16_t>>;
+
 public:
-    gameStrategy(const gameField&, fieldObjects);
+    gameStrategy(const gameField &, fieldObjects);
     //возвращает следующий шаг, который надо сделать
     steps_type::value_type step() noexcept;
     //вернуть количество шагов до победы
@@ -21,18 +22,19 @@ public:
     void update();
     //сбросить стратегию
     void reset(fieldObjects);
+
 private:
     //значение номера стратегии, при которой ходы делаются случайным образом
     static constexpr size_t randval = static_cast<size_t>(-1);
     //шаги, необходимые для победы
     static const std::array<std::array<steps_type::value_type, 3>, 8> Intents;
 
-    const gameField& Arena;
+    const gameField &Arena;
     fieldObjects Side;
-    size_t CurStrat;//номер текущей стратегии
-    steps_type StepsQueue;//очередь шагов
+    size_t CurStrat;       //номер текущей стратегии
+    steps_type StepsQueue; //очередь шагов
 
-    //заполнить очередь 
+    //заполнить очередь
     void fill();
     //заполнить очередь рандомными шагами
     void randfill();
@@ -45,7 +47,11 @@ private:
     //узнать, является ли текущая стратегия рандомной
     bool random() const noexcept { return CurStrat == randval; }
     //очистить очередь
-    void clear() noexcept { while (!StepsQueue.empty()) StepsQueue.pop(); }
+    void clear() noexcept
+    {
+        while (!StepsQueue.empty())
+            StepsQueue.pop();
+    }
     //выбрать стратегию
     size_t select() const;
 };

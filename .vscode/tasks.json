@@ -10,7 +10,30 @@
 				"-o",
 				"${fileDirname}/${fileBasenameNoExtension}",
 				"-O3",
-				"-std=c++17"
+				"-std=c++17",
+				"-pedantic"
+			],
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "компилятор: /usr/bin/g++"
+		},
+		{
+			"type": "cppbuild",
+			"label": "Linux g++ (source dir)",
+			"command": "/usr/bin/g++",
+			"args": [
+				"${fileDirname}/*.cpp",
+				"${fileDirname}/source/*.cpp",
+				"-o",
+				"${fileDirname}/${fileBasenameNoExtension}",
+				"-O3",
+				"-std=c++17",
+				"-pedantic"
 			],
 			"options": {
 				"cwd": "${fileDirname}"
@@ -43,13 +66,13 @@
 		},
 		{
 			"type": "cppbuild",
-			"label": "Windows clang++ (tic-tac-toe)",
+			"label": "Windows clang++ (source dir)",
 			"command": "C:/LLVM/bin/clang++",
 			"args": [
 				"${fileDirname}/*.cpp",
 				"${fileDirname}/source/*.cpp",
 				"-o",
-				"${fileDirname}/tic-tac-toe.exe",
+				"${fileDirname}/{fileBasenameNoExtension}.exe",
 				"-O3",
 				"-std=c++17"
 			],

@@ -1,24 +1,23 @@
-#include "..\headers\strategy.hpp"
-#include "..\headers\field.hpp"
+#include "../headers/strategy.hpp"
+#include "../headers/field.hpp"
 #include <algorithm>
 #include <vector>
 #include <random>
 #include <set>
 
 const std::array<std::array<gameStrategy::steps_type::value_type, 3>, 8> gameStrategy::Intents =
-{
-    //rows
-    std::array<gameStrategy::steps_type::value_type, 3>{ gameStrategy::steps_type::value_type { 0U, 0U }, gameStrategy::steps_type::value_type { 0U, 1U }, gameStrategy::steps_type::value_type { 0U, 2U } },
-    std::array<gameStrategy::steps_type::value_type, 3>{ gameStrategy::steps_type::value_type { 1U, 0U }, gameStrategy::steps_type::value_type { 1U, 1U }, gameStrategy::steps_type::value_type { 1U, 2U } },
-    std::array<gameStrategy::steps_type::value_type, 3>{ gameStrategy::steps_type::value_type { 2U, 0U }, gameStrategy::steps_type::value_type { 2U, 1U }, gameStrategy::steps_type::value_type { 2U, 2U } },
-    //columns
-    std::array<gameStrategy::steps_type::value_type, 3>{ gameStrategy::steps_type::value_type { 0U, 0U }, gameStrategy::steps_type::value_type { 1U, 0U }, gameStrategy::steps_type::value_type { 2U, 0U } },
-    std::array<gameStrategy::steps_type::value_type, 3>{ gameStrategy::steps_type::value_type { 0U, 1U }, gameStrategy::steps_type::value_type { 1U, 1U }, gameStrategy::steps_type::value_type { 2U, 1U } },
-    std::array<gameStrategy::steps_type::value_type, 3>{ gameStrategy::steps_type::value_type { 0U, 2U }, gameStrategy::steps_type::value_type { 1U, 2U }, gameStrategy::steps_type::value_type { 2U, 2U } },
-    //diagonals
-    std::array<gameStrategy::steps_type::value_type, 3>{ gameStrategy::steps_type::value_type { 0U, 0U }, gameStrategy::steps_type::value_type { 1U, 1U }, gameStrategy::steps_type::value_type { 2U, 2U } },
-    std::array<gameStrategy::steps_type::value_type, 3>{ gameStrategy::steps_type::value_type { 0U, 2U }, gameStrategy::steps_type::value_type { 1U, 1U }, gameStrategy::steps_type::value_type { 2U, 0U } }
-};
+    {
+        //rows
+        std::array<gameStrategy::steps_type::value_type, 3>{gameStrategy::steps_type::value_type{0U, 0U}, gameStrategy::steps_type::value_type{0U, 1U}, gameStrategy::steps_type::value_type{0U, 2U}},
+        std::array<gameStrategy::steps_type::value_type, 3>{gameStrategy::steps_type::value_type{1U, 0U}, gameStrategy::steps_type::value_type{1U, 1U}, gameStrategy::steps_type::value_type{1U, 2U}},
+        std::array<gameStrategy::steps_type::value_type, 3>{gameStrategy::steps_type::value_type{2U, 0U}, gameStrategy::steps_type::value_type{2U, 1U}, gameStrategy::steps_type::value_type{2U, 2U}},
+        //columns
+        std::array<gameStrategy::steps_type::value_type, 3>{gameStrategy::steps_type::value_type{0U, 0U}, gameStrategy::steps_type::value_type{1U, 0U}, gameStrategy::steps_type::value_type{2U, 0U}},
+        std::array<gameStrategy::steps_type::value_type, 3>{gameStrategy::steps_type::value_type{0U, 1U}, gameStrategy::steps_type::value_type{1U, 1U}, gameStrategy::steps_type::value_type{2U, 1U}},
+        std::array<gameStrategy::steps_type::value_type, 3>{gameStrategy::steps_type::value_type{0U, 2U}, gameStrategy::steps_type::value_type{1U, 2U}, gameStrategy::steps_type::value_type{2U, 2U}},
+        //diagonals
+        std::array<gameStrategy::steps_type::value_type, 3>{gameStrategy::steps_type::value_type{0U, 0U}, gameStrategy::steps_type::value_type{1U, 1U}, gameStrategy::steps_type::value_type{2U, 2U}},
+        std::array<gameStrategy::steps_type::value_type, 3>{gameStrategy::steps_type::value_type{0U, 2U}, gameStrategy::steps_type::value_type{1U, 1U}, gameStrategy::steps_type::value_type{2U, 0U}}};
 
 void gameStrategy::randfill()
 {
@@ -28,26 +27,28 @@ void gameStrategy::randfill()
         for (uint16_t j = 0U; j != 3U; ++j)
             if (Arena.at(i, j) == fieldObjects::EMPTY)
                 FreePlaces.emplace_back(i, j);
-    std::shuffle(FreePlaces.begin(), FreePlaces.end(), std::random_device {});
-    for (auto& i : FreePlaces)
+    std::shuffle(FreePlaces.begin(), FreePlaces.end(), std::random_device{});
+    for (auto &i : FreePlaces)
         StepsQueue.emplace(i);
 }
 
 void gameStrategy::fill()
 {
-    if (random()) return randfill();
-    static std::array<uint16_t, 3> buff { 0, 1, 2 };
+    if (random())
+        return randfill();
+    static std::array<uint16_t, 3> buff{0, 1, 2};
     clear();
-    std::shuffle(buff.begin(), buff.end(), std::random_device {});
+    std::shuffle(buff.begin(), buff.end(), std::random_device{});
     for (auto i : buff)
         StepsQueue.emplace(Intents[CurStrat][i]);
 }
 
 bool gameStrategy::fit() const noexcept
 {
-    if (random()) return true;
+    if (random())
+        return true;
     fieldObjects EnemySide = Side == fieldObjects::CROSS ? fieldObjects::NOUGHT : fieldObjects::CROSS;
-    for (auto& i : Intents[CurStrat])
+    for (auto &i : Intents[CurStrat])
         if (Arena.at(i.first, i.second) == EnemySide)
             return false;
     return true;
@@ -57,19 +58,19 @@ std::pair<bool, uint16_t> gameStrategy::priority(size_t nStrat) const noexcept
 {
     uint16_t Count = 0U;
     fieldObjects EnemySide = Side == fieldObjects::CROSS ? fieldObjects::NOUGHT : fieldObjects::CROSS;
-    for (auto& i : Intents[nStrat])
+    for (auto &i : Intents[nStrat])
     {
         if (Arena.at(i.first, i.second) == EnemySide)
-            return { false, -1 };
+            return {false, -1};
         else if (Arena.at(i.first, i.second) == Side)
             ++Count;
     }
-    return { true, Count };
+    return {true, Count};
 }
 
 void gameStrategy::change()
 {
-    std::set < std::pair<uint16_t, size_t>, std::greater<std::pair<uint16_t, size_t>>> Priorities;
+    std::set<std::pair<uint16_t, size_t>, std::greater<std::pair<uint16_t, size_t>>> Priorities;
     std::pair<bool, uint16_t> curval;
     std::pair<bool, uint16_t> curStratPriority;
     for (size_t i = 0; i != Intents.size(); ++i)
@@ -93,15 +94,16 @@ void gameStrategy::change()
 
 size_t gameStrategy::select() const
 {
-    static std::default_random_engine e { std::random_device {}() };
+    static std::default_random_engine e{std::random_device{}()};
     std::vector<size_t> pool;
     for (size_t i = 0; i != Intents.size(); ++i)
     {
         if (priority(i).first)
             pool.emplace_back(i);
     }
-    if (pool.empty()) return randval;
-    std::uniform_int_distribution<size_t> d { 0, pool.size() - 1 };
+    if (pool.empty())
+        return randval;
+    std::uniform_int_distribution<size_t> d{0, pool.size() - 1};
     return pool[d(e)];
 }
 
@@ -118,9 +120,10 @@ gameStrategy::steps_type::value_type gameStrategy::step() noexcept
 
 uint16_t gameStrategy::left() const noexcept
 {
-    if (random()) return static_cast<uint16_t>(-1);
+    if (random())
+        return static_cast<uint16_t>(-1);
     uint16_t Count = 0U;
-    for (const auto& i : Intents[CurStrat])
+    for (const auto &i : Intents[CurStrat])
         if (Arena.at(i.first, i.second) == Side)
             ++Count;
     return 3U - Count;
@@ -144,8 +147,7 @@ void gameStrategy::update()
     }
 }
 
-gameStrategy::gameStrategy(const gameField& _Field, fieldObjects _MySide) :
-    Arena { _Field }, Side { _MySide }, CurStrat { select() }
+gameStrategy::gameStrategy(const gameField &_Field, fieldObjects _MySide) : Arena{_Field}, Side{_MySide}, CurStrat{select()}
 {
     fill();
 }

@@ -1,4 +1,4 @@
-#include "headers\tic_tac_toe.hpp"
+#include "headers/tic_tac_toe.hpp"
 
 int main()
 {

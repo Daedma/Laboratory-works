@@ -1,19 +1,18 @@
-#include "..\headers\field.hpp"
+#include "../headers/field.hpp"
 #include <iostream>
 #define FILLING_CUP 9
 
-#if (defined (_WIN32) || defined (_WIN64))
+#if (defined(_WIN32) || defined(_WIN64))
 #define AGGREGATE char(176)
 #endif
-#if (defined (LINUX) || defined (__linux__))
+#if (defined(LINUX) || defined(__linux__))
 #define AGGREGATE ' '
 #endif
 
-gameField::gameField() :
-    _Valid { true }, _Filling { 0 }
+gameField::gameField() : _Valid{true}, _Filling{0}
 {
-    for (auto& y : _Arena)
-        for (auto& x : y)
+    for (auto &y : _Arena)
+        for (auto &x : y)
             x = fieldObjects::EMPTY;
 }
 
@@ -40,8 +39,8 @@ bool gameField::clear(size_t nRow, size_t nColumn) noexcept
 
 void gameField::reset()
 {
-    for (auto& y : _Arena)
-        for (auto& x : y)
+    for (auto &y : _Arena)
+        for (auto &x : y)
             x = fieldObjects::EMPTY;
     _Filling = 0;
     _Valid = true;
@@ -87,9 +86,9 @@ fieldObjects gameField::check() const
     counter _Count;
     //перебор всех вариантов
     //1nd case
-    for (auto& y : _Arena)
+    for (auto &y : _Arena)
     {
-        for (auto& x : y)
+        for (auto &x : y)
         {
             _Count.add(x);
         }
@@ -142,7 +141,7 @@ char gameField::sym(size_t nRow, size_t nColumn) const
     return AGGREGATE;
 }
 
-std::ostream& operator<<(std::ostream& os, const gameField& _Field)
+std::ostream &operator<<(std::ostream &os, const gameField &_Field)
 {
     os << '|' << '\\' << "|1|2|3|" << std::endl;
     os << "|1|" << _Field.sym(0, 0) << '|' << _Field.sym(0, 1) << '|' << _Field.sym(0, 2) << '|' << std::endl;
