@@ -3,3 +3,4 @@
 !*.*
 *.exe
 *.CACHE
+.vscode/c_cpp_properties.json
