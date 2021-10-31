@@ -76,6 +76,7 @@
         "queue": "cpp",
         "stack": "cpp",
         "set": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "mutex": "cpp"
     }
 }
