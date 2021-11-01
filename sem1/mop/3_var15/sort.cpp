@@ -1,8 +1,3 @@
-/*
-Вариат 15	
-Б	
-Строго случайные данные и случайные данные с малым числом уникальных значений
-*/
 #include <iostream>
 #include <vector>
 #include <iterator>
@@ -13,30 +8,27 @@
 #include <cmath>
 #include <functional>
 
-#define UPPER_BOUND 10000
-#define LOWER_BOUND -10000
 
 //Class-timer
 struct timer
 {
 private:
     using clock_t = std::chrono::high_resolution_clock;
-    using second_t = std::chrono::duration<double, std::ratio<1> >;
-
     std::chrono::time_point<clock_t> m_beg;
 
 public:
     timer() : m_beg(clock_t::now())
     {}
 
+    //сбросить таймер
     void reset()
     {
         m_beg = clock_t::now();
     }
-
-    double elapsed() const
+    //получить пройденное с момента отсчёта  время
+    long double elapsed() const
     {
-        return std::chrono::duration_cast<second_t>(clock_t::now() - m_beg).count();
+        return std::chrono::duration_cast<std::chrono::duration<long double, std::milli>>(clock_t::now() - m_beg).count();
     }
 };
 
@@ -60,6 +52,7 @@ T getValue(Func... UnPred)//UnPred(Unary predicate) - функции для пр
     return value;
 }
 
+//Функция-обертка, вызывает getValue<int>
 template<typename... Func>
 int geti(Func&&... UnPred)
 {
@@ -86,22 +79,24 @@ bool keep_on()
     return  find_result < choices.cbegin() + choices.size() / 2;//положительные ответы содержаться в первой половине массива
 }
 
-
+//пространство с моими реализациями функций из стандартной библиотеки
 namespace my{
-    template<typename OutputIt>
-    void generate_n(OutputIt dest, size_t count, int lower_bound, int upper_bound) noexcept
+    //заполнить контейнер случайными значениями из заданного диапазона 
+    template<typename OutputIt, typename T>
+    void generate_n(OutputIt dest, size_t count, T lower_bound, T upper_bound) noexcept
     {
         static std::default_random_engine e { std::random_device {}() };
-        std::uniform_int_distribution<int> d { lower_bound, upper_bound };
+        std::uniform_int_distribution<T> d { lower_bound, upper_bound };
         for (size_t i = 0; i != count; ++i, ++dest)
             *dest = d(e);
     }
 
-    template<typename OutputIt>
-    void generate_n(OutputIt dest, size_t count, size_t unique_count, int lower_bound, int upper_bound)
+    //заполнить контейнер случайными значениями с малым числом уникальных
+    template<typename OutputIt, typename T>
+    void generate_n(OutputIt dest, size_t count, size_t unique_count, T lower_bound, T upper_bound)
     {
 
-        std::vector<int> num_pool(unique_count);
+        std::vector<T> num_pool(unique_count);
         my::generate_n(num_pool.begin(), unique_count, lower_bound, upper_bound);
         static std::default_random_engine e { std::random_device {}() };
         std::uniform_int_distribution<size_t> d { 0, unique_count - 1 };
@@ -109,12 +104,13 @@ namespace my{
             *dest = num_pool[d(e)];
     }
 
+    //разделить массив 
     template<typename BidirIt, typename Compare = std::less<>>
     BidirIt partition(BidirIt first, BidirIt last, Compare comp = std::less<> {})
     {
         using std::swap;
-        auto p = std::prev(last);
-        auto i = first;
+        auto p = std::prev(last);//опорный элемент
+        auto i = first;//указывает на элементы большие либо равные p
         for (auto j = first; j != p; ++j)
             if (comp(*j, *p))
                 swap(*i++, *j);
@@ -122,6 +118,7 @@ namespace my{
         return i;
     }
 
+    //быстрая сортировка
     template< typename BidirIt, typename Compare = std::less<>>
     void sort(BidirIt first, BidirIt last, Compare comp = std::less<> {})
     {
@@ -134,6 +131,7 @@ namespace my{
     }
 }
 
+//ввод массива вручную
 template<typename OutputIt>
 void input_container(OutputIt dest, size_t count)
 {
@@ -151,18 +149,19 @@ bool is_positive(T val) noexcept
     return val > 0;
 }
 
+//заполнить вектор различными способами, которыми пожелает пользователь
 void fill_vec(std::vector<int>& vec)
 {
     std::cout << "Enter number of elements\n>";
     int count = geti(is_positive<>);
     std::cout << "Do you want enter value of elements(1) or generate(2)?\n>";
-    int choice = geti([](int val){return val == 1 || val == 2; });
+    int choice = geti([](int val) noexcept{return val == 1 || val == 2; });
     if (choice == 1)
         input_container(std::back_inserter(vec), count);
     else
     {
-        std::cout << "1 - strictly random data\nor\n2 - random data with a small number of unique values\n> ";
-        choice = geti([](int val){return val == 1 || val == 2; });
+        std::cout << "1 - strictly random data\nor\n2 - random data with a small number of unique values?\n> ";
+        choice = geti([](int val) noexcept{return val == 1 || val == 2; });
         if (choice == 1)
             my::generate_n(std::back_inserter(vec), count, -count, count);
         else
@@ -172,32 +171,35 @@ void fill_vec(std::vector<int>& vec)
 
 int main()
 {
-    static const size_t outCup = 20;
+    static const size_t outCup = 20;//максимальное количество выводимых элементов
     std::cout << "==============| Fast sort |==============\n";
     do
     {
-        std::vector<int> vec;
+        std::vector<int> vec;//изначальный вектор
         fill_vec(vec);
-        double mysort_time, stdsort_time;
-        std::vector<int> mysort_vec = vec;
-        std::vector<int> stdsort_vec = vec;
+        long double mysort_time, stdsort_time;
+        std::vector<int> mysort_vec = vec;//вектор, отсортированный моим алгоритмом сортировки
+        std::vector<int> stdsort_vec = vec;//вектор, отсортированный стандартным алгоритмом сортировки
 
         timer t;
         my::sort(mysort_vec.begin(), mysort_vec.end());
-        mysort_time = t.elapsed();
+        mysort_time = t.elapsed();//фиксируем время
 
         t.reset();
         std::sort(stdsort_vec.begin(), stdsort_vec.end());
-        stdsort_time = t.elapsed();
+        stdsort_time = t.elapsed();//фиксируем время
 
-        size_t outCount = std::min(outCup, mysort_vec.size());
+        size_t outCount = std::min(outCup, mysort_vec.size());//количество выводимых символов
         std::cout << "Initial vector:\n";
-        std::copy_n(vec.begin(), outCount, std::ostream_iterator<int>{std::cout, " "});
+        std::copy_n(vec.begin(), outCount, std::ostream_iterator<int>{std::cout, " "});//вывести первоначальный вектор
+
         std::cout << "\nResults of my implementation of the sorting algorithm:\n";
-        std::copy_n(mysort_vec.cbegin(), outCount, std::ostream_iterator <int>{std::cout, " "});
-        std::cout << "\nTime: " << mysort_time << " seconds\n";
+        std::copy_n(mysort_vec.cbegin(), outCount, std::ostream_iterator <int>{std::cout, " "});//вывести отсортированный вектор
+        std::cout << "\nTime: " << mysort_time << " milliseconds\n";
+
         std::cout << "Results of the standart sorting algorithm:\n";
-        std::copy_n(stdsort_vec.cbegin(), outCount, std::ostream_iterator <int>{std::cout, " "});
-        std::cout << "\nTime: " << stdsort_time << " seconds\n";
+        std::copy_n(stdsort_vec.cbegin(), outCount, std::ostream_iterator <int>{std::cout, " "});//вывести отсортированный вектор
+        std::cout << "\nTime: " << stdsort_time << " milliseconds\n";
+
     } while (keep_on());
 }
