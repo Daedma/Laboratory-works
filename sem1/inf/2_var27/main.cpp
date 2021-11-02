@@ -28,7 +28,7 @@ T getValue(Func... UnPred) //UnPred(Unary predicate) - функции для п�
     return value;
 }
 
-//Функция-обертка, вызывает getValue<double>
+//Функция-обертка, вызывает getValue<long double>
 template <typename... Func>
 long double getld(Func &&...UnPred)
 {
@@ -45,10 +45,9 @@ std::string getstr(Func &&...UnPred)
 //Узнает о намерениях пользователя о продолжении работы программы через консоль
 bool keep_on()
 {
-    static const std::array<std::string, 10> choices = {"Yes", "yes", "y", "Y", "YES", "NO", "No", "no", "n", "N"}; //допустимые ответы
+    static const std::array<std::string, 10> choices = { "Yes", "yes", "y", "Y", "YES", "NO", "No", "no", "n", "N" }; //допустимые ответы
     std::array<std::string, 10>::const_iterator find_result;                                                        //указывает на введенный пользователем допустимый ответ
-    auto valid = [&find_result](const std::string &str)
-    {
+    auto valid = [&find_result](const std::string& str)    {
         return (find_result = std::find(choices.cbegin(), choices.cend(), str)) != choices.cend();
     };
     std::cout << "Do you want to continue?\n>";
@@ -59,7 +58,7 @@ bool keep_on()
 int main()
 {
     std::cout << "=========Last second of the fall=========\n";
-    auto valid_val = [](long double PathPart) noexcept { //проверяет допустимость введенного пользователем значения для доли расстояния
+    auto valid_val = [](long double PathPart) noexcept{ //проверяет допустимость введенного пользователем значения для доли расстояния
         return PathPart > 0.L && PathPart < 1.L;
     };
     std::cout << std::setprecision(std::numeric_limits<long double>::max_digits10 + 1);

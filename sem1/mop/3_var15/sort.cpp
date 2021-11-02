@@ -193,9 +193,9 @@ int main()
         std::cout << "Initial vector:\n";
         std::copy_n(vec.begin(), outCount, std::ostream_iterator<int>{std::cout, " "});//вывести первоначальный вектор
 
-        std::cout << "\nResults of my implementation of the sorting algorithm:\n";
+        std::cout << "\n\nResults of my implementation of the sorting algorithm:\n";
         std::copy_n(mysort_vec.cbegin(), outCount, std::ostream_iterator <int>{std::cout, " "});//вывести отсортированный вектор
-        std::cout << "\nTime: " << mysort_time << " milliseconds\n";
+        std::cout << "\nTime: " << mysort_time << " milliseconds\n\n";
 
         std::cout << "Results of the standart sorting algorithm:\n";
         std::copy_n(stdsort_vec.cbegin(), outCount, std::ostream_iterator <int>{std::cout, " "});//вывести отсортированный вектор
