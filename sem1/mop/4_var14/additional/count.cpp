@@ -72,30 +72,6 @@ bool is_creatable(const std::filesystem::path& aFileName)
     return false;
 }
 
-std::vector<std::string> getTokens(int argc, char** argv)
-{
-    std::vector<std::string> tokens;
-    for (size_t i = 1; i != argc; ++i)
-    {
-        if (argv[i][0] == '\"')
-        {
-            std::string tmp { argv[i] + 1 };
-            while (tmp.back() != '\"')
-            {
-                if (++i == argc)
-                    throw std::invalid_argument { "missing closing \"" };
-                tmp += " ";
-                tmp += argv[i];
-            }
-            tmp.pop_back();
-            tokens.emplace_back(std::move(tmp));
-        }
-        else
-            tokens.emplace_back(argv[i]);
-    }
-    return tokens;
-}
-
 std::pair<std::filesystem::path, std::filesystem::path> enterFileName(const std::filesystem::path& aDefaultOut)
 {
     std::string rfile, wfile;
@@ -120,21 +96,21 @@ std::pair<std::filesystem::path, std::filesystem::path> enterFileName(const std:
 
 std::pair<std::filesystem::path, std::filesystem::path> getFileName(int argc, char** argv, const std::filesystem::path& aDefaultOut)
 {
-    if (argc == 1) return enterFileName(aDefaultOut);
     using namespace std::string_literals;
-    const auto tokens = getTokens(argc, argv);
-    switch (tokens.size())
+    switch (argc)
     {
     case 1:
-        if (!is_exist(tokens[0]))
-            throw std::invalid_argument { "file with this name ["s + tokens[0] + "] does not exist or not readable" };
-        return { tokens[0], aDefaultOut };
+        return enterFileName(aDefaultOut);
     case 2:
-        if (!is_exist(tokens[0]))
-            throw std::invalid_argument { "file with this name ["s + tokens[0] + "] does not exist or not readable" };
-        if (!is_creatable(tokens[1]))
-            throw std::invalid_argument { "file with this name ["s + tokens[1] + "] cannot be created" };
-        return { tokens[0], tokens[1] };
+        if (!is_exist(argv[1]))
+            throw std::invalid_argument { "file with this name ["s + argv[1] + "] does not exist or not readable" };
+        return { argv[1], aDefaultOut };
+    case 3:
+        if (!is_exist(argv[1]))
+            throw std::invalid_argument { "file with this name ["s + argv[1] + "] does not exist or not readable" };
+        if (!is_creatable(argv[2]))
+            throw std::invalid_argument { "file with this name ["s + argv[2] + "] cannot be created" };
+        return { argv[1], argv[2] };
     default:
         throw std::invalid_argument { "too many arguments (more than two)" };
     }
@@ -184,7 +160,7 @@ int main(int argc, char** argv)
             return -1;
         }
         std::fstream fs { rwfile.first, std::ios::in };
-        std::map<char, size_t, std::greater<>> counts;
+        std::map<char, size_t> counts;
         std::for_each(std::istream_iterator<char>{fs},
             std::istream_iterator<char>{},
             [&counts](char val){
