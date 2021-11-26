@@ -54,12 +54,14 @@ bool keep_on()
     return  find_result < choices.cbegin() + choices.size() / 2;//положительные ответы содержаться в первой половине массива
 }
 
+//проверка на существование файла
 bool is_exist(const std::string& aFileName)
 {
     std::ifstream ifs { aFileName };
     return ifs.is_open();
 }
 
+//проверка на возможность создания файла с таким именем
 bool is_creatable(const std::filesystem::path& aFileName)
 {
     std::ofstream ofs { aFileName };
@@ -72,6 +74,7 @@ bool is_creatable(const std::filesystem::path& aFileName)
     return false;
 }
 
+//ввод имен файлов с клавиатуры
 std::pair<std::filesystem::path, std::filesystem::path> enterFileName(const std::filesystem::path& aDefaultOut)
 {
     std::string rfile, wfile;
@@ -94,6 +97,7 @@ std::pair<std::filesystem::path, std::filesystem::path> enterFileName(const std:
     return { rfile, wfile };
 }
 
+//получить имена файлов
 std::pair<std::filesystem::path, std::filesystem::path> getFileName(int argc, char** argv, const std::filesystem::path& aDefaultOut)
 {
     using namespace std::string_literals;
@@ -116,6 +120,7 @@ std::pair<std::filesystem::path, std::filesystem::path> getFileName(int argc, ch
     }
 }
 
+//перевод времени в строку
 template <typename ClockT>
 std::string time_to_str(std::chrono::time_point<ClockT> aPoint, char aDelim = ' ')
 {
@@ -132,11 +137,13 @@ std::string time_to_str(std::chrono::time_point<ClockT> aPoint, char aDelim = ' 
     return (std::ostringstream {} << Day << '.' << Month << '.' << Year % 1000 << aDelim << Hour << 'h' << Minute << 'm' << Second << 's').str();
 }
 
+//сгенерировать имя файла по умолчанию
 std::filesystem::path generateFileName(std::string_view aPref, std::string_view aSuf)
 {
     return (std::ostringstream {} << aPref << time_to_str(std::chrono::system_clock::now(), '_') << aSuf).str();
 }
 
+//перевод пары в строку
 template<typename T1, typename T2>
 std::string toString(const std::pair<T1, T2>& pair)
 {

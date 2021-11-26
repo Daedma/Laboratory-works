@@ -57,6 +57,7 @@ bool keep_on()
     return  find_result < choices.cbegin() + choices.size() / 2;//положительные ответы содержаться в первой половине массива
 }
 
+//заменить все вхождения подстроки в строке на другую подстроку
 void replace_all(std::string& aSource, std::string_view aOld, std::string_view aNew)
 {
     auto cur = aSource.find(aOld);
@@ -67,6 +68,7 @@ void replace_all(std::string& aSource, std::string_view aOld, std::string_view a
     }
 }
 
+//считать строки в файле до выполняющей условие строки
 template<typename Func>
 std::string read_lines(std::istream& is, Func UnPred)
 {
@@ -74,16 +76,19 @@ std::string read_lines(std::istream& is, Func UnPred)
     while (std::getline(is, tmp) && UnPred(tmp))
         result += tmp + "\n";
     if (!result.empty())
-        result.pop_back();
+        result.pop_back();//убрать последний символ перевода строки
     return result;
 }
 
+//проверка на существование файла
 bool is_exist(const std::string& aFileName)
 {
     std::ifstream ifs { aFileName };
     return ifs.is_open();
 }
 
+
+//проверка на возможность создания файла с таким именем
 bool is_creatable(const std::filesystem::path& aFileName)
 {
     std::ofstream ofs { aFileName };
@@ -96,6 +101,7 @@ bool is_creatable(const std::filesystem::path& aFileName)
     return false;
 }
 
+//получить информацию о именах файла с клавиатуры
 std::pair<std::filesystem::path, std::filesystem::path> enterFileName(const std::filesystem::path& aDefaultOut)
 {
     std::string rfile, wfile;
@@ -118,6 +124,7 @@ std::pair<std::filesystem::path, std::filesystem::path> enterFileName(const std:
     return { rfile, wfile };
 }
 
+//получить имена файлов
 std::pair<std::filesystem::path, std::filesystem::path> getFileName(int argc, char** argv, const std::filesystem::path& aDefaultOut)
 {
     using namespace std::string_literals;
@@ -140,6 +147,7 @@ std::pair<std::filesystem::path, std::filesystem::path> getFileName(int argc, ch
     }
 }
 
+//перевод времени в строку
 template <typename ClockT>
 std::string time_to_str(std::chrono::time_point<ClockT> aPoint, char aDelim = ' ')
 {
@@ -156,6 +164,7 @@ std::string time_to_str(std::chrono::time_point<ClockT> aPoint, char aDelim = ' 
     return (std::ostringstream {} << Day << '.' << Month << '.' << Year % 1000 << aDelim << Hour << 'h' << Minute << 'm' << Second << 's').str();
 }
 
+//генерация имени по умолчанию
 std::filesystem::path generateFileName(std::string_view aPref, std::string_view aSuf)
 {
     return (std::ostringstream {} << aPref << time_to_str(std::chrono::system_clock::now(), '_') << aSuf).str();
@@ -163,6 +172,7 @@ std::filesystem::path generateFileName(std::string_view aPref, std::string_view 
 
 int main(int argc, char** argv)
 {
+    setlocale(LC_ALL, "ru");
     do
     {
         std::pair<std::filesystem::path, std::filesystem::path> rwfile;
