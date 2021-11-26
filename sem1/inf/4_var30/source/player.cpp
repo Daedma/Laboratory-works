@@ -1,11 +1,10 @@
-#include "..\headers\player.hpp"
+#include "../headers/player.hpp"
 #include <algorithm>
 #include <iostream>
 
-Player::Player(const coord_t& aCoord, int32_t aHp, int32_t aDmg) noexcept :
-    coord { aCoord }, hp { aHp }, sword { 100, aDmg } {}
+Player::Player(const coord_t &aCoord, int32_t aHp, int32_t aDmg) noexcept : coord{aCoord}, hp{aHp}, sword{100, aDmg} {}
 
-const Player::coord_t& Player::move(directions aDir) noexcept
+const Player::coord_t &Player::move(directions aDir) noexcept
 {
     switch (aDir)
     {
@@ -57,6 +56,6 @@ int32_t Player::deal_dmg() const noexcept
 void Player::print_status() const
 {
     std::cout << "HP: " << hp << '\n'
-        << "DAMAGE: " << sword.dmg << '\n'
-        << "SWORD CONDITION: " << sword.cond << "%\n";
+              << "DAMAGE: " << sword.dmg << '\n'
+              << "SWORD CONDITION: " << sword.cond << "%\n";
 }
