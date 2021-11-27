@@ -3,8 +3,8 @@
 #include <vector>
 #include <filesystem>
 #include <utility>
+#include "..\headers\maze_objects.hpp"
 
-class MazeObject;
 
 class MazeField
 {

@@ -1,4 +1,4 @@
-#include "Labyrinth.hpp"
+#include "..\headers\Labyrinth.hpp"
 #include <iostream>
 #include <algorithm>
 #include <cmath>

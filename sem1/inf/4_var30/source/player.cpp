@@ -2,10 +2,11 @@
 #include <algorithm>
 #include <iostream>
 
-Player::Player(const coord_t &aCoord, int32_t aHp, int32_t aDmg) noexcept : coord{aCoord}, hp{aHp}, sword{100, aDmg} {}
+Player::Player(const coord_t& aCoord, int32_t aHp, int32_t aDmg) noexcept : coord { aCoord }, hp { aHp }, sword { 100, aDmg } {}
 
-const Player::coord_t &Player::move(directions aDir) noexcept
+const Player::coord_t& Player::move(directions aDir) noexcept
 {
+    changes = true;
     switch (aDir)
     {
     case directions::left:
@@ -30,10 +31,15 @@ int32_t Player::break_sword(int32_t aDmg) noexcept
 {
     if (sword.cond)
     {
-        if (sword.cond - aDmg <= 0)
+        changes = true;
+        if (sword.cond - aDmg <= 0 || !sword.dmg)
+        {
             sword.cond = sword.dmg = 0;
+            std::cout << "Your sword is broken. Now you will not be able to damage.\n";
+        }
         else
         {
+            std::cout << "The strength of the sword decreases ...\n";
             sword.cond -= aDmg;
             sword.dmg *= sword.cond / 100.;
         }
@@ -43,6 +49,7 @@ int32_t Player::break_sword(int32_t aDmg) noexcept
 
 int32_t Player::take_dmg(int32_t aDmg) noexcept
 {
+    changes = true;
     if (hp)
         hp = std::max(hp - aDmg, 0);
     return hp;
@@ -55,7 +62,8 @@ int32_t Player::deal_dmg() const noexcept
 
 void Player::print_status() const
 {
+    changes = false;
     std::cout << "HP: " << hp << '\n'
-              << "DAMAGE: " << sword.dmg << '\n'
-              << "SWORD CONDITION: " << sword.cond << "%\n";
+        << "DAMAGE: " << sword.dmg << '\n'
+        << "SWORD CONDITION: " << sword.cond << "%\n";
 }

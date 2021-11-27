@@ -72,7 +72,7 @@
 				"${fileDirname}/*.cpp",
 				"${fileDirname}/source/*.cpp",
 				"-o",
-				"${fileDirname}/{fileBasenameNoExtension}.exe",
+				"${fileDirname}/${fileBasenameNoExtension}.exe",
 				"-O3",
 				"-std=c++17"
 			],

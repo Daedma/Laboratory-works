@@ -14,9 +14,10 @@ public:
     MazeObject(const MazeObject&) = default;
     MazeObject& operator=(const MazeObject&) = default;
     MazeObject& operator=(MazeObject&&) = default;
-    virtual bool need_clear() const noexcept = 0 { return !hp; }
+    virtual bool need_clear() const noexcept { return !hp; }
     virtual std::string_view take_dmg(Player& aPlayer) noexcept = 0;
     virtual std::string_view try_move(Player& aPlayer, directions aDir) noexcept = 0;
+    virtual std::string info_hp() const = 0;
     virtual char sym() const noexcept = 0;
 protected:
     int32_t hp;
@@ -31,6 +32,7 @@ public:
     std::string_view take_dmg(Player& aPlayer) noexcept override;
     std::string_view try_move(Player& aPlayer, directions aDir) noexcept override;
     char sym() const noexcept override { return symbol; }
+    std::string info_hp() const override;
 
     static constexpr char symbol = '.';
 };
@@ -42,6 +44,7 @@ public:
     std::string_view take_dmg(Player& aPlayer) noexcept override;
     std::string_view try_move(Player& aPlayer, directions aDir) noexcept override;
     char sym() const noexcept override { return symbol; }
+    std::string info_hp() const override;
 
     static constexpr char symbol = '#';
 };
@@ -53,6 +56,33 @@ public:
     std::string_view take_dmg(Player& aPlayer) noexcept override;
     std::string_view try_move(Player& aPlayer, directions aDir) noexcept override;
     char sym() const noexcept override { return symbol; }
+    std::string info_hp() const override;
 
     static constexpr char symbol = 'M';
+};
+
+class Healer : public MazeObject
+{
+public:
+    Healer(int32_t aHp, int32_t aDmg) noexcept;
+    std::string_view take_dmg(Player& aPlayer) noexcept override;
+    std::string_view try_move(Player& aPlayer, directions aDir) noexcept override;
+    char sym() const noexcept override { return symbol; }
+    std::string info_hp() const override;
+    bool need_clear() const noexcept override { return true; }
+
+    static constexpr char symbol = 'H';
+};
+
+class Blacksmith : public MazeObject
+{
+public:
+    Blacksmith(int32_t aHp, int32_t aDmg) noexcept;
+    std::string_view take_dmg(Player& aPlayer) noexcept override;
+    std::string_view try_move(Player& aPlayer, directions aDir) noexcept override;
+    char sym() const noexcept override { return symbol; }
+    std::string info_hp() const override;
+    bool need_clear() const noexcept override { return true; }
+
+    static constexpr char symbol = 'B';
 };

@@ -30,6 +30,7 @@ namespace{
         {
             badInputMessage();
         }
+        std::cin.get();
         return value;
     }
 
@@ -37,6 +38,12 @@ namespace{
     std::pair<std::string, int> getAction(Func&&... UnPred)
     {
         return getValue<std::pair<std::string, int>>(std::forward<Func>(UnPred)...);
+    }
+
+    template<typename... Func>
+    int geti(Func&&... UnPred)
+    {
+        return getValue<int>(std::forward<Func>(UnPred)...);
     }
 
     //Функция-обертка, вызывает getValue<std::string>
