@@ -105,13 +105,13 @@ void play_maze(Player& aPlayer, MazeField& aMaze)
         {
             std::cout << aMaze.get(actionPos.first, actionPos.second)->take_dmg(aPlayer) << '\n';
             std::cout << aMaze.get(actionPos.first, actionPos.second)->info_hp();
-            if (aMaze.get(actionPos.first, actionPos.second)->need_clear())
-                aMaze.clear(actionPos.first, actionPos.second);
         }
         else
         {
             std::cout << aMaze.get(actionPos.first, actionPos.second)->try_move(aPlayer, static_cast<directions>(dir - 1)) << '\n';
         }
+        if (aMaze.get(actionPos.first, actionPos.second)->need_clear())
+            aMaze.clear(actionPos.first, actionPos.second);
         if (aPlayer.changed())
             aPlayer.print_status();
         if (!aPlayer.get_hp())
