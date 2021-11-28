@@ -6,7 +6,6 @@ Player::Player(const coord_t& aCoord, int32_t aHp, int32_t aDmg) noexcept : coor
 
 const Player::coord_t& Player::move(directions aDir) noexcept
 {
-    changes = true;
     switch (aDir)
     {
     case directions::left:
@@ -39,7 +38,10 @@ int32_t Player::break_sword(int32_t aDmg) noexcept
         }
         else
         {
-            std::cout << "The strength of the sword decreases ...\n";
+            if (aDmg > 0)
+                std::cout << "The strength of the sword decreases ...\n";
+            else if (aDmg < 0)
+                std::cout << "The strength of the sword increases ...\n";
             sword.cond -= aDmg;
             sword.dmg *= sword.cond / 100.;
         }
