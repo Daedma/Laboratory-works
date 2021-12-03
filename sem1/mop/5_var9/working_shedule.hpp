@@ -26,8 +26,8 @@ public:
     uint16_t get_min() const noexcept { return minute; }
     uint16_t get_hour() const noexcept { return hour; }
 private:
-    uint16_t minute;
     uint16_t hour;
+    uint16_t minute;
 };
 
 class Work_schedule
