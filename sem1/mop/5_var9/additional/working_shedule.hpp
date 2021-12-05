@@ -21,7 +21,7 @@ class Time
 public:
     Time() = default;
     explicit Time(std::string_view aTime);
-    Time(uint16_t aMin, uint16_t aHour);
+    Time(uint16_t aHour, uint16_t aMin);
     Time operator-(const Time& rhs) const noexcept;
     uint16_t get_min() const noexcept { return minute; }
     uint16_t get_hour() const noexcept { return hour; }
