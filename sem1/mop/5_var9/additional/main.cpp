@@ -59,7 +59,7 @@ template<typename OutputIt>
 void read_info(OutputIt aDest)
 {
     std::ifstream ifs { get_input_filename() };
-    std::copy(std::istream_iterator<Work_schedule>{ifs}, {}, aDest);
+    std::copy(std::istream_iterator<Employee>{ifs}, {}, aDest);
     if (ifs.fail() && !ifs.eof())
         throw std::exception { "data does not match the format" };
 }
@@ -72,7 +72,7 @@ void enter_info(OutputIt aDest)
     for (size_t i = 0; i != n; ++i)
     {
         std::cout << "Enter the " << i + 1 << "st element\n>";
-        *aDest++ = getValue<Work_schedule>();
+        *aDest++ = getValue<Employee>();
     }
 }
 
@@ -103,20 +103,13 @@ int main()
     {
         try
         {
-            std::vector<Work_schedule> work_info;
-            get_info(std::back_inserter(work_info));
-            std::vector<Time> time_info;
-            std::transform(work_info.cbegin(), work_info.cend(), std::back_inserter(time_info),
-                [](const Work_schedule& val) noexcept{return val.working_hours(); });
-            auto out = get_out();
-            for (auto [entered, calculated] = std::make_pair(work_info.cbegin(), time_info.cbegin());
-                entered != work_info.cend(); ++entered, ++calculated)
-                *out << *entered << '\n' << "Working hours: " << *calculated << "\n\n";
+            std::vector<Employee> employees;
+            get_info(std::back_inserter(employees));
+            std::copy(employees.cbegin(), employees.cend(), std::ostream_iterator<Employee> { *get_out(), "\n\n" });
         }
         catch (const std::exception& e)
         {
             std::cerr << "Error: " << e.what() << '\n';
         }
     } while (keep_on());
-
 }

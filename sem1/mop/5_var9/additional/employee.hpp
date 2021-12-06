@@ -7,6 +7,8 @@
 class Employee
 {
 public:
+    Employee() :
+        name { "unknow" } {}
     Employee(const std::string& aName) :
         name { aName } {}
     uint64_t month_hours_worked(Date::Months aMonth) const noexcept;
