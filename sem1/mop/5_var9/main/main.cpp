@@ -111,7 +111,13 @@ int main()
             auto out = get_out();
             for (auto [entered, calculated] = std::make_pair(work_info.cbegin(), time_info.cbegin());
                 entered != work_info.cend(); ++entered, ++calculated)
-                *out << *entered << '\n' << "Working hours: " << *calculated << "\n\n";
+            {
+                *out << "Date: " << entered->get_date() << '\n'
+                    << "Arrival: " << entered->get_arrival() << '\n'
+                    << "Leaving: " << entered->get_leaving() << '\n'
+                    << "Working time: " << *calculated << "\n\n";
+                //*out << *entered << "\n\n";
+            }
         }
         catch (const std::exception& e)
         {

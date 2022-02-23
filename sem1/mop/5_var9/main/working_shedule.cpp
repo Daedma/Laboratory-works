@@ -48,6 +48,20 @@ Date::Date(std::string_view aDate)
         throw std::invalid_argument { "There is no such day in a month" };
 }
 
+uint16_t& Date::set_day(uint16_t aDay)
+{
+    if (!day_exist(aDay, month))
+        throw std::invalid_argument { "There is no such day in a month" };
+    return day = aDay;
+}
+
+Date::Months& Date::set_month(Months aMonth)
+{
+    if (static_cast<uint16_t>(aMonth) > 12 || static_cast<uint16_t>(aMonth) < 1)
+        throw std::invalid_argument { "Months with such a number does not exist" };
+    return month = aMonth;
+}
+
 Time::Time(std::string_view aTime)
 {
     if (!is_format(aTime, ':'))
@@ -67,6 +81,20 @@ Time::Time(uint16_t aHour, uint16_t aMin) :
         throw std::invalid_argument { "The number of hours should not exceed 23" };
     if (minute > 59)
         throw std::invalid_argument { "The number of minutes should not exceed 59" };
+}
+
+uint16_t& Time::set_min(uint16_t aMinute)
+{
+    if (aMinute > 59)
+        throw std::invalid_argument { "The number of minutes should not exceed 59" };
+    return minute = aMinute;
+}
+
+uint16_t& Time::set_hour(uint16_t aHour)
+{
+    if (aHour > 23)
+        throw std::invalid_argument { "The number of hours should not exceed 23" };
+    return hour = aHour;
 }
 
 Time Time::operator-(const Time& rhs) const noexcept
@@ -115,7 +143,7 @@ std::istream& operator>>(std::istream& is, Work_schedule& rhs)
 {
     Date d;
     Time at, lt;
-    if (is >> d >> at >> lt)
+    if (is >> d && is >> at && is >> lt)
         rhs = Work_schedule { d, at, lt };
     return is;
 }
@@ -145,7 +173,7 @@ std::ostream& operator<<(std::ostream& os, const Time& rhs)
 
 std::ostream& operator<<(std::ostream& os, const Work_schedule& rhs)
 {
-    return os << "Date: " << rhs.get_date() << '\n'
-        << "Arrival: " << rhs.get_arrival() << '\n'
-        << "Leaving: " << rhs.get_leaving();
+    return os << rhs.get_date() << '\n'
+        << rhs.get_arrival() << '\n'
+        << rhs.get_leaving();
 }
