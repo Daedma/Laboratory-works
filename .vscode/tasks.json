@@ -52,7 +52,7 @@
 				"${fileDirname}/*.cpp",
 				"-o",
 				"${fileDirname}/${fileBasenameNoExtension}.exe",
-				"-O3",
+				"-O0",
 				"-std=c++17"
 			],
 			"options": {
