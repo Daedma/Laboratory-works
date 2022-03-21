@@ -124,8 +124,41 @@ void heap_sort(list* beg, list* end, size_t size)
     }
 }
 
+void bubble_sort(list* before_beg, list* beg, list* end)
+{
+    list* init_before_beg = before_beg;
+    if (before_beg->next->val < beg->next->val)
+    {
+        swap(before_beg, beg);
+        std::swap(before_beg, beg);
+        init_before_beg = before_beg;
+        if (before_beg->next == end)
+            end = beg->next;
+    }
+    std::cout << beg << '\n';
+    while (beg != end)
+    {
+        if (before_beg->next->val < beg->next->val)
+        {
+            swap(before_beg, beg);
+            std::swap(before_beg, beg);
+            if (before_beg->next == end)
+                end = beg->next;
+        }
+        beg = beg->next;
+        before_beg = before_beg->next;
+    }
+    if (init_before_beg != beg->next)
+        bubble_sort(init_before_beg, init_before_beg->next, before_beg);
+}
+
 void bubble_sort(list* beg, list* end)
-{}
+{
+    list* before_beg = end;
+    while (before_beg->next != beg)
+        before_beg = before_beg->next;
+    bubble_sort(before_beg, beg, end);
+}
 
 int main()
 {
