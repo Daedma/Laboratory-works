@@ -30,7 +30,10 @@ char* read_word(std::ifstream& afile)
         }
     }
     if (word_size == 0)
+    {
+        delete[] word;
         return nullptr;
+    }
     word[word_size] = 0;
     return word;
 }

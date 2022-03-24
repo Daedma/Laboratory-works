@@ -67,6 +67,13 @@ list* next(list* val, size_t step = 1)
     return step == 0 ? val : next(val, step - 1)->next;
 }
 
+list* prev(list* p)
+{
+    list* res = p;
+    while (res->next != p) res = res->next;
+    return res;
+}
+
 std::ostream& operator<<(std::ostream& os, list* head)
 {
     if (head)
@@ -103,7 +110,6 @@ void heap_sort(list* beg, list* end, size_t size)
     if (size == 1) return;
     using std::swap;
     list* middle = next(beg, size / 2 - 1);
-    list* head = beg;
     beg = end;
     end = next(beg, size - 1);
     list* beg2 = beg;
@@ -124,51 +130,44 @@ void heap_sort(list* beg, list* end, size_t size)
     }
 }
 
-void bubble_sort(list* before_beg, list* beg, list* end)
+void bubble_sort(list*& first, list* end)
 {
-    list* init_before_beg = before_beg;
-    if (before_beg->next->val < beg->next->val)
-    {
-        swap(before_beg, beg);
-        std::swap(before_beg, beg);
-        init_before_beg = before_beg;
-        if (before_beg->next == end)
-            end = beg->next;
-    }
-    std::cout << beg << '\n';
+    list* beg = end;
+    end = prev(end);
+    first = beg;
     while (beg != end)
     {
-        if (before_beg->next->val < beg->next->val)
+        while (beg->next != end)
         {
-            swap(before_beg, beg);
-            std::swap(before_beg, beg);
-            if (before_beg->next == end)
-                end = beg->next;
+            if (beg->next->next->val < beg->next->val)
+            {
+                if (beg->next == first)
+                    first = beg->next->next;
+                if (beg->next->next == end)
+                    end = beg->next;
+                swap(beg, beg->next);
+            }
+            else
+            {
+                beg = beg->next;
+            }
         }
-        beg = beg->next;
-        before_beg = before_beg->next;
+        end = beg;
+        beg = first;
     }
-    if (init_before_beg != beg->next)
-        bubble_sort(init_before_beg, init_before_beg->next, before_beg);
-}
-
-void bubble_sort(list* beg, list* end)
-{
-    list* before_beg = end;
-    while (before_beg->next != beg)
-        before_beg = before_beg->next;
-    bubble_sort(before_beg, beg, end);
+    first = first->next;
 }
 
 int main()
 {
     size_t nfile_items = count("input.txt");//считаем количество элементов в файле
     std::ifstream ifs { "input.txt" };
-    list head { 0, &head };//голова
+    list* head = new list;//голова
+    head->next = head;
     bool sort_type;
     ifs >> sort_type;
-    ifs >> head.val;
-    list* last = &head;
+    ifs >> head->val;
+    list* last = head;
     for (size_t i = 2; i != nfile_items; ++i)
     {
         double tmp;
@@ -177,11 +176,11 @@ int main()
     }
     if (sort_type == 0)
     {
-        heap_sort(&head, last, nfile_items - 1);
+        heap_sort(head, last, nfile_items - 1);
     }
     else
     {
-        bubble_sort(&head, last);
+        bubble_sort(head, last);
     }
     ifs.close();
     std::ofstream ofs { "output.txt" };
@@ -189,9 +188,9 @@ int main()
     //last = next(last, 3);
     //ofs << head.next->val << ' ' << last->next->val << '\n' << head.next->next->val << ' ' << last->next->next->val << '\n';
     //swap(&head, last);
-    ofs << &head;
+    ofs << head;
     //ofs << head.next->val << ' ' << last->next->val << '\n' << head.next->next->val << ' ' << last->next->next->val << '\n';
     ofs.close();
-    while (erase(&head) != &head);
+    while (erase(head) != head);
     return 0;
 }
