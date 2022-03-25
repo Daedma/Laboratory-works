@@ -1,5 +1,4 @@
 #include <fstream>
-#include <iostream>
 #include <utility>
 
 enum class Sort_mode { HEAP, BUBBLE };
@@ -19,7 +18,6 @@ list* insert(list* _lst, double val)
 //удаление элемента после _lst
 list* erase(list* _lst)
 {
-    //(*_lst).next = _lst->next
     list* next = _lst->next->next;//сохраняем указатель на следующий за удаляемым элементом
     delete _lst->next;//удаляем элемент
     return _lst->next = next;//текущий элемент теперь должен ссылаться на следующий за удаленным
@@ -140,10 +138,13 @@ void bubble_sort(list*& first, list* end)
                     end = beg->next;
                 swap(beg, beg->next);
             }
-            else
-            {
-                beg = beg->next;
-            }
+            beg = beg->next;
+        }
+        if (end->next->val < end->val)
+        {
+            if (end->next == first)
+                first = end;
+            swap(beg, beg->next);
         }
         end = beg;
         beg = first;
