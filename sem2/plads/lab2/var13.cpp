@@ -2,6 +2,8 @@
 #include <iostream>
 #include <utility>
 
+enum class Sort_mode { HEAP, BUBBLE };
+
 struct list
 {
     double val;
@@ -21,16 +23,6 @@ list* erase(list* _lst)
     list* next = _lst->next->next;//сохраняем указатель на следующий за удаляемым элементом
     delete _lst->next;//удаляем элемент
     return _lst->next = next;//текущий элемент теперь должен ссылаться на следующий за удаленным
-}
-
-size_t count(const char* aFile)//Number of items in the file
-{
-    std::ifstream ifs { aFile };
-    size_t num = 0;
-    double d;
-    while (ifs >> d) ++num;
-    ifs.close();
-    return num;
 }
 
 void swap(list* lhs, list* rhs)
@@ -95,7 +87,7 @@ inline bool is_odd(size_t num)
 void heapify(list* beg, list* mid, list* end)
 {
     using std::swap;
-    while (mid->next != end->next)
+    while (mid != end)
     {
         list* max_son = min(beg, beg->next);
         if (max_son->next->val < mid->next->val)
@@ -111,7 +103,7 @@ void heap_sort(list* beg, list* end, size_t size)
     using std::swap;
     list* middle = next(beg, size / 2 - 1);
     beg = end;
-    end = next(beg, size - 1);
+    end = prev(end);
     list* beg2 = beg;
     while (size != 1)
     {
@@ -132,6 +124,7 @@ void heap_sort(list* beg, list* end, size_t size)
 
 void bubble_sort(list*& first, list* end)
 {
+    if (first->next == first) return;
     list* beg = end;
     end = prev(end);
     first = beg;
@@ -160,23 +153,18 @@ void bubble_sort(list*& first, list* end)
 
 int main()
 {
-    size_t nfile_items = count("input.txt");//считаем количество элементов в файле
     std::ifstream ifs { "input.txt" };
-    list* head = new list;//голова
+    list* head = new list;
     head->next = head;
-    bool sort_type;
+    int sort_type;
     ifs >> sort_type;
     ifs >> head->val;
     list* last = head;
-    for (size_t i = 2; i != nfile_items; ++i)
+    size_t list_size = 1;
+    for (double tmp; ifs >> tmp; last = insert(last, tmp), ++list_size);
+    if (sort_type == static_cast<int>(Sort_mode::HEAP))
     {
-        double tmp;
-        ifs >> tmp;
-        last = insert(last, tmp);
-    }
-    if (sort_type == 0)
-    {
-        heap_sort(head, last, nfile_items - 1);
+        heap_sort(head, last, list_size);
     }
     else
     {
@@ -184,13 +172,9 @@ int main()
     }
     ifs.close();
     std::ofstream ofs { "output.txt" };
-    //ofs << nfile_items - 1 << ' ';
-    //last = next(last, 3);
-    //ofs << head.next->val << ' ' << last->next->val << '\n' << head.next->next->val << ' ' << last->next->next->val << '\n';
-    //swap(&head, last);
-    ofs << head;
-    //ofs << head.next->val << ' ' << last->next->val << '\n' << head.next->next->val << ' ' << last->next->next->val << '\n';
+    ofs << list_size << ' ' << head;
     ofs.close();
     while (erase(head) != head);
+    delete head;
     return 0;
 }
