@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <memory>
 #include <iterator>
+#include <iomanip>
 
 template<typename T>
 void realloc(T*& old, size_t old_size, size_t new_size)
@@ -20,6 +21,7 @@ char* read_word(std::ifstream& afile)
     char* word = new char[10];
     size_t word_size = 0;
     size_t word_capacity = 10;
+    afile >> std::ws;
     for (; afile.get(cur_ch) && !std::isspace(cur_ch); ++word_size)
     {
         word[word_size] = cur_ch;
@@ -29,6 +31,7 @@ char* read_word(std::ifstream& afile)
             word_capacity *= 2;
         }
     }
+    afile >> std::ws;
     if (word_size == 0)
     {
         delete[] word;
@@ -56,6 +59,6 @@ int main()
     ifs.close();
     words.remove_if([](const auto& val){return !task(val.get()); });
     std::ofstream ofs { "output.txt" };
-    std::transform(words.cbegin(), words.cend(), std::ostream_iterator<char*>{ofs}, [](const auto& val){return val.get()});
+    std::transform(words.cbegin(), words.cend(), std::ostream_iterator<char*>{ofs, " "}, [](const auto& val){return val.get(); });
     ofs.close();
 }
