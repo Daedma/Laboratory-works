@@ -1,64 +1,125 @@
 #include <fstream>
-#include <list>
+#include <vector>
 #include <cctype>
 #include <algorithm>
-#include <memory>
 #include <iterator>
 #include <iomanip>
+#include <cstring>
+#include <iostream>
 
-template<typename T>
-void realloc(T*& old, size_t old_size, size_t new_size)
+//перевыделение памяти под массив
+template <typename T>
+void realloc(T *&old, size_t old_size, size_t new_size)
 {
-    T* new_p = new T[new_size];
+    T *new_p = new T[new_size];
     std::copy_n(old, old_size, new_p);
     delete[] old;
     old = new_p;
 }
 
-char* read_word(std::ifstream& afile)
+//считать содержимое файла в строку
+char *read(std::ifstream &afile)
 {
-    char cur_ch;
-    char* word = new char[10];
-    size_t word_size = 0;
-    size_t word_capacity = 10;
-    afile >> std::ws;
-    for (; afile.get(cur_ch) && !std::isspace(cur_ch); ++word_size)
+    char *text = new char[10];
+    size_t text_size = 0;
+    size_t text_capacity = 10;
+    for (char cur_ch; afile.get(cur_ch); ++text_size)
     {
-        word[word_size] = cur_ch;
-        if (word_size == word_capacity - 1)
+        text[text_size] = cur_ch;
+        if (text_size == text_capacity - 1)
         {
-            realloc(word, word_capacity, word_capacity * 2);
-            word_capacity *= 2;
+            realloc(text, text_capacity, text_capacity * 2);
+            text_capacity *= 2;
         }
     }
-    afile >> std::ws;
-    if (word_size == 0)
+    if (text_size == 0)
     {
-        delete[] word;
+        delete[] text;
         return nullptr;
     }
-    word[word_size] = 0;
-    return word;
+    text[text_size] = 0;
+    return text;
 }
 
-bool task(char* str)
+//проверка слова на палиндром
+bool is_palindrom(char *word)
 {
-    /*
-    Обработка...
-    */
+    for (char *end = word + std::strlen(word) - 1; word < end; ++word, --end)
+        if (*word != *end)
+            return false;
     return true;
+}
+
+//проверка слова на русский язык
+bool is_ru(char *word)
+{
+    while (*word)
+    {
+        if (!(*word >= 'А' || *word == 'Ё' || *word == 'ё'))
+            return false;
+        ++word;
+    }
+    return true;
+}
+
+//начало следующего слова
+char *next_word_begin(char *p)
+{
+    while (std::isspace(*p))
+        ++p;
+    return p;
+}
+
+//конец текущего слова
+char *cur_word_end(char *p)
+{
+    while (!std::isspace(*p) && *p)
+        ++p;
+    return p;
+}
+
+//разделяет текст на слова
+std::vector<char *> split(char *text)
+{
+    std::vector<char *> words;
+    for (char *word_beg = next_word_begin(text), *word_end = cur_word_end(word_beg); word_beg != word_end; word_beg = next_word_begin(word_end), word_end = cur_word_end(word_beg))
+    {
+        char *cur_word = new char[word_end - word_beg + 1];
+        cur_word[word_end - word_beg] = 0;
+        std::copy(word_beg, word_end, cur_word);
+        words.emplace_back(cur_word);
+    }
+    return words;
+}
+//возвращает вектор слов, удовлетворяющих условию задания
+std::vector<char *> task(char *text)
+{
+    std::vector<char *> results;
+    auto words = split(text);
+    std::copy_if(words.cbegin(), words.cend(), std::inserter(results, results.end()),
+                 [](char *word)
+                 {
+                     if (std::strlen(word) <= 6 && is_ru(word) && is_palindrom(word))
+                         return true;
+                     delete[] word;
+                     return false;
+                 });
+
+    return results;
 }
 
 int main()
 {
-    std::ifstream ifs { "input.txt" };
-    char* cur;
-    std::list<std::unique_ptr<char[]>> words;
-    while ((cur = read_word(ifs)))
-        words.emplace_back(cur);
+    setlocale(LC_ALL, "RU");
+    std::ifstream ifs{"input.txt"};
+    char *text = read(ifs);
     ifs.close();
-    words.remove_if([](const auto& val){return !task(val.get()); });
-    std::ofstream ofs { "output.txt" };
-    std::transform(words.cbegin(), words.cend(), std::ostream_iterator<char*>{ofs, " "}, [](const auto& val){return val.get(); });
+    auto results = task(text); //слова, удовлетворяющие условию задания
+    delete[] text;
+    std::copy(results.cbegin(), results.cend(), std::ostream_iterator<char *>{std::cout, " "});
+    std::ofstream ofs{"output.txt"};
+    std::copy(results.cbegin(), results.cend(), std::ostream_iterator<char *>{ofs, " "});
     ofs.close();
+    for (char *i : results)
+        delete[] i;
 }
