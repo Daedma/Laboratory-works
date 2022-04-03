@@ -175,21 +175,25 @@ int main()
     int sort_type;//тип сортировки
     std::ifstream ifs { "input.txt" };//открываем файловый поток
     ifs >> sort_type;//считываем тип сортировки
-    ifs >> head->val;//считываем первый элемент
+    size_t list_size = 0;//размер списка
+    if (ifs >> head->val) ++list_size;//считываем первый элемент
     list* last = head;//указатель на последний элемент списка
-    size_t list_size = 1;//размер списка
     for (double tmp; ifs >> tmp; last = insert_after(last, tmp), ++list_size);//заполняем список
-    if (sort_type == static_cast<int>(Sort_mode::HEAP))
+    if (list_size)
     {
-        heap_sort(head, last, list_size);
-    }
-    else
-    {
-        bubble_sort(head, last);
+        if (sort_type == static_cast<int>(Sort_mode::HEAP))
+        {
+            heap_sort(head, last, list_size);
+        }
+        else
+        {
+            bubble_sort(head, last);
+        }
     }
     ifs.close();
     std::ofstream ofs { "output.txt" };
-    ofs << list_size << ' ' << head;//выводим результат сортировки
+    ofs << list_size << ' ';
+    if (list_size) ofs << head;//выводим результат сортировки
     ofs.close();
     clear(head);//очищаем список
     return 0;
