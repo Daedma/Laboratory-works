@@ -54,25 +54,24 @@ void fill_state_machine(std::array < std::array < state, calc_states_num(S)>, S>
             *aFirstHalf = i;
             if (state_machine[i][enter].is_null())
                 state_machine[i][enter] = next_state();
-            if (aWordSize == 1)
-            {
-                for (char j = 0; j != S; ++j)
-                {
-                    state_machine[j][enter] = state_machine[i][enter];
-                }
-            }
             fill_state_machine(state_machine, aWordSize - 1, state_machine[i][enter], aFirstHalf + 1);
         }
     else
     {
+        for (char j = 0; j != S; ++j)
+        {
+            state_machine[j][enter] = enter;
+        }
         state cur_state = enter;
         while (*(--aFirstHalf) != STACK_EMPTY_VAL)
         {
             if (state_machine[*aFirstHalf][cur_state].is_null())
                 state_machine[*aFirstHalf][cur_state] = next_state();
+            if (*(aFirstHalf - 1) == STACK_EMPTY_VAL)
+                state_machine[*aFirstHalf][cur_state].set_available();
             cur_state = state_machine[*aFirstHalf][cur_state];
         }
-        state_machine[*(aFirstHalf + 1)][cur_state].set_available();
+        //state_machine[*(aFirstHalf + 1)][cur_state].set_available();
     }
 }
 
@@ -87,6 +86,8 @@ std::array < std::array < state, calc_states_num(S)>, S> create_state_machine(co
     {
         fill_state_machine(palindrom_state_machine, CurWordSize, init_state, iter);
     }
+    for (char i = 0; i != S; ++i)
+        palindrom_state_machine[i][1].set_available();
     return palindrom_state_machine;
 }
 
@@ -118,7 +119,7 @@ int main()
 {
     try
     {
-        std::cout << check_word("bbb");
+        std::cout << check_word("b");
     }
     catch (std::runtime_error e)
     {
