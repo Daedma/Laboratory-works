@@ -6,15 +6,14 @@
 #include <iomanip>
 #include <memory>
 #include <vector>
-#include <string_view>
 #include <cctype>
 #include <iterator>
 
 namespace{
     constexpr uint32_t ENTER_STATE = 1;
     constexpr char STACK_EMPTY_VAL = -1;
-    constexpr size_t RU_ALPHABET_POWER = 66;
-    constexpr size_t RU_PSM_STATES_NUM = 291920;
+    constexpr size_t RU_ALPHABET_POWER = 33;
+    constexpr size_t RU_PSM_STATES_NUM = 200'000;
 }
 
 class state;
@@ -38,11 +37,20 @@ public:
     bool is_null() const noexcept { return !_id; }
 };
 
-state next_state(bool available = false) noexcept
+class state_generator
 {
-    static uint32_t last_state = ENTER_STATE;
-    return { ++last_state, available };
-}
+    static uint32_t last_state;
+public:
+    static state next(bool available = false) noexcept { return { ++last_state, available }; }
+    static void reset() noexcept { last_state = ENTER_STATE; }
+    static uint32_t current() noexcept { return last_state; }
+    static uint32_t peek() noexcept { return last_state + 1; }
+    state_generator() = delete;
+    state_generator(const state_generator&) = delete;
+    state_generator(state_generator&&) = delete;
+};
+
+uint32_t state_generator::last_state = ENTER_STATE;
 
 template<size_t AlphaPower, size_t nStates>
 void fill_state_machine(state_machine_t<AlphaPower, nStates>& state_machine, uint16_t aWordSize, state enter, char* aFirstHalf) noexcept
@@ -52,20 +60,22 @@ void fill_state_machine(state_machine_t<AlphaPower, nStates>& state_machine, uin
         {
             *aFirstHalf = i;
             if (state_machine[i][enter].is_null())
-                state_machine[i][enter] = next_state();
+                state_machine[i][enter] = state_generator::next();
             fill_state_machine<AlphaPower, nStates>(state_machine, aWordSize - 1, state_machine[i][enter], aFirstHalf + 1);
         }
     else
     {
+        state mid = state_generator::next();
         for (size_t i = 0; i != AlphaPower; ++i)
         {
-            state_machine[i][enter] = enter;
+            state_machine[i][enter] = mid;
+            state_machine[i][mid] = state_generator::peek();
         }
         state cur_state = enter;
         while (*(--aFirstHalf) != STACK_EMPTY_VAL)
         {
             if (state_machine[*aFirstHalf][cur_state].is_null())
-                state_machine[*aFirstHalf][cur_state] = next_state();
+                state_machine[*aFirstHalf][cur_state] = state_generator::next();
             if (*(aFirstHalf - 1) == STACK_EMPTY_VAL)
                 state_machine[*aFirstHalf][cur_state].set_available();
             cur_state = state_machine[*aFirstHalf][cur_state];
@@ -82,22 +92,20 @@ state_machine_t<AlphaPower, nStates>* create_state_machine(uint16_t aWordSize)
         fill_state_machine<AlphaPower, nStates>(*palindrom_state_machine, CurWordSize, ENTER_STATE, stack + 1);
     for (size_t i = 0; i != AlphaPower; ++i)
         (*palindrom_state_machine)[i][ENTER_STATE].set_available();
+    std::cout << state_generator::current() << '\n';
+    state_generator::reset();
     return palindrom_state_machine;
-}
-
-size_t file_char_count(std::ifstream& ifs)
-{
-    return std::distance(std::istream_iterator<char>{ifs >> std::noskipws}, {});
 }
 
 char* read_from_file(const char* filename)
 {
     std::ifstream ifs { filename };
-    size_t filesize = file_char_count(ifs);
-    ifs.close();
-    ifs.open(filename);
+    size_t filesize = std::distance(std::istream_iterator<char>{ifs >> std::noskipws}, {});
+    ifs.clear();
+    ifs.seekg(std::ios::beg);
     char* filecontent = new char[filesize + 1];
     std::copy(std::istream_iterator<char>{ifs}, {}, filecontent);
+    ifs.close();
     filecontent[filesize] = 0;
     return filecontent;
 }
@@ -118,50 +126,61 @@ const char* skip_lexem(const char* pos)
 
 bool islexend(const char* pos)
 {
-    return std::isspace(*pos);
+    return std::isspace(*pos) || !(*pos);
 }
 
 size_t ru_to_index(char letter)
 {
-    // if ('А' <= letter && letter <= 'я')
-    //     return letter + 'А';
-    // if (letter == 'Ё')
-    //     return 64;
-    // if (letter == 'ё')
-    //     return 65;
-    return 66;
+    // if ('А' <= letter && letter <= 'Я')
+    //     return letter - 'A';
+    // if ('а' <= letter && letter <= 'я')
+    //     return letter - 'а';
+    // if (letter == 'Ё' || letter == 'ё')
+    //     return 32;
+    return 33;
 }
 
 size_t en_to_index(char letter)
 {
-    return letter - 'A';
+    return std::toupper(letter) - 'A';
 }
 
-std::vector<std::string_view> text_processing(const char* content)
+std::vector<const char*> text_processing(const char* content)
 {
     std::unique_ptr<state_machine_t<RU_ALPHABET_POWER, RU_PSM_STATES_NUM>> psm_table { create_state_machine<RU_ALPHABET_POWER, RU_PSM_STATES_NUM>(6) };
-    std::vector<std::string_view> result;
+    std::vector<const char*> result;
     const char* curpos = content;
     while (*curpos)
     {
         const char* lexbeg = curpos;
-        size_t lexsize = 0;
         state curstate = ENTER_STATE;
-        while (!curstate.is_null() && !islexend(curpos) && *curpos)
+        while (!curstate.is_null() && !islexend(curpos))
         {
             curstate = (*psm_table)[en_to_index(*curpos)][curstate];
+            std::cout << curstate.is_available();
             ++curpos;
-            ++lexsize;
         }
+        std::cout << '\n';
         if (curstate.is_available())
-        {
-            result.emplace_back(lexbeg, lexsize);
-        }
-        else if (curstate.is_null())
+            result.emplace_back(lexbeg);
+        if (curstate.is_null())
             curpos = skip_lexem(curpos);
         curpos = next_lexem(curpos);
     }
     return result;
+}
+
+void print(const std::vector<const char*>& lexems, const char* filename)
+{
+    std::ofstream ofs { filename };
+    for (auto i = lexems.cbegin(); i != lexems.cend() - 1; ++i)
+    {
+        for (const char* cur = *i; !islexend(cur); ++cur)
+            ofs << *cur;
+        ofs << ' ';
+    }
+    ofs << *(lexems.cend() - 1);
+    ofs.close();
 }
 
 int main()
@@ -169,8 +188,6 @@ int main()
     //setlocale(LC_ALL, "RU");
     char* content = read_from_file("input.txt");
     auto result = text_processing(content);
-    std::ofstream ofs { "output.txt" };
-    std::copy(result.cbegin(), result.cend(), std::ostream_iterator<std::string_view>{ofs, " "});
-    std::cout << next_state();
+    print(result, "output.txt");
     delete[] content;
 }
