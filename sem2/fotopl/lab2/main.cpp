@@ -8,12 +8,13 @@
 #include <vector>
 #include <cctype>
 #include <iterator>
+#include <iostream>
 
 namespace{
     constexpr uint32_t ENTER_STATE = 1;//Входное состояние
     constexpr char STACK_EMPTY_VAL = -1;//Специальное значение для обнаружения начала стека
     constexpr size_t RU_ALPHABET_POWER = 33;//Мощность русского алфавита
-    constexpr size_t RU_PSM_STATES_NUM = 37'061;//Количество генерируемых состояний
+    constexpr size_t RU_PSM_STATES_NUM = 145928;//Количество генерируемых состояний//37'061
 }
 
 class state;
@@ -23,10 +24,10 @@ using state_machine_t = std::array<std::array<state, nStates>, AlphaPower + 1>;/
 
 class state//Класс состояния
 {
-    int64_t _id;
+    int32_t _id;
 public:
     state() noexcept : _id(0) {}
-    state(uint32_t state_id, bool available = false) noexcept : _id { state_id }
+    state(uint32_t state_id, bool available = false) noexcept : _id { static_cast<int32_t>(state_id) }
     {
         if (available) _id = -_id;
     }
@@ -64,8 +65,6 @@ void fill_state_machine(state_machine_t<AlphaPower, nStates>& state_machine, uin
         }
     else
     {
-        for (size_t i = 0; i != AlphaPower; ++i)//Учтем палиндром нечетной длины
-            state_machine[i][enter] = enter;
         state cur_state = enter;
         while (*(--aFirstHalf) != STACK_EMPTY_VAL)//Раскручивание стека
         {
@@ -87,6 +86,7 @@ state_machine_t<AlphaPower, nStates>* create_state_machine(uint16_t aWordSize)//
         fill_state_machine<AlphaPower, nStates>(*palindrom_state_machine, CurWordSize, ENTER_STATE, stack + 1);
     for (size_t i = 0; i != AlphaPower; ++i)//Все слова длины 1 - палиндромы
         (*palindrom_state_machine)[i][ENTER_STATE].set_available();
+    std::cout << state_generator::peek();
     state_generator::reset();
     return palindrom_state_machine;
 }
@@ -125,18 +125,18 @@ bool islexend(const char* pos)//Проверка на достижение ко�
 
 bool is_ru(char letter)
 {
-    return ('А' <= letter && letter <= 'я') || letter == 'ё' || letter == 'Ё';
+    return false;//('А' <= letter && letter <= 'я') || letter == 'ё' || letter == 'Ё';
 }
 
 size_t ru_to_index(char letter)//Перевод буквы русского алфавита в индекс
 {
     //Регистр не учитывается
-    if ('А' <= letter && letter <= 'Я')
-        return letter + 'A' - 1;
-    if ('а' <= letter && letter <= 'я')
-        return letter - 'а';
-    if (letter == 'Ё' || letter == 'ё')
-        return 32;
+    // if ('А' <= letter && letter <= 'Я')
+    //     return letter + 'A' - 1;
+    // if ('а' <= letter && letter <= 'я')
+    //     return letter - 'а';
+    // if (letter == 'Ё' || letter == 'ё')
+    //     return 32;
     return 33;
 }
 
