@@ -2,57 +2,60 @@
 #include <queue>
 #include <iterator>
 
-class tree
+class tree//Класс дерева
 {
-    struct node
+    struct node//Структура узла
     {
-        int val;
-        node* left;
-        node* right;
+        int val;//Значение в узле
+        node* left;//Левый потомок
+        node* right;//Правый потомок
         node(int v = 0, node* l = nullptr, node* r = nullptr) noexcept : val { v }, left { l }, right { r } {}
-        void clear_child() noexcept
+        void clear_child() noexcept//Удалить всех потомков данного узла
         {
             if (left)
             {
                 left->clear_child();
                 delete left;
+                left = nullptr;
             }
             if (right)
             {
                 right->clear_child();
                 delete right;
+                right = nullptr;
             }
         }
-        void reflect() noexcept
+        void reflect() noexcept//Отразить ветку относительно текущего узла
         {
             using std::swap;
             if (left) left->reflect();
             if (right) right->reflect();
             swap(left, right);
         }
-        void print(std::ostream& os) const
+        void print(std::ostream& os) const//Вывести дерево прямым обходом
         {
             os << val << " ";
             if (left) left->print(os);
             if (right) right->print(os);
         }
     };
-    node* root = nullptr;
+
+    node* root = nullptr;//Корень дерева
 public:
     tree() = default;
 
     template<typename InputIt>
-    tree(InputIt first, InputIt last)
+    tree(InputIt first, InputIt last)//Конструктор для инициализации дерева диапозоном значений
     {
         if (first == last) return;
-        root = new node(*first++, nullptr, nullptr);
+        root = new node(*first++);
         std::queue<node*> q;
         q.emplace(root);
         while (first != last)
         {
-            q.front()->left = new node(*first++, nullptr, nullptr);
+            q.front()->left = new node(*first++);
             if (first == last) return;
-            q.front()->right = new node(*first++, nullptr, nullptr);
+            q.front()->right = new node(*first++);
             q.emplace(q.front()->left);
             q.emplace(q.front()->right);
             q.pop();
@@ -68,12 +71,12 @@ public:
         }
     }
 
-    void reflect() noexcept
+    void reflect() noexcept//Метод отражения дерева относительно корня
     {
         if (root) root->reflect();
     }
 
-    std::ostream& print(std::ostream& os) const
+    std::ostream& print(std::ostream& os) const//Вывод дерева с помощью прямого обхода
     {
         if (root) root->print(os);
         return os;
