@@ -4,8 +4,8 @@
 #include <vector>
 #include <iterator>
 #include <algorithm>
-#include <iostream>
 
+//Состояния
 enum States
 {
     NULL_STATE, ENTER_STATE,
@@ -14,12 +14,12 @@ enum States
     SEP_STATE,
     OPERATOR_LESS_STATE, OPERATOR_GREAT_STATE, OPERATOR_EQUAL_STATE, OPERATOR_EQUAL_STATE2, OPERATOR_GREAT_STATE2
 };
-
+//Символы алфавита
 enum Symbols { ALPHA, DIGIT, SPACE, SIGN, OPERATOR_LESS, OPERATOR_GREAT, OPERATOR_EQUAL, UNDEFINED };
-
+//Типы лексем
 enum Lexem_type { KW, CO, EQ, AO, WL, VL, ID };
 
-Symbols get_sym(char c)
+Symbols get_sym(char c)//Определить тип символа
 {
     if (std::isspace(c) || c == 0) return SPACE;
     if (std::isalpha(c)) return ALPHA;
@@ -31,19 +31,19 @@ Symbols get_sym(char c)
     return UNDEFINED;
 }
 
-struct lexem
+struct lexem//Класс лексемы
 {
-    const char* begin;
-    size_t length;
-    Lexem_type id;
+    const char* begin;//Начало лексемы
+    size_t length;//Длина лексемы
+    Lexem_type id;//Тип лексемы
 };
 
-void skipws(const char*& pos)
+void skipws(const char*& pos)//Пропустить пробелы
 {
     while (std::isspace(*pos) && *pos) ++pos;
 }
 
-int pow(int base, int exp)
+int pow(int base, int exp)//целочисленное возведение в степень
 {
     if (exp == 1) return base;
     if (exp % 2) return pow(base, exp - 1) * base;
@@ -51,7 +51,7 @@ int pow(int base, int exp)
     return half * half;
 }
 
-bool valid_num(const char* numstr, size_t sz)
+bool valid_num(const char* numstr, size_t sz)//Проверка числа на допустимые значения
 {
     if (sz > 5) return false;
     size_t num = 0;
@@ -64,7 +64,7 @@ bool valid_num(const char* numstr, size_t sz)
     return num <= 32768;
 }
 
-bool strcomp(const char* lhs, const char* rhs, size_t sz)
+bool strcomp(const char* lhs, const char* rhs, size_t sz)//Проверка на точное равенство найденной лексемы и строки
 {
     while (sz && *lhs)
     {
@@ -75,7 +75,7 @@ bool strcomp(const char* lhs, const char* rhs, size_t sz)
     return !sz;
 }
 
-Lexem_type lextype(const char* word, size_t word_size, States state)
+Lexem_type lextype(const char* word, size_t word_size, States state)//Определение типа лексемы
 {
     static constexpr std::array<const char*, 4> key_words = { "if", "then", "else", "end" };
     switch (state)
@@ -124,7 +124,7 @@ void lexical_analysis(const char* text, std::vector<lexem>& results)
 
     using state_machine_t = std::array<std::array<States, 8>, 15>;//[STATE][SYMBOL]
 
-    static constexpr const state_machine_t  state_machine =
+    static constexpr const state_machine_t  state_machine = //Таблица переходов
     { {
             // ALPHA, DIGIT, SPACE, SIGN, OPERATOR_LESS, OPERATOR_GREAT, OPERATOR_EQUAL, UNDEFINED 
         { NULL_STATE, NULL_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//NULL_STATE
@@ -144,14 +144,15 @@ void lexical_analysis(const char* text, std::vector<lexem>& results)
         { SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE } //OPERATOR_GREAT_STATE2
         } };
 
-    const char* curpos = text;
+    const char* curpos = text;//Текущая позиция
     skipws(curpos);
-    while (*curpos)
+    while (*curpos)//Пока не достигли конца строки
     {
-        const char* lexbeg = curpos;
-        size_t cursize = 0;
-        States curstate = ENTER_STATE, prevstate;
-        while (curstate != SEP_STATE)
+        const char* lexbeg = curpos;//Начало считываемой лексемы
+        size_t cursize = 0;//Размер текущей лексемы
+        States curstate = ENTER_STATE,//Текущее состояние
+            prevstate;//Предыдущее состояние
+        while (curstate != SEP_STATE)//Переход по состояниям пока не встретится разделитель
         {
             prevstate = curstate;
             curstate = state_machine[curstate][get_sym(*curpos++)];
@@ -159,12 +160,12 @@ void lexical_analysis(const char* text, std::vector<lexem>& results)
         }
         --curpos;
         --cursize;
-        results.push_back({ lexbeg, cursize, lextype(lexbeg, cursize, prevstate) });
+        results.push_back({ lexbeg, cursize, lextype(lexbeg, cursize, prevstate) });//Добавим лексему в список
         skipws(curpos);
     }
 }
 
-const char* lexid_c(Lexem_type id)
+const char* lexid_c(Lexem_type id)//Текстовое представление типа лексемы
 {
     switch (id)
     {
@@ -186,12 +187,12 @@ const char* lexid_c(Lexem_type id)
     return "";
 }
 
-std::ostream& operator<<(std::ostream& os, const lexem& rhs)
+std::ostream& operator<<(std::ostream& os, const lexem& rhs)//Вывод лексемы
 {
     return os.write(rhs.begin, rhs.length) << lexid_c(rhs.id);
 }
 
-const char* read(const char* filename)
+const char* read(const char* filename)//Считать содержимое файла в строку
 {
     std::ifstream ifs { filename, std::ios::binary };
     ifs.seekg(0, std::ios::end);
@@ -203,7 +204,7 @@ const char* read(const char* filename)
     return content;
 }
 
-void save(const char* filename, const std::vector<lexem>& lexems)
+void save(const char* filename, const std::vector<lexem>& lexems)//Записать результат работы программы в файл
 {
     std::ofstream ofs { filename };
     std::copy(lexems.cbegin(), lexems.cend(), std::ostream_iterator<lexem>{ofs, " "});
