@@ -9,25 +9,27 @@
 enum States
 {
     NULL_STATE, ENTER_STATE,
-    SIGN_STATE, DIGIT_STATE,
+    ARITHMETICAL_STATE, DIGIT_STATE,
     ALPHA_STATE, ALNUM_STATE1, ALNUM_STATE2, ALNUM_STATE3, ALNUM_STATE4,
     SEP_STATE,
-    OPERATOR_LESS_STATE, OPERATOR_GREAT_STATE, OPERATOR_EQUAL_STATE, OPERATOR_EQUAL_STATE2, OPERATOR_GREAT_STATE2
+    OPERATOR_LESS_STATE, OPERATOR_GREAT_STATE, OPERATOR_EQUAL_STATE, OPERATOR_GREAT_STATE2, SEMICOLON_STATE, OPERATOR_EQUAL_STATE2, MINUS_STATE
 };
 //Символы алфавита
-enum Symbols { ALPHA, DIGIT, SPACE, SIGN, OPERATOR_LESS, OPERATOR_GREAT, OPERATOR_EQUAL, UNDEFINED };
+enum Symbols { ALPHA, DIGIT, SPACE, ARITHMETICAL, MINUS, OPERATOR_LESS, OPERATOR_GREAT, OPERATOR_EQUAL, SEMILICON, UNDEFINED };
 //Типы лексем
-enum Lexem_type { KW, CO, EQ, AO, WL, VL, ID };
+enum Lexem_type { KW, CO, EQ, AO, WL, VL, ID, SC };
 
 Symbols get_sym(char c)//Определить тип символа
 {
     if (std::isspace(c) || c == 0) return SPACE;
     if (std::isalpha(c)) return ALPHA;
     if (std::isdigit(c)) return DIGIT;
-    if (c == '-' || c == '+') return SIGN;
+    if (c == '+' || c == '*' || c == '/') return ARITHMETICAL;
+    if (c == '-') return MINUS;
     if (c == '<') return OPERATOR_LESS;
     if (c == '>') return OPERATOR_GREAT;
     if (c == '=') return OPERATOR_EQUAL;
+    if (c == ';') return SEMILICON;
     return UNDEFINED;
 }
 
@@ -54,14 +56,21 @@ int pow(int base, int exp)//целочисленное возведение в �
 bool valid_num(const char* numstr, size_t sz)//Проверка числа на допустимые значения
 {
     if (sz > 5) return false;
-    size_t num = 0;
+    bool negate = false;
+    if (numstr[0] == '-')
+    {
+        negate = true;
+        ++numstr;
+        --sz;
+    }
+    int num = 0;
     while (sz)
     {
         num += pow(10, sz) * (*numstr - '0');
         --sz;
         ++numstr;
     }
-    return num <= 32768;
+    return num <= 32767 + negate;
 }
 
 bool strcomp(const char* lhs, const char* rhs, size_t sz)//Проверка на точное равенство найденной лексемы и строки
@@ -77,13 +86,14 @@ bool strcomp(const char* lhs, const char* rhs, size_t sz)//Проверка на
 
 Lexem_type lextype(const char* word, size_t word_size, States state)//Определение типа лексемы
 {
-    static constexpr std::array<const char*, 4> key_words = { "if", "then", "else", "end" };
+    static constexpr std::array<const char*, 7> key_words = { "if", "then", "else", "end", "not", "and", "or" };
     switch (state)
     {
     case NULL_STATE:
         return WL;
         break;
-    case SIGN_STATE:
+    case MINUS_STATE:
+    case ARITHMETICAL_STATE:
         return AO;
     case DIGIT_STATE:
         if (valid_num(word, word_size))
@@ -93,11 +103,11 @@ Lexem_type lextype(const char* word, size_t word_size, States state)//Опред
     case ALPHA_STATE:
         return ID;
     case ALNUM_STATE1:
-        if (strcomp(key_words[0], word, word_size))
+        if (strcomp(key_words[0], word, word_size) || strcomp(key_words[6], word, word_size))
             return KW;
         return ID;
     case ALNUM_STATE2:
-        if (strcomp(key_words[3], word, word_size))
+        if (strcomp(key_words[3], word, word_size) || strcomp(key_words[4], word, word_size) || strcomp(key_words[5], word, word_size))
             return KW;
         return ID;
     case ALNUM_STATE3:
@@ -106,13 +116,15 @@ Lexem_type lextype(const char* word, size_t word_size, States state)//Опред
         return ID;
     case ALNUM_STATE4:
         return ID;
-    case OPERATOR_GREAT_STATE2:
     case OPERATOR_EQUAL_STATE2:
+    case OPERATOR_GREAT_STATE2:
     case OPERATOR_GREAT_STATE:
     case OPERATOR_LESS_STATE:
         return CO;
     case OPERATOR_EQUAL_STATE:
         return EQ;
+    case SEMICOLON_STATE:
+        return SC;
     default:
         break;
     }
@@ -122,26 +134,28 @@ Lexem_type lextype(const char* word, size_t word_size, States state)//Опред
 void lexical_analysis(const char* text, std::vector<lexem>& results)
 {
 
-    using state_machine_t = std::array<std::array<States, 8>, 15>;//[STATE][SYMBOL]
+    using state_machine_t = std::array<std::array<States, 10>, 17>;//[STATE][SYMBOL]
 
     static constexpr const state_machine_t  state_machine = //Таблица переходов
     { {
-            // ALPHA, DIGIT, SPACE, SIGN, OPERATOR_LESS, OPERATOR_GREAT, OPERATOR_EQUAL, UNDEFINED 
-        { NULL_STATE, NULL_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//NULL_STATE
-        { ALPHA_STATE, DIGIT_STATE, SEP_STATE, SIGN_STATE, OPERATOR_LESS_STATE, OPERATOR_GREAT_STATE, OPERATOR_EQUAL_STATE, NULL_STATE },//ENTER_STATE
-        { SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//SIGN_STATE
-        { NULL_STATE, DIGIT_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//DIGIT_STATE
-        { ALNUM_STATE1, ALNUM_STATE1, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//ALPHA_STATE
-        { ALNUM_STATE2, ALNUM_STATE2, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//ALNUM_STATE1
-        { ALNUM_STATE3, ALNUM_STATE3, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//ALNUM_STATE2
-        { ALNUM_STATE4, ALNUM_STATE4, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//ALNUM_STATE3
-        { NULL_STATE, NULL_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//ALNUM_STATE4
-        { ALPHA_STATE, DIGIT_STATE, SEP_STATE, SIGN_STATE, OPERATOR_LESS_STATE, OPERATOR_GREAT_STATE, OPERATOR_EQUAL_STATE, NULL_STATE },//SEP_STATE
-        { SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, OPERATOR_GREAT_STATE2, OPERATOR_EQUAL_STATE2, NULL_STATE },//OPERATOR_LESS_STATE
-        { SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, OPERATOR_EQUAL_STATE2, NULL_STATE },//OPERATOR_GREAT_STATE
-        { SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//OPERATOR_EQUAL_STATE
-        { SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//OPERATOR_EQUAL_STATE2
-        { SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE } //OPERATOR_GREAT_STATE2
+            // ALPHA, DIGIT, SPACE, ARITHMETICAL, MINUS, OPERATOR_LESS, OPERATOR_GREAT, OPERATOR_EQUAL, SEMILICON, UNDEFINED 
+        { NULL_STATE, NULL_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//NULL_STATE
+        { ALPHA_STATE, DIGIT_STATE, SEP_STATE, ARITHMETICAL_STATE, MINUS_STATE, OPERATOR_LESS_STATE, OPERATOR_GREAT_STATE, OPERATOR_EQUAL_STATE, SEMICOLON_STATE, NULL_STATE },//ENTER_STATE
+        { SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//ARITHMETICAL_STATE
+        { NULL_STATE, DIGIT_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//DIGIT_STATE
+        { ALNUM_STATE1, ALNUM_STATE1, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//ALPHA_STATE
+        { ALNUM_STATE2, ALNUM_STATE2, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//ALNUM_STATE1
+        { ALNUM_STATE3, ALNUM_STATE3, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//ALNUM_STATE2
+        { ALNUM_STATE4, ALNUM_STATE4, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//ALNUM_STATE3
+        { NULL_STATE, NULL_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE },//ALNUM_STATE4
+        { ALPHA_STATE, DIGIT_STATE, SEP_STATE, ARITHMETICAL_STATE, MINUS_STATE, OPERATOR_LESS_STATE, OPERATOR_GREAT_STATE, OPERATOR_EQUAL_STATE, SEMICOLON_STATE, NULL_STATE },//SEP_STATE
+        { SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, OPERATOR_GREAT_STATE2, OPERATOR_EQUAL_STATE2, SEP_STATE, NULL_STATE },//OPERATOR_LESS_STATE
+        { SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, OPERATOR_EQUAL_STATE2, SEP_STATE, NULL_STATE },//OPERATOR_GREAT_STATE
+        { SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//OPERATOR_EQUAL_STATE
+        { SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//OPERATOR_GREAT_STATE2
+        { SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//SEMICOLON_STATE
+        { SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE },//OPERATOR_EQUAL_STATE2
+        { SEP_STATE, DIGIT_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, SEP_STATE, NULL_STATE }//MINUS_STATE
         } };
 
     const char* curpos = text;//Текущая позиция
@@ -183,6 +197,8 @@ const char* lexid_c(Lexem_type id)//Текстовое представлени�
         return "[vl]";
     case ID:
         return "[id]";
+    case SC:
+        return "[sc]";
     }
     return "";
 }
