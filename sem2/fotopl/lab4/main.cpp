@@ -6,25 +6,9 @@
 #include <algorithm>
 #include <cstring>
 
-/*
-if <логическое выражение> then
-<операторы>
-[ else <операторы> ]
-end
-
-Уровень 1
-<логическое выражение> → <операнд> | <операнд><операция сравнения><операнд>
-<операция сравнения> →| <= | >= | = | <>
-<операнд> → <идентификатор>|<константа>
-<операторы> → <идентификатор> = <арифметическое выражение>
-<арифметическое выражние> → <операнд> |
-<арифметическое выражение><арифметическая операция><операнд>
-<арифметическая операция> → + | –
-*/
-
-class Lexical_analyser
+class Lexical_analyser //Класс лексического анализатора
 {
-    enum Symbols
+    enum Symbols //Группы символов
     {
         ALPHA,
         DIGIT,
@@ -38,7 +22,7 @@ class Lexical_analyser
         SYMCOUNT
     };
 
-    enum States
+    enum States //Состояния
     {
         NULL_STATE,
         ENTER_STATE,
@@ -56,7 +40,7 @@ class Lexical_analyser
 public:
     struct Token //Класс лексемы
     {
-        enum Types
+        enum Types //Типы лексем
         {
             IF,
             TH,
@@ -75,7 +59,7 @@ public:
         Types id;          //Тип лексемы
     };
 
-    static const char* to_str(Token::Types type)
+    static const char* to_str(Token::Types type) //Строковое представление типа лексемы
     {
         switch(type)
         {
@@ -99,11 +83,13 @@ public:
                 return "ao";
             case Token::WL:
                 return "wl";
+            case Token::TYPECOUNT:
+                ;
         }
         return "";
     }
 
-    static std::vector<Token> get_tokens(const char *text)
+    static std::vector<Token> get_tokens(const char *text) //Получить список лексем из текста
     {
         std::vector<Token> tokens;
         const char *curpos = text; //Текущая позиция
@@ -117,7 +103,7 @@ public:
             do
             {
                 prevstate = curstate;
-                curstate = transition_table[charid(*curpos)][curstate];
+                curstate = transition_table[charid(*curpos++)][curstate];
                 ++cursize;
             } while (curstate != ENTER_STATE); //Переход по состояниям пока не встретится разделитель
             --curpos;
@@ -131,23 +117,11 @@ public:
     Lexical_analyser() = delete;
 
 private:
-    using trans_table_t = std::array<std::array<States, STATECOUNT>, SYMCOUNT>; //[SYMBOL][STATE]
+    using trans_table_t = std::array<std::array<States, STATECOUNT>, SYMCOUNT>; //Таблица переходов для лексического анализатора
 
-    static constexpr const trans_table_t transition_table = //Таблица переходов
-        {{
-          // NULL_STATE   ENTER_STATE  ARITH_STATE  DIGIT_STATE  ALNUM_STATE  LESS_STATE    GREAT_STATE  EQUAL_STATE  GREAT_STATE2 MINUS_STATE
-            {NULL_STATE,  ALNUM_STATE, ENTER_STATE, NULL_STATE,  ALNUM_STATE, ENTER_STATE,  ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE},  // ALPHA
-            {NULL_STATE,  DIGIT_STATE, ENTER_STATE, DIGIT_STATE, ALNUM_STATE, ENTER_STATE,  ENTER_STATE, ENTER_STATE, ENTER_STATE, DIGIT_STATE},  // DIGIT
-            {ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE,  ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE},  // SPACE
-            {ENTER_STATE, ARITH_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE,  ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE},  // ARITH
-            {ENTER_STATE, MINUS_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE,  ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE},  // MINUS
-            {ENTER_STATE, LESS_STATE,  ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE,  ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE},  // LESS
-            {ENTER_STATE, GREAT_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE, GREAT_STATE2, ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE},  // GREAT
-            {ENTER_STATE, EQUAL_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE, EQUAL_STATE,  EQUAL_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE},  // EQUAL
-            {NULL_STATE,  NULL_STATE,  ENTER_STATE, NULL_STATE,  NULL_STATE,  ENTER_STATE,  ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE},  // UNDEFINED
-        }};
+    static const trans_table_t transition_table; //Таблица переходов
 
-    static Symbols charid(char c)
+    static Symbols charid(char c) //Определение принадлежности символа к одной из групп
     {
         if (std::isspace(c) || c == 0)
             return SPACE;
@@ -178,7 +152,7 @@ private:
         return half * half;
     }
 
-    static bool isval(const char *numstr, size_t sz) //Проверка числа на допустимые значения
+    static bool isval(const char *numstr, size_t sz) //Проверка числа на допустимые значения константа
     {
         if (sz > 5)
             return false;
@@ -199,7 +173,7 @@ private:
         return num <= 32767 + negate;
     }
 
-    static bool strcmp(const char *lhs, const Token &rhs) //Проверка на точное равенство найденной лексемы и строки
+    static bool strcmp(const char *lhs, const Token &rhs) //Проверка на точное равенство лексемы и строки
     {
         size_t left = rhs.length;
         const char *it = rhs.begin;
@@ -209,16 +183,16 @@ private:
                 return false;
             --left;
         }
-        return !left;
+        return left == 0 && *lhs == 0;
     }
 
-    static void skipws(const char *&pos)
+    static void skipws(const char *&pos) //Пропустить пробельные символы
     {
         while (std::isspace(*pos) && *pos)
             ++pos;
     }
 
-    static Token get_token(const char *beg, size_t sz, States st)
+    static Token get_token(const char *beg, size_t sz, States st) //Получить токен
     {
         switch (st)
         {
@@ -247,19 +221,37 @@ private:
                 tmp.id = Token::EN;
             return tmp;
         }
+        case EQUAL_STATE:
+            return {beg, sz, Token::EQ};
         case LESS_STATE:
         case GREAT_STATE:
-        case EQUAL_STATE:
         case GREAT_STATE2:
             return {beg, sz, Token::CO};
+        case ENTER_STATE:
+        case STATECOUNT:
+            ;
         }
         return {beg, sz, Token::WL};
     }
 };
 
-class Syntax_analyzer
+const Lexical_analyser::trans_table_t Lexical_analyser::transition_table =
+        {{
+          // NULL_STATE   ENTER_STATE  ARITH_STATE  DIGIT_STATE  ALNUM_STATE  LESS_STATE    GREAT_STATE  EQUAL_STATE  GREAT_STATE2 MINUS_STATE
+            {NULL_STATE,  ALNUM_STATE, ENTER_STATE, NULL_STATE,  ALNUM_STATE, ENTER_STATE,  ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE},  // ALPHA
+            {NULL_STATE,  DIGIT_STATE, ENTER_STATE, DIGIT_STATE, ALNUM_STATE, ENTER_STATE,  ENTER_STATE, ENTER_STATE, ENTER_STATE, DIGIT_STATE},  // DIGIT
+            {ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE,  ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE},  // SPACE
+            {ENTER_STATE, ARITH_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE,  ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE},  // ARITH
+            {ENTER_STATE, MINUS_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE,  ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE},  // MINUS
+            {ENTER_STATE, LESS_STATE,  ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE,  ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE},  // LESS
+            {ENTER_STATE, GREAT_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE, GREAT_STATE2, ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE},  // GREAT
+            {ENTER_STATE, EQUAL_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE, EQUAL_STATE,  EQUAL_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE},  // EQUAL
+            {NULL_STATE,  NULL_STATE,  ENTER_STATE, NULL_STATE,  NULL_STATE,  ENTER_STATE,  ENTER_STATE, ENTER_STATE, ENTER_STATE, ENTER_STATE},  // UNDEFINED
+        }};
+
+class Syntax_analyzer //Класс синтаксического анализатора
 {
-    enum States
+    enum States //Состояния
     {
         ERROR_STATE,
         ENTER,
@@ -279,27 +271,15 @@ class Syntax_analyzer
     };
 
     using trans_table_t = std::array<std::array<States, STATECOUNT>, Lexical_analyser::Token::TYPECOUNT>;
-    static constexpr trans_table_t transition_table = {{
-        //ERROR_STATE  ENTER        IF           LOGEXP0      LOGEXP1      LOGEXP2      OPER0        OPER1        OPER2        OPER3        ELSE0        ELSE1        ELSE2        ELSE3
-        { ERROR_STATE, IF,          ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE },//IF
-        { ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, OPER0,       ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE },//TH
-        { ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ELSE0,       ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE },//EL
-        { ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ENTER,       ERROR_STATE, ERROR_STATE, ERROR_STATE, ENTER       },//EN
-        { ERROR_STATE, ERROR_STATE, ERROR_STATE, LOGEXP1,     ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE },//CO
-        { ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, OPER2,       ERROR_STATE, ERROR_STATE, ERROR_STATE, ELSE2,       ERROR_STATE, ERROR_STATE },//EQ
-        { ERROR_STATE, ERROR_STATE, LOGEXP0,     ERROR_STATE, LOGEXP2,     ERROR_STATE, OPER1,       ERROR_STATE, OPER3,       ERROR_STATE, ELSE1,       ERROR_STATE, ELSE3,       ERROR_STATE },//ID
-        { ERROR_STATE, ERROR_STATE, LOGEXP0,     ERROR_STATE, LOGEXP2,     ERROR_STATE, ERROR_STATE, ERROR_STATE, OPER3,       ERROR_STATE, ERROR_STATE, ERROR_STATE, ELSE3,       ERROR_STATE },//VL
-        { ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, OPER2,       ERROR_STATE, ERROR_STATE, ERROR_STATE, ELSE2       },//AO
-        { ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE },//WL
-    }};
+    static const trans_table_t transition_table; //Таблица переходов синтаксического анализатора
 
 public:
 
-    struct Report
+    struct Report //Класс отчета по синтаксическому анализу
     {
     private:
-        char* _message;
-        int64_t _errpos;
+        char* _message; //Сообщение
+        int64_t _errpos;//Позиция ошибки
 
         static constexpr int NOERROR_POS = -1;
         static constexpr int ID_SIZE = 3;
@@ -307,13 +287,13 @@ public:
 
     public:
 
-        Report(const char* mess) : 
+        Report(const char* mess) : //Конструктор для отчета об успешном синтаксическом анализе
             _message(new char[std::strlen(mess)]), _errpos(NOERROR_POS)
         {
             std::strcpy(_message, mess);
         }
 
-        Report(int64_t pos, States last_state) : _errpos(pos)
+        Report(int64_t pos, States last_state) : _errpos(pos) //Конструктор для отчета об неуспешном синтаксическом анализе
         {
             _message = new char[DEFAULT_MESSAGE_SIZE];
             char* cursor = _message;
@@ -327,18 +307,18 @@ public:
 
         ~Report() { delete[] _message; }
 
-        void print(std::ostream& os) const
+        void print(std::ostream& os) const //Вывод отчета
         {
-            if(_errpos != NOERROR_POS) os <<  _errpos;
+            if(_errpos != NOERROR_POS) os <<  _errpos << ' ';
             os << _message;
         }
     };
 
-    static Report get_report(const std::vector<Lexical_analyser::Token>& tokens)
+    static Report get_report(const std::vector<Lexical_analyser::Token>& tokens) //Получить отчет по синтаксическому анализу
     {
         States curstate = ENTER, prevstate;
         auto i = tokens.cbegin();
-        while (i != tokens.cend() && curstate != ERROR_STATE)
+        while (i != tokens.cend() && curstate != ERROR_STATE) //Переход по состояниям
         {
             prevstate = curstate;
             curstate = transition_table[i->id][curstate];
@@ -346,10 +326,26 @@ public:
         }
         if (curstate == ENTER)
             return {"OK"};
-        return {std::distance(tokens.cbegin(), i), prevstate};
+        return {std::distance(tokens.cbegin(), i) - 1, prevstate};
     }
 
+    Syntax_analyzer() = delete;
+
 };
+
+const Syntax_analyzer::trans_table_t Syntax_analyzer::transition_table = {{
+        //ERROR_STATE  ENTER        IF           LOGEXP0      LOGEXP1      LOGEXP2      OPER0        OPER1        OPER2        OPER3        ELSE0        ELSE1        ELSE2        ELSE3
+        { ERROR_STATE, IF,          ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE },//IF
+        { ERROR_STATE, ERROR_STATE, ERROR_STATE, OPER0,       ERROR_STATE, OPER0,       ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE },//TH
+        { ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ELSE0,       ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE },//EL
+        { ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ENTER,       ERROR_STATE, ERROR_STATE, ERROR_STATE, ENTER       },//EN
+        { ERROR_STATE, ERROR_STATE, ERROR_STATE, LOGEXP1,     ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE },//CO
+        { ERROR_STATE, ERROR_STATE, ERROR_STATE, LOGEXP1,     ERROR_STATE, ERROR_STATE, ERROR_STATE, OPER2,       ERROR_STATE, ERROR_STATE, ERROR_STATE, ELSE2,       ERROR_STATE, ERROR_STATE },//EQ
+        { ERROR_STATE, ERROR_STATE, LOGEXP0,     ERROR_STATE, LOGEXP2,     ERROR_STATE, OPER1,       ERROR_STATE, OPER3,       ERROR_STATE, ELSE1,       ERROR_STATE, ELSE3,       ERROR_STATE },//ID
+        { ERROR_STATE, ERROR_STATE, LOGEXP0,     ERROR_STATE, LOGEXP2,     ERROR_STATE, ERROR_STATE, ERROR_STATE, OPER3,       ERROR_STATE, ERROR_STATE, ERROR_STATE, ELSE3,       ERROR_STATE },//VL
+        { ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, OPER2,       ERROR_STATE, ERROR_STATE, ERROR_STATE, ELSE2       },//AO
+        { ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE, ERROR_STATE },//WL
+    }};
 
 const char *read(const char *filename) //Считать содержимое файла в строку
 {
@@ -375,9 +371,9 @@ void save(const char *filename, const std::vector<Lexical_analyser::Token> &toke
 int main()
 {
     setlocale(LC_ALL, "RU");
-    const char* content = read("input.txt");
-    auto tokens = Lexical_analyser::get_tokens(content);
-    auto report = Syntax_analyzer::get_report(tokens);
-    save("output.txt", tokens, report);
+    const char* content = read("input.txt");            //Прочитать содержимое файла
+    auto tokens = Lexical_analyser::get_tokens(content);//Получить список лексем
+    auto report = Syntax_analyzer::get_report(tokens);  //Получить отчет по синтаксическому анализу
+    save("output.txt", tokens, report);                 //Сохранить результаты работы программы
     delete[] content;
 }
