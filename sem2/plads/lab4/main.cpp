@@ -1,8 +1,6 @@
 #include <stdexcept>
 #include <fstream>
 #include <iostream>
-#include <functional>
-#include <array>
 
 class Rectangle //Класс прямоугольника
 {
@@ -38,38 +36,39 @@ public:
     bool operator>=(const Rectangle &rhs) const noexcept { return area() >= rhs.area(); }
     bool operator==(const Rectangle &rhs) const noexcept
     {
-        return _width == rhs._width && _height == rhs._height && _center.x == rhs._center.x && _center.y == rhs._center.y;
+        return _width == rhs._width &&
+               _height == rhs._height &&
+               _center.x == rhs._center.x &&
+               _center.y == rhs._center.y;
     }
     bool operator!=(const Rectangle &rhs) const noexcept { return !(*this == rhs); }
 
-    //Геттеры
     double width() const noexcept { return _width; }
     double height() const noexcept { return _height; }
 
-    //Сеттеры
-    double setw(double width)
+    double setw(double width) //Изменить ширину
     {
         if (width < 0)
             throw std::invalid_argument{"ERROR: width cannot be negative"};
         return _width = width;
     }
-    double seth(double height)
+    double seth(double height) //Изменить высоту
     {
         if (height < 0)
             throw std::invalid_argument{"ERROR: height cannot be negative"};
         return _height = height;
     }
-    void set_size(double width, double height)
+    void set_size(double width, double height) //Изменить размеры
     {
         *this = Rectangle{width, height, _center};
     }
-    Point &set_coord(double x, double y) noexcept
+    Point &set_coord(double x, double y) noexcept //Изменить координаты центра
     {
         _center.x = x;
         _center.y = y;
         return _center;
     }
-    Point &center() noexcept { return _center; }
+    Point &center() noexcept { return _center; } //Прямой доступ к координатам центра
     const Point &center() const noexcept { return _center; }
 
     double area() const noexcept { return _width * _height; }            //Вычисление площади
@@ -82,13 +81,13 @@ public:
 
 std::ostream &operator<<(std::ostream &os, const Rectangle &rhs) //Оператор вывода в поток
 {
-    return os  << rhs.center().x << ' ' << rhs.center().y << ' ' << rhs.width() << ' ' << rhs.height();
+    return os << rhs.center().x << ' ' << rhs.center().y << ' ' << rhs.width() << ' ' << rhs.height();
 }
 
 std::istream &operator>>(std::istream &is, Rectangle &rhs) //Оператор чтения из потока
 {
     double width, height, x, y;
-    if (is>> x >> y >> width >> height )
+    if (is >> x >> y >> width >> height)
     {
         try
         {
@@ -105,74 +104,96 @@ std::istream &operator>>(std::istream &is, Rectangle &rhs) //Оператор ч
 
 int main()
 {
+    enum Modes
+    {
+        COMP,
+        COORD,
+        SIZE,
+        AREA,
+        PERIM,
+        SUM
+    };
     try
     {
-        std::ifstream ifs{"input.txt"};                             //Открываем файл для чтения
-        ifs.exceptions(std::ios::failbit | std::ios::badbit);       //Включаем исключения у потока
-        static const std::array<std::function<void(void)>, 6> modes //Режимы работы программы
-            {
-                [&ifs]() //Операция сравнения на точное равенство
-                {
-                    Rectangle rec1, rec2;
-                    ifs >> rec1 >> rec2;
-                    ifs.close();
-                    std::ofstream ofs{"output.txt"};
-                    ofs << (rec1 == rec2);
-                    ofs.close();
-                },
-                [&ifs]() //Изменение координаты центра
-                {
-                    Rectangle rect;
-                    ifs >> rect;
-                    double nx, ny;
-                    ifs >> nx >> ny;
-                    ifs.close();
-                    rect.set_coord(nx, ny);
-                    std::ofstream ofs{"output.txt"};
-                    ofs << rect.center().x << ' ' << rect.center().y;
-                    ofs.close();
-                },
-                [&ifs]() //Изменение размера одной из сторон
-                {
-                    Rectangle rect;
-                    ifs >> rect;
-                    double new_size;
-                    ifs >> new_size;
-                    ifs.close();
-                    std::ofstream ofs{"output.txt"};
-                    ofs << rect.setw(new_size);
-                    ofs.close();
-                },
-                [&ifs]() //Вычисление площади
-                {
-                    Rectangle rect;
-                    ifs >> rect;
-                    ifs.close();
-                    std::ofstream ofs{"output.txt"};
-                    ofs << rect.area();
-                    ofs.close();
-                },
-                [&ifs]() //Вычисление периметра
-                {
-                    Rectangle rect;
-                    ifs >> rect;
-                    ifs.close();
-                    std::ofstream ofs{"output.txt"};
-                    ofs << rect.perimeter();
-                    ofs.close();
-                },
-                [&ifs]() //Сложение прямоугольников
-                {
-                    Rectangle rec1, rec2;
-                    ifs >> rec1 >> rec2;
-                    ifs.close();
-                    std::ofstream ofs{"output.txt"};
-                    ofs << (rec1 + rec2).area();
-                    ofs.close();
-                }};
-        uint16_t mode; //Режим работы программы
+        std::ifstream ifs{"input.txt"};                       //Открываем файл для чтения
+        ifs.exceptions(std::ios::failbit | std::ios::badbit); //Включаем исключения у потока
+        int mode;                                             //Режим работы программы
         ifs >> mode;
-        modes.at(mode)();
+        switch (mode)
+        {
+        case COMP: //Сравнение прямоугольников
+        {
+            Rectangle rec1, rec2;
+            ifs >> rec1 >> rec2;
+            ifs.close();
+            std::ofstream ofs{"output.txt"};
+            ofs << (rec1 == rec2) << '\n';
+            ofs << (rec1 != rec2) << '\n';
+            ofs << (rec1 <= rec2) << '\n';
+            ofs << (rec1 >= rec2) << '\n';
+            ofs << (rec1 > rec2) << '\n';
+            ofs << (rec1 < rec2) << '\n';
+            ofs.close();
+            break;
+        }
+        case COORD: //Изменение координаты
+        {
+            Rectangle rect;
+            ifs >> rect;
+            double nx, ny;
+            ifs >> nx >> ny;
+            ifs.close();
+            rect.set_coord(nx, ny);
+            std::ofstream ofs{"output.txt"};
+            ofs << rect.center().x << ' ' << rect.center().y;
+            ofs.close();
+            break;
+        }
+        case SIZE: //Изменение размера одной из сторон
+        {
+            Rectangle rect;
+            ifs >> rect;
+            double new_size;
+            ifs >> new_size;
+            ifs.close();
+            std::ofstream ofs{"output.txt"};
+            ofs << rect.setw(new_size);
+            ofs.close();
+            break;
+        }
+        case AREA: //Вычисление площади прямоугольника
+        {
+            Rectangle rect;
+            ifs >> rect;
+            ifs.close();
+            std::ofstream ofs{"output.txt"};
+            ofs << rect.area();
+            ofs.close();
+            break;
+        }
+        case PERIM: //Вычисление периметра прямоугольника
+        {
+            Rectangle rect;
+            ifs >> rect;
+            ifs.close();
+            std::ofstream ofs{"output.txt"};
+            ofs << rect.perimeter();
+            ofs.close();
+            break;
+        }
+        case SUM: //Вычисление суммы прямоугольников
+        {
+            Rectangle rec1, rec2;
+            ifs >> rec1 >> rec2;
+            ifs.close();
+            std::ofstream ofs{"output.txt"};
+            ofs << (rec1 + rec2).area();
+            ofs.close();
+            break;
+        }
+        default:
+            throw std::runtime_error{"ERROR: undefined mode"};
+        }
         return EXIT_SUCCESS;
     }
     catch (const std::exception &e)
