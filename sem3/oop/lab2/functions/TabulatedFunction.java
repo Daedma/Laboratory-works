@@ -27,7 +27,8 @@ public class TabulatedFunction {
     }
 
     private void realloc() {
-        FunctionPoint[] buff = new FunctionPoint[(int) (_points.length * REALLOC_MULTIPLIER)];
+        FunctionPoint[] buff = new FunctionPoint[(int) ((_points.length == 0 ? 1 : _points.length)
+                * REALLOC_MULTIPLIER)];
         System.arraycopy(_points, 0, buff, 0, _pointsCount);
         _points = buff;
     }
