@@ -1,6 +1,6 @@
 package functions;
 
-public class LinkedListTabulatedFunction {
+public class LinkedListTabulatedFunction implements TabulatedFunction {
 	// Classes
 	private class FunctionNode {
 		public FunctionPoint _data;
@@ -55,18 +55,23 @@ public class LinkedListTabulatedFunction {
 
 	private FunctionNode translate(FunctionNode start, int offset) {
 		FunctionNode result = start;
-		if (offset < 0)
+		if (offset < 0) {
+			if (_head == start)
+				start = start._prev;
 			for (int i = 0; i != offset; --i) {
 				if (result == _head)
 					++i;
 				result = result._prev;
 			}
-		else
+		} else {
+			if (_head == start)
+				start = start._next;
 			for (int i = 0; i != offset; ++i) {
 				if (result == _head)
 					--i;
 				result = result._next;
 			}
+		}
 		return result;
 	}
 
@@ -75,7 +80,7 @@ public class LinkedListTabulatedFunction {
 				index - _size - _lastReadWriteNodeIndex);
 		int minDistanceHead = minAbs(index, index - _size);
 		int minDistance = minAbs(minDistanceHead, minDistanceLast);
-		FunctionNode start = minDistance == minDistanceLast ? _lastReadWriteNode : _head;
+		FunctionNode start = minDistance == minDistanceLast ? _lastReadWriteNode : _head._next;
 		_lastReadWriteNode = translate(start, minDistance);
 		_lastReadWriteNodeIndex = index;
 		return _lastReadWriteNode;
@@ -99,6 +104,10 @@ public class LinkedListTabulatedFunction {
 
 	private FunctionNode deleteNodeByIndex(int index) {
 		FunctionNode nodeToBeDeleted = getNodeByIndex(index);
+		if (_lastReadWriteNode == nodeToBeDeleted) {
+			_lastReadWriteNode = _lastReadWriteNode._next;
+			_lastReadWriteNodeIndex += _lastReadWriteNode == _head ? -_lastReadWriteNodeIndex : 0;
+		}
 		nodeToBeDeleted.remove();
 		--_size;
 		return nodeToBeDeleted;
@@ -139,7 +148,7 @@ public class LinkedListTabulatedFunction {
 		if (leftX >= rightX)
 			throw new IllegalArgumentException("leftX >= rightX");
 		if (pointsCount < 2)
-			throw new IllegalArgumentException("Points count less than 2");
+			throw new IllegalArgumentException("points count less than 2");
 		double step = Math.abs(rightX - leftX + 1.) / pointsCount;
 		for (int i = 0; i != pointsCount; ++i) {
 			addNodeToTail()._data = new FunctionPoint(leftX, 0);
@@ -151,7 +160,7 @@ public class LinkedListTabulatedFunction {
 		if (leftX >= rightX)
 			throw new IllegalArgumentException("leftX >= rightX");
 		if (values.length < 2)
-			throw new IllegalArgumentException("Points count less than 2");
+			throw new IllegalArgumentException("points count less than 2");
 		double step = Math.abs(rightX - leftX + 1.) / values.length;
 		for (int i = 0; i != values.length; ++i) {
 			addNodeToTail()._data = new FunctionPoint(leftX, values[i]);
@@ -174,8 +183,8 @@ public class LinkedListTabulatedFunction {
 		FunctionPoint leftBound = new FunctionPoint(),
 				rightBound = new FunctionPoint();
 		for (FunctionNode i = _head._prev; i != _head; i = i._prev) {
-			if (x >= i._next._data.getX()) {
-				leftBound = i._next._data;
+			if (x >= i._prev._data.getX()) {
+				leftBound = i._prev._data;
 				rightBound = i._data;
 				break;
 			}
@@ -190,51 +199,56 @@ public class LinkedListTabulatedFunction {
 
 	public FunctionPoint getPoint(int index) throws FunctionPointIndexOutOfBoundsException {
 		if (!isValidIndex(index))
-			throw new FunctionPointIndexOutOfBoundsException();
+			throw new FunctionPointIndexOutOfBoundsException(
+					"invalid index " + index + " (index must be from 0 to " + (_size - 1) + " )");
 		return new FunctionPoint(getNodeByIndex(index)._data);
 	}
 
 	public void setPoint(int index, FunctionPoint point)
 			throws FunctionPointIndexOutOfBoundsException, InappropriateFunctionPointException {
 		if (!isValidIndex(index))
-			throw new FunctionPointIndexOutOfBoundsException();
+			throw new FunctionPointIndexOutOfBoundsException(
+					"invalid index " + index + " (index must be from 0 to " + (_size - 1) + " )");
 		FunctionNode pointWrite = getNodeByIndex(index);
 		double leftBound = index == 0 ? Double.NEGATIVE_INFINITY : pointWrite._prev._data.getX();
 		double rightBound = index == _size - 1 ? Double.POSITIVE_INFINITY : pointWrite._next._data.getX();
 		if (point.getX() >= leftBound && point.getX() <= rightBound)
 			pointWrite._data = point;
 		else
-			throw new InappropriateFunctionPointException();
+			throw new InappropriateFunctionPointException(
+					"X must be enclosed between " + leftBound + " and " + rightBound + " (x = " + point.getX() + ") ");
 	}
 
 	public double getPointX(int index) throws FunctionPointIndexOutOfBoundsException {
 		if (!isValidIndex(index))
-			throw new FunctionPointIndexOutOfBoundsException();
+			throw new FunctionPointIndexOutOfBoundsException(
+					"invalid index " + index + " (index must be from 0 to " + (_size - 1) + " )");
 		return getNodeByIndex(index)._data.getX();
 	}
 
 	public void setPointX(int index, double x)
 			throws FunctionPointIndexOutOfBoundsException, InappropriateFunctionPointException {
-		if (!isValidIndex(index))
-			throw new FunctionPointIndexOutOfBoundsException();
 		setPoint(index, new FunctionPoint(x, getNodeByIndex(index)._data.getY()));
 	}
 
 	public double getPointY(int index) throws FunctionPointIndexOutOfBoundsException {
 		if (!isValidIndex(index))
-			throw new FunctionPointIndexOutOfBoundsException();
+			throw new FunctionPointIndexOutOfBoundsException(
+					"invalid index " + index + " (index must be from 0 to " + (_size - 1) + " )");
 		return getNodeByIndex(index)._data.getY();
 	}
 
 	public void setPointY(int index, double y) throws FunctionPointIndexOutOfBoundsException {
 		if (!isValidIndex(index))
-			throw new FunctionPointIndexOutOfBoundsException();
+			throw new FunctionPointIndexOutOfBoundsException(
+					"invalid index " + index + " (index must be from 0 to " + (_size - 1) + " )");
 		getNodeByIndex(index)._data.setY(y);
 	}
 
 	public void deletePoint(int index) throws FunctionPointIndexOutOfBoundsException {
 		if (!isValidIndex(index))
-			throw new FunctionPointIndexOutOfBoundsException();
+			throw new FunctionPointIndexOutOfBoundsException(
+					"invalid index " + index + " (index must be from 0 to " + (_size - 1) + " )");
 		if (_size < 3)
 			throw new IllegalStateException("Number os points is less than 3");
 		deleteNodeByIndex(index);
@@ -242,7 +256,8 @@ public class LinkedListTabulatedFunction {
 
 	public void addPoint(FunctionPoint point) throws InappropriateFunctionPointException {
 		if (isContains(point.getX()))
-			throw new InappropriateFunctionPointException();
+			throw new InappropriateFunctionPointException(
+					"Point with this abcis already exists (x = " + point.getX() + ")");
 		for (FunctionNode i = _head; i != _head._next; i = i._prev) {
 			if (i._prev._data.getX() < point.getX()) {
 				i.emplaceBefore(new FunctionNode(point));
