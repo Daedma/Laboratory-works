@@ -1,0 +1,256 @@
+package functions;
+
+public class LinkedListTabulatedFunction {
+	// Classes
+	private class FunctionNode {
+		public FunctionPoint _data;
+		public FunctionNode _prev;
+		public FunctionNode _next;
+
+		public FunctionNode() {
+			_prev = this;
+			_next = this;
+		}
+
+		public FunctionNode(FunctionPoint data, FunctionNode prev, FunctionNode next) {
+			_data = data;
+			_prev = prev;
+			_next = next;
+		}
+
+		public FunctionNode(FunctionPoint data) {
+			this(data, null, null);
+		}
+
+		public FunctionNode(FunctionNode rhs) {
+			_data = rhs._data;
+			_prev = rhs._prev;
+			_next = rhs._next;
+		}
+
+		public void emplaceBefore(FunctionNode node) {
+			node._next = this;
+			node._prev = _prev;
+			node._prev._next = node;
+			_prev = node;
+		}
+
+		public void remove() {
+			_prev._next = _next;
+			_next._prev = _prev;
+			_prev = _next = null;
+		}
+	}
+
+	// Members
+	private FunctionNode _head = new FunctionNode();
+	private FunctionNode _lastReadWriteNode = _head;
+	private int _lastReadWriteNodeIndex = 0;
+	private int _size = 0;
+
+	// Private methods
+	private int minAbs(int rhs, int lhs) {
+		return Math.abs(rhs) < Math.abs(lhs) ? rhs : lhs;
+	}
+
+	private FunctionNode translate(FunctionNode start, int offset) {
+		FunctionNode result = start;
+		if (offset < 0)
+			for (int i = 0; i != offset; --i) {
+				if (result == _head)
+					++i;
+				result = result._prev;
+			}
+		else
+			for (int i = 0; i != offset; ++i) {
+				if (result == _head)
+					--i;
+				result = result._next;
+			}
+		return result;
+	}
+
+	private FunctionNode getNodeByIndex(int index) {
+		int minDistanceLast = minAbs(index - _lastReadWriteNodeIndex,
+				index - _size - _lastReadWriteNodeIndex);
+		int minDistanceHead = minAbs(index, index - _size);
+		int minDistance = minAbs(minDistanceHead, minDistanceLast);
+		FunctionNode start = minDistance == minDistanceLast ? _lastReadWriteNode : _head;
+		_lastReadWriteNode = translate(start, minDistance);
+		_lastReadWriteNodeIndex = index;
+		return _lastReadWriteNode;
+	}
+
+	private FunctionNode addNodeToTail() {
+		FunctionNode newNode = new FunctionNode();
+		_head.emplaceBefore(newNode);
+		++_size;
+		return newNode;
+	}
+
+	private FunctionNode addNodeByIndex(int index) {
+		FunctionNode place = getNodeByIndex(index);
+		FunctionNode newNode = new FunctionNode();
+		place.emplaceBefore(newNode);
+		++_size;
+		_lastReadWriteNodeIndex += _lastReadWriteNodeIndex >= index ? 1 : 0;
+		return newNode;
+	}
+
+	private FunctionNode deleteNodeByIndex(int index) {
+		FunctionNode nodeToBeDeleted = getNodeByIndex(index);
+		nodeToBeDeleted.remove();
+		--_size;
+		return nodeToBeDeleted;
+	}
+
+	private boolean isEmpty() {
+		return _size == 0;
+	}
+
+	private boolean isValidIndex(int index) {
+		return index >= 0 && index < _size;
+	}
+
+	private boolean isContains(double x) {
+		for (FunctionNode i = _head._next; i != _head; i = i._next) {
+			if (i._data.getX() == x)
+				return true;
+		}
+		return false;
+	}
+
+	private double getLinearFunctionValue(FunctionPoint firstPoint, FunctionPoint secondPoint, double x) {
+		return (x - firstPoint.getX()) * (secondPoint.getY() - firstPoint.getY()) /
+				(secondPoint.getX() - firstPoint.getX())
+				+ firstPoint.getY();
+	}
+
+	private FunctionPoint getFirstPoint() {
+		return _head._next._data;
+	}
+
+	private FunctionPoint getLastPoint() {
+		return _head._prev._data;
+	}
+
+	// Constructors
+	public LinkedListTabulatedFunction(double leftX, double rightX, int pointsCount) throws IllegalArgumentException {
+		if (leftX >= rightX)
+			throw new IllegalArgumentException("leftX >= rightX");
+		if (pointsCount < 2)
+			throw new IllegalArgumentException("Points count less than 2");
+		double step = Math.abs(rightX - leftX + 1.) / pointsCount;
+		for (int i = 0; i != pointsCount; ++i) {
+			addNodeToTail()._data = new FunctionPoint(leftX, 0);
+			leftX += step;
+		}
+	}
+
+	public LinkedListTabulatedFunction(double leftX, double rightX, double[] values) throws IllegalArgumentException {
+		if (leftX >= rightX)
+			throw new IllegalArgumentException("leftX >= rightX");
+		if (values.length < 2)
+			throw new IllegalArgumentException("Points count less than 2");
+		double step = Math.abs(rightX - leftX + 1.) / values.length;
+		for (int i = 0; i != values.length; ++i) {
+			addNodeToTail()._data = new FunctionPoint(leftX, values[i]);
+			leftX += step;
+		}
+	}
+
+	// Methods
+	public double getLeftDomainBorder() {
+		return getFirstPoint().getX();
+	}
+
+	public double getFunctionValue(double x) {
+		if (isEmpty() ||
+				x < getFirstPoint().getX() ||
+				x > getLastPoint().getX())
+			return Double.NaN;
+		if (getLastPoint().getX() == x)
+			return getLastPoint().getY();
+		FunctionPoint leftBound = new FunctionPoint(),
+				rightBound = new FunctionPoint();
+		for (FunctionNode i = _head._prev; i != _head; i = i._prev) {
+			if (x >= i._next._data.getX()) {
+				leftBound = i._next._data;
+				rightBound = i._data;
+				break;
+			}
+		}
+		return getLinearFunctionValue(leftBound, rightBound, x);
+	}
+
+	// Acces
+	public int getPointsCount() {
+		return _size;
+	}
+
+	public FunctionPoint getPoint(int index) throws FunctionPointIndexOutOfBoundsException {
+		if (!isValidIndex(index))
+			throw new FunctionPointIndexOutOfBoundsException();
+		return new FunctionPoint(getNodeByIndex(index)._data);
+	}
+
+	public void setPoint(int index, FunctionPoint point)
+			throws FunctionPointIndexOutOfBoundsException, InappropriateFunctionPointException {
+		if (!isValidIndex(index))
+			throw new FunctionPointIndexOutOfBoundsException();
+		FunctionNode pointWrite = getNodeByIndex(index);
+		double leftBound = index == 0 ? Double.NEGATIVE_INFINITY : pointWrite._prev._data.getX();
+		double rightBound = index == _size - 1 ? Double.POSITIVE_INFINITY : pointWrite._next._data.getX();
+		if (point.getX() >= leftBound && point.getX() <= rightBound)
+			pointWrite._data = point;
+		else
+			throw new InappropriateFunctionPointException();
+	}
+
+	public double getPointX(int index) throws FunctionPointIndexOutOfBoundsException {
+		if (!isValidIndex(index))
+			throw new FunctionPointIndexOutOfBoundsException();
+		return getNodeByIndex(index)._data.getX();
+	}
+
+	public void setPointX(int index, double x)
+			throws FunctionPointIndexOutOfBoundsException, InappropriateFunctionPointException {
+		if (!isValidIndex(index))
+			throw new FunctionPointIndexOutOfBoundsException();
+		setPoint(index, new FunctionPoint(x, getNodeByIndex(index)._data.getY()));
+	}
+
+	public double getPointY(int index) throws FunctionPointIndexOutOfBoundsException {
+		if (!isValidIndex(index))
+			throw new FunctionPointIndexOutOfBoundsException();
+		return getNodeByIndex(index)._data.getY();
+	}
+
+	public void setPointY(int index, double y) throws FunctionPointIndexOutOfBoundsException {
+		if (!isValidIndex(index))
+			throw new FunctionPointIndexOutOfBoundsException();
+		getNodeByIndex(index)._data.setY(y);
+	}
+
+	public void deletePoint(int index) throws FunctionPointIndexOutOfBoundsException {
+		if (!isValidIndex(index))
+			throw new FunctionPointIndexOutOfBoundsException();
+		if (_size < 3)
+			throw new IllegalStateException("Number os points is less than 3");
+		deleteNodeByIndex(index);
+	}
+
+	public void addPoint(FunctionPoint point) throws InappropriateFunctionPointException {
+		if (isContains(point.getX()))
+			throw new InappropriateFunctionPointException();
+		for (FunctionNode i = _head; i != _head._next; i = i._prev) {
+			if (i._prev._data.getX() < point.getX()) {
+				i.emplaceBefore(new FunctionNode(point));
+				++_size;
+				return;
+			}
+		}
+		_head._next.emplaceBefore(new FunctionNode(point));
+		++_size;
+	}
+}
