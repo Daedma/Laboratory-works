@@ -169,9 +169,29 @@ public class LinkedListTabulatedFunction implements TabulatedFunction {
 		}
 	}
 
+	public LinkedListTabulatedFunction(FunctionPoint[] values)
+			throws IllegalArgumentException {
+		if (values.length < 2)
+			throw new IllegalArgumentException("Points count less than 2");
+		addNodeToTail()._data = new FunctionPoint(values[0]);
+		for (int i = 0; i != values.length; ++i) {
+			if (values[i - 1].getX() < values[i].getX())
+				addNodeToTail()._data = new FunctionPoint(values[i]);
+			else
+				throw new IllegalArgumentException(
+						"The passed function point values are not ordered by ascending abscissa ["
+								+ (i - 1) + "]: " + values[i - 1] +
+								" >= [" + i + "]: " + values[i]);
+		}
+	}
+
 	// Methods
 	public double getLeftDomainBorder() {
 		return getFirstPoint().getX();
+	}
+
+	public double getRightDomainBorder() {
+		return getLastPoint().getX();
 	}
 
 	public double getFunctionValue(double x) {
