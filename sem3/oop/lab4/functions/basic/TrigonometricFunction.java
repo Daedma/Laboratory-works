@@ -2,7 +2,7 @@ package functions.basic;
 
 import functions.Function;
 
-protected abstract class TrigonometricFunction implements Function {
+abstract class TrigonometricFunction implements Function {
 
 	public double getRightDomainBorder() {
 		return Double.POSITIVE_INFINITY;

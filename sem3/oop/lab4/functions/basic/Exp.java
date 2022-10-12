@@ -4,15 +4,15 @@ import functions.Function;
 
 public class Exp implements Function {
 
-	double getRightDomainBorder() {
+	public double getRightDomainBorder() {
 		return Double.POSITIVE_INFINITY;
 	}
 
-	double getLeftDomainBorder() {
+	public double getLeftDomainBorder() {
 		return Double.NEGATIVE_INFINITY;
 	}
 
-	double getFunctionValue(double x) {
+	public double getFunctionValue(double x) {
 		return Math.exp(x);
 	}
 }

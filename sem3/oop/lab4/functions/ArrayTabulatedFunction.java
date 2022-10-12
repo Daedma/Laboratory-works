@@ -78,6 +78,7 @@ public class ArrayTabulatedFunction implements TabulatedFunction {
 		if (values.length < 2)
 			throw new IllegalArgumentException("Points count less than 2");
 		_points = new FunctionPoint[values.length];
+		_pointsCount = values.length;
 		_points[0] = new FunctionPoint(values[0]);
 		for (int i = 1; i != values.length; ++i) {
 			if (values[i - 1].getX() < values[i].getX())

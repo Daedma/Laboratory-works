@@ -6,7 +6,7 @@ public class Shift implements Function {
 	Function _function;
 	double _shift_x, _shift_y;
 
-	public Scale(Function function, double shift_x, double shift_y) {
+	public Shift(Function function, double shift_x, double shift_y) {
 		_function = function;
 		_shift_x = shift_x;
 		_shift_y = shift_y;

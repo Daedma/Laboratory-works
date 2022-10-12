@@ -6,9 +6,9 @@ public class Log implements Function {
 
 	private double _base;
 
-	public Log(double base) {
+	public Log(double base) throws IllegalArgumentException {
 		if (base <= 0 || base == 1)
-			throw IllegalArgumentException(
+			throw new IllegalArgumentException(
 					"The base of a logarithm cannot be <= 0 or equal 1 (base: "
 							+ base + ")");
 		_base = base;
