@@ -19,11 +19,11 @@ public class Log implements Function {
 	}
 
 	public double getRightDomainBorder() {
-		return 0.;
+		return Double.POSITIVE_INFINITY;
 	}
 
 	public double getLeftDomainBorder() {
-		return Double.POSITIVE_INFINITY;
+		return 0.;
 	}
 
 	public double getFunctionValue(double x) {

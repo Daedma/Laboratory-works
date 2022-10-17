@@ -38,6 +38,7 @@ final public class TabulatedFunctions {
 			dataOut.writeDouble(function.getPointX(i));
 			dataOut.writeDouble(function.getPointY(i));
 		}
+		dataOut.flush();
 	}
 
 	public static TabulatedFunction inputTabulatedFunction(InputStream in)
@@ -60,12 +61,14 @@ final public class TabulatedFunctions {
 			output.print(' ');
 			output.print(function.getPointY(i));
 		}
+		output.flush();
 	}
 
 	public static TabulatedFunction readTabulatedFunction(Reader in)
 			throws IOException {
 		StreamTokenizer tokenizer = new StreamTokenizer(in);
 		tokenizer.parseNumbers();
+		tokenizer.nextToken();
 		FunctionPoint[] values = new FunctionPoint[(int) tokenizer.nval];
 		for (int i = 0; i != values.length; ++i) {
 			tokenizer.nextToken();

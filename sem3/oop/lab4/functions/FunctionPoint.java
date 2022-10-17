@@ -1,44 +1,46 @@
 package functions;
 
-public class FunctionPoint {
-    // Members
-    private double _x;
-    private double _y;
+import java.io.Serializable;
 
-    // Constructors
-    public FunctionPoint(double x, double y) {
-        _x = x;
-        _y = y;
-    }
+public class FunctionPoint implements Serializable {
+	// Members
+	private double _x;
+	private double _y;
 
-    public FunctionPoint(FunctionPoint point) {
-        _x = point._x;
-        _y = point._y;
-    }
+	// Constructors
+	public FunctionPoint(double x, double y) {
+		_x = x;
+		_y = y;
+	}
 
-    public FunctionPoint() {
-        this(0, 0);
-    }
+	public FunctionPoint(FunctionPoint point) {
+		_x = point._x;
+		_y = point._y;
+	}
 
-    // Acces metods
-    public double getX() {
-        return _x;
-    }
+	public FunctionPoint() {
+		this(0, 0);
+	}
 
-    public double getY() {
-        return _y;
-    }
+	// Acces metods
+	public double getX() {
+		return _x;
+	}
 
-    public void setX(double value) {
-        _x = value;
-    }
+	public double getY() {
+		return _y;
+	}
 
-    public void setY(double value) {
-        _y = value;
-    }
+	public void setX(double value) {
+		_x = value;
+	}
 
-    public void setXY(double x, double y) {
-        _x = x;
-        _y = y;
-    }
+	public void setY(double value) {
+		_y = value;
+	}
+
+	public void setXY(double x, double y) {
+		_x = x;
+		_y = y;
+	}
 }

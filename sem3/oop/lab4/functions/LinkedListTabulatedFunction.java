@@ -1,8 +1,10 @@
 package functions;
 
-public class LinkedListTabulatedFunction implements TabulatedFunction {
+import java.io.Serializable;
+
+public class LinkedListTabulatedFunction implements TabulatedFunction, Serializable {
 	// Classes
-	private class FunctionNode {
+	private class FunctionNode implements Serializable {
 		public FunctionPoint _data;
 		public FunctionNode _prev;
 		public FunctionNode _next;
