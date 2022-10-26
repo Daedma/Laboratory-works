@@ -60,7 +60,7 @@ public class LinkedListTabulatedFunction implements TabulatedFunction, Serializa
 		FunctionNode result = start;
 		if (offset < 0) {
 			if (_head == start)
-				start = start._prev;
+				result = result._prev;
 			for (int i = 0; i != offset; --i) {
 				if (result == _head)
 					++i;
@@ -68,7 +68,7 @@ public class LinkedListTabulatedFunction implements TabulatedFunction, Serializa
 			}
 		} else {
 			if (_head == start)
-				start = start._next;
+				result = result._next;
 			for (int i = 0; i != offset; ++i) {
 				if (result == _head)
 					--i;
@@ -176,7 +176,7 @@ public class LinkedListTabulatedFunction implements TabulatedFunction, Serializa
 		if (values.length < 2)
 			throw new IllegalArgumentException("Points count less than 2");
 		addNodeToTail()._data = new FunctionPoint(values[0]);
-		for (int i = 0; i != values.length; ++i) {
+		for (int i = 1; i != values.length; ++i) {
 			if (values[i - 1].getX() < values[i].getX())
 				addNodeToTail()._data = new FunctionPoint(values[i]);
 			else

@@ -220,7 +220,7 @@ public class ArrayTabulatedFunction implements TabulatedFunction, Serializable {
 			if (tabulatedFunction.getPointsCount() != _pointsCount)
 				return false;
 			for (int i = 0; i != _pointsCount; ++i) {
-				if (!_pointsCount[i].equals(tabulatedFunction.getPoint(i)))
+				if (!_points[i].equals(tabulatedFunction.getPoint(i)))
 					return false;
 			}
 			return true;

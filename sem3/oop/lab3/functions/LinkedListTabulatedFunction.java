@@ -58,7 +58,7 @@ public class LinkedListTabulatedFunction implements TabulatedFunction {
 		FunctionNode result = start;
 		if (offset < 0) {
 			if (_head == start)
-				start = start._prev;
+				result = result._prev;
 			for (int i = 0; i != offset; --i) {
 				if (result == _head)
 					++i;
@@ -66,7 +66,7 @@ public class LinkedListTabulatedFunction implements TabulatedFunction {
 			}
 		} else {
 			if (_head == start)
-				start = start._next;
+				result = result._next;
 			for (int i = 0; i != offset; ++i) {
 				if (result == _head)
 					--i;

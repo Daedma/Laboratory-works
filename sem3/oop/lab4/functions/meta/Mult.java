@@ -11,13 +11,13 @@ public class Mult implements Function {
 	}
 
 	public double getLeftDomainBorder() {
-		double maxLeftDomainBorder = Math.max(first.getLeftDomainBorder(), second.getRightDomainBorder());
+		double maxLeftDomainBorder = Math.max(first.getLeftDomainBorder(), second.getLeftDomainBorder());
 		double minRightDomainBorder = Math.min(first.getRightDomainBorder(), second.getRightDomainBorder());
 		return minRightDomainBorder < maxLeftDomainBorder ? Double.NaN : maxLeftDomainBorder;
 	}
 
 	public double getRightDomainBorder() {
-		double maxLeftDomainBorder = Math.max(first.getLeftDomainBorder(), second.getRightDomainBorder());
+		double maxLeftDomainBorder = Math.max(first.getLeftDomainBorder(), second.getLeftDomainBorder());
 		double minRightDomainBorder = Math.min(first.getRightDomainBorder(), second.getRightDomainBorder());
 		return minRightDomainBorder < maxLeftDomainBorder ? Double.NaN : minRightDomainBorder;
 	}
