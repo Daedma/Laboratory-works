@@ -1,12 +1,14 @@
+package gui;
+
 public class FunctionPointT {
 	private double x, y;
 
-	FunctionPointT() {
+	public FunctionPointT() {
 		x = 0;
 		y = 0;
 	}
 
-	FunctionPointT(double x, double y) {
+	public FunctionPointT(double x, double y) {
 		this.x = x;
 		this.y = y;
 	}
@@ -19,11 +21,11 @@ public class FunctionPointT {
 		return Double.valueOf(y);
 	}
 
-	public void setX(Double x) {
+	public void setX(Double value) {
 		this.x = x;
 	}
 
-	public void setY(Double y) {
+	public void setY(Double value) {
 		this.y = y;
 	}
 }

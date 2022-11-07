@@ -1,4 +1,4 @@
-package docs;
+package gui;
 
 import functions.ArrayTabulatedFunction;
 import functions.FunctionPoint;
@@ -10,6 +10,7 @@ import functions.Function;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+
 import org.json.simple.JSONArray;
 
 import java.io.FileReader;
@@ -22,8 +23,18 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
 	private TabulatedFunction _function;
 	private String _fileName;
 	private boolean _changed;
+	private Controller _contoller;
 
 	// Methods
+	public void CallRedraw() {
+		_contoller.redraw();
+	}
+
+	public void registerRedrawFunctionController(Controller controller) {
+		_contoller = controller;
+		CallRedraw();
+	}
+
 	public boolean isModified() {
 		return _changed;
 	}
@@ -34,6 +45,8 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
 
 	public void newFunction(double leftX, double rightX, int pointsCount) throws IllegalArgumentException {
 		_function = new ArrayTabulatedFunction(leftX, rightX, pointsCount);
+		if (_contoller != null)
+			CallRedraw();
 	}
 
 	public void tabulateFunction(Function function, double leftX, double rightX, int pointsCount)
@@ -66,8 +79,8 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
 		JSONArray jsonPoints = (JSONArray) jsonObject.get("points");
 		FunctionPoint[] points = new FunctionPoint[jsonPoints.size()];
 		for (int i = 0; i != points.length; ++i) {
-			points[i] = new FunctionPoint((Double) (((JSONObject) jsonPoints.get(i)).get("x")),
-					(Double) (((JSONObject) jsonPoints.get(i)).get("y")));
+			JSONObject point = (JSONObject) jsonPoints.get(i);
+			points[i] = new FunctionPoint((Double) point.get("x"), (Double) point.get("y"));
 		}
 		_function = new ArrayTabulatedFunction(points);
 		file.close();
@@ -101,6 +114,7 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
 			throws FunctionPointIndexOutOfBoundsException, InappropriateFunctionPointException {
 		_changed = true;
 		_function.setPoint(index, point);
+		CallRedraw();
 	}
 
 	public double getPointX(int index) throws FunctionPointIndexOutOfBoundsException {
@@ -111,6 +125,7 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
 			InappropriateFunctionPointException {
 		_changed = true;
 		_function.setPointX(index, x);
+		CallRedraw();
 	}
 
 	public double getPointY(int index) throws FunctionPointIndexOutOfBoundsException {
@@ -120,16 +135,19 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
 	public void setPointY(int index, double y) throws FunctionPointIndexOutOfBoundsException {
 		_changed = true;
 		_function.setPointY(index, y);
+		CallRedraw();
 	}
 
 	public void deletePoint(int index) throws FunctionPointIndexOutOfBoundsException {
 		_changed = true;
 		_function.deletePoint(index);
+		CallRedraw();
 	}
 
 	public void addPoint(FunctionPoint point) throws InappropriateFunctionPointException {
 		_changed = true;
 		_function.addPoint(point);
+		CallRedraw();
 	}
 
 	public Object clone() {

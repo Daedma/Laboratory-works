@@ -1,0 +1,1 @@
+java --module-path "C:\Program Files\Java\javafx-sdk-19\lib;C:\Program Files\Java\libs" --add-modules ALL-MODULE-PATH  FunctionGUIApp

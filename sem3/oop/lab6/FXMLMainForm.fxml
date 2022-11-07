@@ -2,9 +2,11 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.Pane?>
 
@@ -24,12 +26,24 @@
             <Button fx:id="buttonDelete" layoutX="263.0" layoutY="466.0" mnemonicParsing="false" onAction="#deletePoint" text="Delete" />
             <Label fx:id="labelTextFieldX" layoutX="20.0" layoutY="440.0" text="New point X:" />
             <Label fx:id="labelTextFieldY" layoutX="20.0" layoutY="470.0" text="New point Y:" />
-            <ToolBar fx:id="toolBar" layoutX="398.0" layoutY="7.0" prefHeight="15.0" prefWidth="200.0">
-              <items>
-                <Button fx:id="buttonFile" mnemonicParsing="false" text="File" />
-                  <Button fx:id="buttonTabulate" mnemonicParsing="false" text="Tabulate" />
-              </items>
-            </ToolBar>
+            <MenuBar fx:id="menuBar" layoutY="8.0">
+              <menus>
+                <Menu fx:id="menuFile" mnemonicParsing="false" text="File">
+                  <items>
+                    <MenuItem mnemonicParsing="false" onAction="#newDocument" text="New" />
+                        <MenuItem mnemonicParsing="false" text="Open" />
+                        <MenuItem mnemonicParsing="false" text="Save" />
+                        <MenuItem mnemonicParsing="false" text="Save Ass..." />
+                  </items>
+                </Menu>
+                <Menu fx:id="menuTabulate" mnemonicParsing="false" text="Tabulate">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="Load" />
+                        <MenuItem mnemonicParsing="false" text="Tabulate" />
+                  </items>
+                </Menu>
+              </menus>
+            </MenuBar>
          </children>
       </AnchorPane>
    </children>

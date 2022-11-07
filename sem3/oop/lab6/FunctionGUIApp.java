@@ -1,4 +1,5 @@
-import docs.TabulatedFunctionDoc;
+
+import gui.TabulatedFunctionDoc;
 import javafx.application.Application;
 import javafx.stage.*;
 import javafx.fxml.*;
@@ -16,6 +17,8 @@ public class FunctionGUIApp extends Application {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("FXMLMainForm.fxml"));
 		Parent root = loader.load();
 		FXMLMainFormController ctrl = loader.getController();
+		ctrl.setStage(stage);
+		tabFDoc.registerRedrawFunctionController(ctrl);
 		Scene scene = new Scene(root);
 		stage.setTitle("Впишите сюда заголовок главного окна");
 		stage.setScene(scene);
