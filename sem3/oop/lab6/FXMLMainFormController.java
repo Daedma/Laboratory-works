@@ -82,18 +82,25 @@ public class FXMLMainFormController implements Initializable, Controller {
 
 	@FXML
 	private void newDocument(ActionEvent av) {
-		try {
-			Stage stage = new Stage();
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("FXMLNewDocFormController.fxml"));
-			Parent root = loader.load();
-			FXMLNewDocFormController ctrl = loader.getController();
-			Scene scene = new Scene(root);
-			stage.setTitle("Function parameters");
-			stage.initModality(Modality.APPLICATION_MODAL);
-			stage.initOwner(primaryStage);
-			stage.showAndWait();
-		} catch (Exception e) {
-		}
+		showDialog();
+		// try {
+		// Stage stage = new Stage();
+		// FXMLLoader loader = new
+		// FXMLLoader(getClass().getResource("FXMLNewDocForm.fxml"));
+		// Parent root = loader.load();
+		// FXMLNewDocFormController ctrl = loader.getController();
+		// ctrl.setStage(stage);
+		// Scene scene = new Scene(root);
+		// stage.setTitle("Function parameters");
+		// stage.setResizable(false);
+		// stage.setScene(scene);
+		// stage.initModality(Modality.APPLICATION_MODAL);
+		// stage.initOwner(primaryStage);
+		// stage.showAndWait();
+		// } catch (Exception e) {
+		// System.err.println(e.getClass().getSimpleName() + " : " +
+		// e.getLocalizedMessage());
+		// }
 	}
 
 	@FXML
@@ -155,9 +162,10 @@ public class FXMLMainFormController implements Initializable, Controller {
 			// If a row of our table is clicked...
 			row.setOnMouseReleased(new EventHandler<MouseEvent>() {
 				public void handle(MouseEvent mouseEvent) {
-					labelPointNumber
-							.setText(String.format("Point %d of %d", row.getIndex() + 1,
-									FunctionGUIApp.tabFDoc.getPointsCount()));
+					if (row.getIndex() < FunctionGUIApp.tabFDoc.getPointsCount())
+						labelPointNumber
+								.setText(String.format("Point %d of %d", row.getIndex() + 1,
+										FunctionGUIApp.tabFDoc.getPointsCount()));
 				}
 			});
 			return row;
@@ -167,6 +175,10 @@ public class FXMLMainFormController implements Initializable, Controller {
 					FunctionGUIApp.tabFDoc.getPointY(i));
 			table.getItems().add(point);
 		}
+	}
+
+	public int showDialog() {
+		return FXMLNewDocFormController.showDialog(primaryStage);
 	}
 
 }
