@@ -71,6 +71,10 @@ public class FXMLMainFormController implements Initializable, Controller {
 
 	private Stage primaryStage;
 
+	private Stage dialogStage;
+
+	private FXMLNewDocFormController dialogController;
+
 	public void setStage(Stage stage) {
 		primaryStage = stage;
 	}
@@ -83,24 +87,6 @@ public class FXMLMainFormController implements Initializable, Controller {
 	@FXML
 	private void newDocument(ActionEvent av) {
 		showDialog();
-		// try {
-		// Stage stage = new Stage();
-		// FXMLLoader loader = new
-		// FXMLLoader(getClass().getResource("FXMLNewDocForm.fxml"));
-		// Parent root = loader.load();
-		// FXMLNewDocFormController ctrl = loader.getController();
-		// ctrl.setStage(stage);
-		// Scene scene = new Scene(root);
-		// stage.setTitle("Function parameters");
-		// stage.setResizable(false);
-		// stage.setScene(scene);
-		// stage.initModality(Modality.APPLICATION_MODAL);
-		// stage.initOwner(primaryStage);
-		// stage.showAndWait();
-		// } catch (Exception e) {
-		// System.err.println(e.getClass().getSimpleName() + " : " +
-		// e.getLocalizedMessage());
-		// }
 	}
 
 	@FXML
@@ -129,7 +115,9 @@ public class FXMLMainFormController implements Initializable, Controller {
 			FunctionPointT point = new FunctionPointT(FunctionGUIApp.tabFDoc.getPointX(i),
 					FunctionGUIApp.tabFDoc.getPointY(i));
 			table.getItems().add(point);
+			System.out.println("(" + columnX.getCellData(i) + " ;" + columnY.getCellData(i));
 		}
+		// table.refresh();
 		labelPointNumber.setText("Count of points: " + FunctionGUIApp.tabFDoc.getPointsCount());
 		// for (FunctionPointT i : table.getItems())
 		// System.out.println(i.getX().toString() + " " + i.getY());
@@ -141,17 +129,7 @@ public class FXMLMainFormController implements Initializable, Controller {
 		table.getColumns().add(columnX);
 		columnY.setCellValueFactory(new PropertyValueFactory<FunctionPointT, Double>("y"));
 		table.getColumns().add(columnY);
-		// EventHandler<TableColumn.CellEditEvent<FunctionPointT, Double>>
-		// selectRowEventHandler = new
-		// EventHandler<TableColumn.CellEditEvent<FunctionPointT, Double>>() {
-		// public void handle(TableColumn.CellEditEvent<FunctionPointT, Double> event) {
-		// labelPointNumber
-		// .setText(String.format("Point %d of %d", event.getTablePosition().getRow(),
-		// FunctionGUIApp.tabFDoc.getPointsCount()));
-		// }
-		// };
-		// columnX.setOnEditStart(selectRowEventHandler);
-		// columnY.setOnEditStart(selectRowEventHandler);
+		// table.setEditable(false);
 		labelPointNumber.setOnMouseReleased(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent event) {
 				labelPointNumber.setText("Count of points: " + FunctionGUIApp.tabFDoc.getPointsCount());
@@ -159,7 +137,6 @@ public class FXMLMainFormController implements Initializable, Controller {
 		});
 		table.setRowFactory(tableView -> {
 			TableRow<FunctionPointT> row = new TableRow<FunctionPointT>();
-			// If a row of our table is clicked...
 			row.setOnMouseReleased(new EventHandler<MouseEvent>() {
 				public void handle(MouseEvent mouseEvent) {
 					if (row.getIndex() < FunctionGUIApp.tabFDoc.getPointsCount())
@@ -168,6 +145,9 @@ public class FXMLMainFormController implements Initializable, Controller {
 										FunctionGUIApp.tabFDoc.getPointsCount()));
 				}
 			});
+			row.setPrefHeight(10);
+			row.setMinHeight(10);
+			row.setMaxHeight(10);
 			return row;
 		});
 		for (int i = 0; i < FunctionGUIApp.tabFDoc.getPointsCount(); ++i) {
@@ -178,7 +158,28 @@ public class FXMLMainFormController implements Initializable, Controller {
 	}
 
 	public int showDialog() {
-		return FXMLNewDocFormController.showDialog(primaryStage);
+		if (dialogStage == null) {
+			try {
+				dialogStage = new Stage();
+				FXMLLoader loader = new FXMLLoader(getClass().getResource("FXMLNewDocForm.fxml"));
+				Parent root = loader.load();
+				dialogController = loader.getController();
+				dialogController.setStage(dialogStage);
+				Scene scene = new Scene(root);
+				dialogStage.setTitle("Function parameters");
+				dialogStage.setResizable(false);
+				dialogStage.setScene(scene);
+				dialogStage.initModality(Modality.APPLICATION_MODAL);
+				dialogStage.initOwner(primaryStage);
+				dialogStage.showAndWait();
+			} catch (Exception e) {
+				System.err.println(e.getClass().getSimpleName() + " : " +
+						e.getLocalizedMessage());
+			}
+		} else {
+			dialogStage.showAndWait();
+		}
+		return dialogController.getStatus();
 	}
 
 }

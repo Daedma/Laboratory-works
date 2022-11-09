@@ -33,7 +33,7 @@
                     <MenuItem mnemonicParsing="false" onAction="#newDocument" text="New" />
                         <MenuItem mnemonicParsing="false" text="Open" />
                         <MenuItem mnemonicParsing="false" text="Save" />
-                        <MenuItem mnemonicParsing="false" text="Save Ass..." />
+                        <MenuItem mnemonicParsing="false" text="Save As..." />
                   </items>
                 </Menu>
                 <Menu fx:id="menuTabulate" mnemonicParsing="false" text="Tabulate">

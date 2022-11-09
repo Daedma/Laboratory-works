@@ -29,8 +29,6 @@ public class FXMLNewDocFormController implements Controller, Initializable {
 
 	private Stage stage;
 
-	private static FXMLNewDocFormController dialogWindow = null; // Singleton
-
 	@FXML
 	private TextField edRightBorder = new TextField();
 
@@ -58,6 +56,10 @@ public class FXMLNewDocFormController implements Controller, Initializable {
 
 	public int getPointsCount() {
 		return edPointsCount.getValue();
+	}
+
+	public int getStatus() {
+		return lastButton;
 	}
 
 	public void redraw() {
@@ -106,27 +108,4 @@ public class FXMLNewDocFormController implements Controller, Initializable {
 		edRightBorder.setText("10");
 	}
 
-	public static int showDialog(Stage primaryStage) {
-		if (dialogWindow == null) {
-			try {
-				Stage stage = new Stage();
-				FXMLLoader loader = new FXMLLoader(FXMLNewDocFormController.class.getResource("FXMLNewDocForm.fxml"));
-				Parent root = loader.load();
-				dialogWindow = loader.getController();
-				dialogWindow.setStage(stage);
-				Scene scene = new Scene(root);
-				stage.setTitle("Function parameters");
-				stage.setResizable(false);
-				stage.setScene(scene);
-				stage.initModality(Modality.APPLICATION_MODAL);
-				stage.initOwner(primaryStage);
-				stage.showAndWait();
-			} catch (Exception e) {
-				System.err.println(e.getClass().getSimpleName() + " : " + e.getLocalizedMessage());
-			}
-		} else {
-			dialogWindow.stage.show();
-		}
-		return dialogWindow.lastButton;
-	}
 }
