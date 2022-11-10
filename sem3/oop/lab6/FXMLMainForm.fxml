@@ -15,7 +15,7 @@
       <AnchorPane layoutY="-7.0" minHeight="0.0" minWidth="0.0" prefHeight="505.0" prefWidth="598.0">
          <children>
             <Label fx:id="labelPointNumber" layoutX="20.0" layoutY="42.0" text="Point . of ." />
-            <TableView fx:id="table" editable="true" fixedCellSize="10.0" layoutX="20.0" layoutY="59.0" prefHeight="370.0" prefWidth="558.0" AnchorPane.bottomAnchor="76.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="59.0">
+            <TableView fx:id="table" editable="true" fixedCellSize="30.0" layoutX="20.0" layoutY="59.0" prefHeight="370.0" prefWidth="558.0" AnchorPane.bottomAnchor="76.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="59.0">
                <columnResizePolicy>
                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                </columnResizePolicy>
