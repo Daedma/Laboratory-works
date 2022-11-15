@@ -152,7 +152,7 @@ public class LinkedListTabulatedFunction implements TabulatedFunction, Serializa
 			throw new IllegalArgumentException("leftX >= rightX");
 		if (pointsCount < 2)
 			throw new IllegalArgumentException("points count less than 2");
-		double step = Math.abs(rightX - leftX + 1.) / pointsCount;
+		double step = Math.abs(rightX - leftX) / (pointsCount - 1);
 		for (int i = 0; i != pointsCount; ++i) {
 			addNodeToTail()._data = new FunctionPoint(leftX, 0);
 			leftX += step;
@@ -164,7 +164,7 @@ public class LinkedListTabulatedFunction implements TabulatedFunction, Serializa
 			throw new IllegalArgumentException("leftX >= rightX");
 		if (values.length < 2)
 			throw new IllegalArgumentException("points count less than 2");
-		double step = Math.abs(rightX - leftX + 1.) / values.length;
+		double step = Math.abs(rightX - leftX) / (values.length - 1);
 		for (int i = 0; i != values.length; ++i) {
 			addNodeToTail()._data = new FunctionPoint(leftX, values[i]);
 			leftX += step;

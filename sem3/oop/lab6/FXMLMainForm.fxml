@@ -31,15 +31,15 @@
                 <Menu fx:id="menuFile" mnemonicParsing="false" text="File">
                   <items>
                     <MenuItem mnemonicParsing="false" onAction="#newDocument" text="New" />
-                        <MenuItem mnemonicParsing="false" text="Open" />
-                        <MenuItem mnemonicParsing="false" text="Save" />
-                        <MenuItem mnemonicParsing="false" text="Save As..." />
+                        <MenuItem mnemonicParsing="false" onAction="#openFile" text="Open" />
+                        <MenuItem mnemonicParsing="false" onAction="#saveFile" text="Save" />
+                        <MenuItem mnemonicParsing="false" onAction="#saveAsFile" text="Save As..." />
                   </items>
                 </Menu>
                 <Menu fx:id="menuTabulate" mnemonicParsing="false" text="Tabulate">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="Load" />
-                        <MenuItem mnemonicParsing="false" text="Tabulate" />
+                    <MenuItem mnemonicParsing="false" onAction="#loadFunction" text="Load" />
+                        <MenuItem mnemonicParsing="false" onAction="#tabulateFunction" text="Tabulate" />
                   </items>
                 </Menu>
               </menus>

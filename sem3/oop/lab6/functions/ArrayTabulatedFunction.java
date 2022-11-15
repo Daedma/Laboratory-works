@@ -54,7 +54,7 @@ public class ArrayTabulatedFunction implements TabulatedFunction, Serializable {
 			throw new IllegalArgumentException("Points count less than 2");
 		_pointsCount = pointsCount;
 		_points = new FunctionPoint[pointsCount];
-		double step = Math.abs(rightX - leftX + 1.) / pointsCount;
+		double step = Math.abs(rightX - leftX) / (pointsCount - 1);
 		for (int i = 0; i != pointsCount; ++i) {
 			_points[i] = new FunctionPoint(leftX, 0);
 			leftX += step;
@@ -68,7 +68,7 @@ public class ArrayTabulatedFunction implements TabulatedFunction, Serializable {
 			throw new IllegalArgumentException("Points count less than 2");
 		_pointsCount = values.length;
 		_points = new FunctionPoint[_pointsCount];
-		double step = Math.abs(rightX - leftX + 1.) / _pointsCount;
+		double step = Math.abs(rightX - leftX) / (_pointsCount - 1);
 		for (int i = 0; i != _pointsCount; ++i) {
 			_points[i] = new FunctionPoint(leftX, values[i]);
 			leftX += step;

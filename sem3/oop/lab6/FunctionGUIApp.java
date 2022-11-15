@@ -29,7 +29,7 @@ public class FunctionGUIApp extends Application {
 		super.init();
 		if (tabFDoc == null) {
 			tabFDoc = new TabulatedFunctionDoc();
-			tabFDoc.newFunction(0, 100000, 100);
+			tabFDoc.newFunction(0, 100, 101);
 		}
 	}
 
