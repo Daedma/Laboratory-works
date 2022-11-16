@@ -21,9 +21,9 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 public class FXMLNewDocFormController implements Controller, Initializable {
-	private static final int OK = 0;
+	public static final int OK = 0;
 
-	private static final int CANCEL = 1;
+	public static final int CANCEL = 1;
 
 	private int lastButton = OK;
 
@@ -78,18 +78,18 @@ public class FXMLNewDocFormController implements Controller, Initializable {
 
 	@FXML
 	private void confirm(ActionEvent ae) {
-		try {
-			FunctionGUIApp.tabFDoc.newFunction(Double.parseDouble(edLeftBorder.getText()),
-					Double.parseDouble(edRightBorder.getText()), edPointsCount.getValue());
-			lastButton = OK;
-			stage.hide();
-		} catch (Exception e) {
-			Alert errorMessage = new Alert(AlertType.ERROR);
-			errorMessage.setHeaderText("Error");
-			errorMessage.setContentText(e.getLocalizedMessage());
-			errorMessage.setResizable(false);
-			errorMessage.showAndWait();
-		}
+		// try {
+		// FunctionGUIApp.tabFDoc.newFunction(Double.parseDouble(edLeftBorder.getText()),
+		// Double.parseDouble(edRightBorder.getText()), edPointsCount.getValue());
+		lastButton = OK;
+		stage.hide();
+		// } catch (Exception e) {
+		// Alert errorMessage = new Alert(AlertType.ERROR);
+		// errorMessage.setHeaderText("Error");
+		// errorMessage.setContentText(e.getLocalizedMessage());
+		// errorMessage.setResizable(false);
+		// errorMessage.showAndWait();
+		// }
 
 	}
 

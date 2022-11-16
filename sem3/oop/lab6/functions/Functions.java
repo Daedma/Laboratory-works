@@ -25,6 +25,10 @@ final public class Functions {
 		return new Power(f, new Const(power));
 	}
 
+	public static Function power(Function f, Function power) {
+		return new Power(f, power);
+	}
+
 	public static Function sum(Function f1, Function f2) {
 		return new Sum(f1, f2);
 	}

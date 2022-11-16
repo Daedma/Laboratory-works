@@ -20,7 +20,7 @@ public class FunctionGUIApp extends Application {
 		ctrl.setStage(stage);
 		tabFDoc.registerRedrawFunctionController(ctrl);
 		Scene scene = new Scene(root);
-		stage.setTitle("Впишите сюда заголовок главного окна");
+		stage.setTitle("Tabulated functions");
 		stage.setScene(scene);
 		stage.show();
 	}

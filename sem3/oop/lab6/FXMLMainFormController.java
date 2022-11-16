@@ -1,4 +1,6 @@
 
+import functions.Function;
+import functions.FunctionParser;
 import functions.FunctionPoint;
 import gui.Controller;
 import gui.FunctionPointT;
@@ -18,6 +20,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -34,7 +37,11 @@ import javafx.stage.Modality;
 import javafx.scene.*;
 
 import java.io.File;
+import java.io.FileReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -100,11 +107,12 @@ public class FXMLMainFormController implements Initializable, Controller {
 					if (result.isPresent()) {
 						if (result.get() == ButtonType.YES)
 							saveFile(null);
-						else
+						else if (result.get() == ButtonType.NO)
 							System.exit(0);
 					}
 				} else
 					System.exit(0);
+
 			}
 		});
 	}
@@ -157,12 +165,44 @@ public class FXMLMainFormController implements Initializable, Controller {
 
 	@FXML
 	private void loadFunction(ActionEvent av) {
-		// TODO: load function???
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Open function file");
+		fileChooser.getExtensionFilters().add(new ExtensionFilter("Function file", "*"));
+		fileChooser.setInitialDirectory(new File(".\\"));
+		File file = fileChooser.showOpenDialog(primaryStage);
+		if (file == null)
+			return;
+		try {
+			String content = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())), StandardCharsets.UTF_8);
+			Function function = FunctionParser.parse(content);
+			if (showDialog() == dialogController.OK)
+				FunctionGUIApp.tabFDoc.tabulateFunction(function, dialogController.getLeftDomainBorder(),
+						dialogController.getRightDomainBorder(), dialogController.getPointsCount());
+		} catch (Throwable e) {
+			showErrorMessage(e.getLocalizedMessage());
+		}
 	}
 
 	@FXML
 	private void tabulateFunction(ActionEvent av) {
-		// TODO: tabulate function???
+		TextInputDialog dialog = new TextInputDialog();
+		dialog.setTitle("Tabulate function");
+		dialog.setHeaderText("Tabulate function");
+		dialog.setContentText("Enter function to tabulate:");
+		dialog.setResizable(false);
+		// dialog.initModality(Modality.APPLICATION_MODAL);
+		// dialog.initOwner(primaryStage);
+		Optional<String> result = dialog.showAndWait();
+		if (result.isPresent()) {
+			try {
+				Function function = FunctionParser.parse(result.get());
+				if (showDialog() == dialogController.OK)
+					FunctionGUIApp.tabFDoc.tabulateFunction(function, dialogController.getLeftDomainBorder(),
+							dialogController.getRightDomainBorder(), dialogController.getPointsCount());
+			} catch (Throwable e) {
+				showErrorMessage(e.getLocalizedMessage());
+			}
+		}
 	}
 
 	@FXML
@@ -173,6 +213,13 @@ public class FXMLMainFormController implements Initializable, Controller {
 	@FXML
 	private void newDocument(ActionEvent av) {
 		showDialog();
+		try {
+			if (dialogController.getStatus() == dialogController.OK)
+				FunctionGUIApp.tabFDoc.newFunction(dialogController.getLeftDomainBorder(),
+						dialogController.getRightDomainBorder(), dialogController.getPointsCount());
+		} catch (Throwable e) {
+			showErrorMessage(e.getLocalizedMessage());
+		}
 	}
 
 	@FXML
@@ -251,14 +298,12 @@ public class FXMLMainFormController implements Initializable, Controller {
 				dialogStage.setScene(scene);
 				dialogStage.initModality(Modality.APPLICATION_MODAL);
 				dialogStage.initOwner(primaryStage);
-				dialogStage.showAndWait();
 			} catch (Throwable e) {
 				e.printStackTrace();
 				System.exit(-1);
 			}
-		} else {
-			dialogStage.showAndWait();
 		}
+		dialogStage.showAndWait();
 		return dialogController.getStatus();
 	}
 

@@ -46,6 +46,7 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
 
 	public void newFunction(double leftX, double rightX, int pointsCount) throws IllegalArgumentException {
 		_function = new ArrayTabulatedFunction(leftX, rightX, pointsCount);
+		_changed = true;
 		if (_contoller != null)
 			CallRedraw();
 	}
@@ -53,6 +54,8 @@ public class TabulatedFunctionDoc implements TabulatedFunction {
 	public void tabulateFunction(Function function, double leftX, double rightX, int pointsCount)
 			throws IllegalArgumentException {
 		_function = TabulatedFunctions.tabulate(function, leftX, rightX, pointsCount);
+		_changed = true;
+		CallRedraw();
 	}
 
 	public void saveFunctionAs(String fileName) throws IOException {
