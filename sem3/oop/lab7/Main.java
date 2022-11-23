@@ -10,9 +10,9 @@ import threads.Task;
 
 public class Main {
 	public static void main(String[] args) {
-		// nonThread();
+		nonThread();
 		try {
-			// simpleThread();
+			simpleThread();
 			complicatedThreads();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -38,8 +38,8 @@ public class Main {
 		task.setTaskCount(100);
 		SimpleGenerator simpleGenerator = new SimpleGenerator(task);
 		SimpleIntegrator simpleIntegrator = new SimpleIntegrator(task);
-		Thread generatorThread = new Thread(simpleGenerator);
-		Thread integratorThread = new Thread(simpleIntegrator);
+		Thread generatorThread = new Thread((Runnable) simpleGenerator);
+		Thread integratorThread = new Thread((Runnable) simpleIntegrator);
 		generatorThread.start();
 		integratorThread.start();
 		generatorThread.join();
@@ -52,10 +52,6 @@ public class Main {
 		Semaphore semaphore = new Semaphore(1, true);
 		Generator generator = new Generator(task, semaphore);
 		Integrator integrator = new Integrator(task, semaphore);
-		// Thread generatorThread = new Thread(generator);
-		// Thread integratorThread = new Thread(integrator);
-		// generatorThread.start();
-		// integratorThread.start();
 		generator.start();
 		integrator.start();
 		Thread.currentThread().sleep(50);

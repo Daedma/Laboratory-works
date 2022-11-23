@@ -14,6 +14,8 @@ public class Integrator extends Thread {
 
 	public void run() {
 		for (int i = 0; i != task.getTaskCount(); ++i) {
+			while (!task.isInitialize())
+				;
 			semaphore.acquireUninterruptibly();
 			double result = task.integrate();
 			System.out.printf("Result %f %f %f %f%n", task.getLeft(), task.getRight(), task.getStep(),
