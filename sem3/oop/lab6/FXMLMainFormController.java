@@ -105,9 +105,10 @@ public class FXMLMainFormController implements Initializable, Controller {
 					// alert.setContentText();
 					Optional<ButtonType> result = alert.showAndWait();
 					if (result.isPresent()) {
-						if (result.get() == ButtonType.YES)
+						System.out.println(result.get());
+						if (result.get().getButtonData().equals(ButtonType.YES.getButtonData()))
 							saveFile(null);
-						else if (result.get() == ButtonType.NO)
+						else if (result.get().getButtonData().equals(ButtonType.NO.getButtonData()))
 							System.exit(0);
 					}
 				} else
@@ -124,7 +125,7 @@ public class FXMLMainFormController implements Initializable, Controller {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open tabulated function document");
 		fileChooser.getExtensionFilters().add(new ExtensionFilter("JSON Document (*.json)", "*.json"));
-		fileChooser.setInitialDirectory(new File(".\\"));
+		fileChooser.setInitialDirectory(new File("."));
 		File file = fileChooser.showOpenDialog(primaryStage);
 		if (file == null)
 			return;
@@ -140,7 +141,7 @@ public class FXMLMainFormController implements Initializable, Controller {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Save tabulated function as...");
 		fileChooser.getExtensionFilters().add(new ExtensionFilter("JSON Document (*.json)", "*.json"));
-		fileChooser.setInitialDirectory(new File(".\\"));
+		fileChooser.setInitialDirectory(new File("."));
 		File file = fileChooser.showSaveDialog(primaryStage);
 		if (file == null)
 			return;
@@ -168,7 +169,7 @@ public class FXMLMainFormController implements Initializable, Controller {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open function file");
 		fileChooser.getExtensionFilters().add(new ExtensionFilter("Function file", "*"));
-		fileChooser.setInitialDirectory(new File(".\\"));
+		fileChooser.setInitialDirectory(new File("."));
 		File file = fileChooser.showOpenDialog(primaryStage);
 		if (file == null)
 			return;

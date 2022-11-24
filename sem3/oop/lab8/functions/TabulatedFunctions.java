@@ -12,6 +12,10 @@ import java.io.StreamTokenizer;
 import java.io.InputStream;
 import java.io.Writer;
 import java.lang.reflect.Array;
+
+import javax.lang.model.type.ArrayType;
+import javax.management.openmbean.SimpleType;
+
 import java.io.Reader;
 
 final public class TabulatedFunctions {
@@ -56,9 +60,10 @@ final public class TabulatedFunctions {
 			double rightX, double[] values)
 			throws IllegalArgumentException {
 		try {
-			return fClass.getDeclaredConstructor(Double.TYPE, Double.TYPE, Double.TYPE.arrayType()).newInstance(
-					leftX,
-					rightX, values);
+			return fClass.getDeclaredConstructor(Double.TYPE, Double.TYPE, double[].class)
+					.newInstance(
+							leftX,
+							rightX, values);
 		} catch (Exception e) {
 			throw new IllegalArgumentException(e.getLocalizedMessage(), e);
 		}
@@ -67,7 +72,8 @@ final public class TabulatedFunctions {
 	public static TabulatedFunction createTabulatedFunction(Class<? extends TabulatedFunction> fClass,
 			FunctionPoint[] values) throws IllegalArgumentException {
 		try {
-			return fClass.getDeclaredConstructor(FunctionPoint.class.arrayType()).newInstance((Object) values);
+			return fClass.getDeclaredConstructor(FunctionPoint[].class)
+					.newInstance((Object) values);
 		} catch (Exception e) {
 			throw new IllegalArgumentException(e.getLocalizedMessage(), e);
 		}

@@ -1,2 +1,2 @@
 #!/bin/sh
-java --module-path "~/java-libs/openjfx-19:~/java-libs" --add-modules ALL-MODULE-PATH FunctionGUIApp
+java --module-path "/usr/lib/jvm/openjfx-19-sdk:/home/damir/java-libs" --add-modules ALL-MODULE-PATH FunctionGUIApp

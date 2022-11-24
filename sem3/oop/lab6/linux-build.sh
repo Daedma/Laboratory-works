@@ -1,2 +1,2 @@
 #!/bin/sh
-javac --module-path "/home/java-libs/openjfx-19/lib" --add-modules ALL-MODULE-PATH *.java gui/*.java
+javac --module-path "/usr/lib/jvm/openjfx-19-sdk:/home/damir/java-libs" --add-modules ALL-MODULE-PATH *.java gui/*.java
