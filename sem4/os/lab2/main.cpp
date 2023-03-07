@@ -40,6 +40,7 @@ private:
 
 	static void init();
 
+	static mode_t get_mode(const std::vector<std::string_view>& args);
 private:
 
 	static bool is_initialized;
@@ -135,4 +136,11 @@ bool file_operations::info(const std::vector<std::string_view>& args)
 		<< "Time of last modification (in seconds): " << file_info.st_mtim.tv_sec << '\n'
 		<< "Time of last status change (in seconds): " << file_info.st_ctim.tv_sec << std::endl;
 	return true;
+}
+
+bool file_operations::mode(const std::vector<std::string_view>& args)
+{
+	const static std::map < std::string, mode_t> flags = { { "ISUID", S_ISUID },
+		{ "ISGID", S_ISGID }, { "ISVTX", S_ISVTX }, { "IRUSR", S_IRUSR }, { "IWUSR", S_IWUSR }, { "IXUSR", S_IXUSR }, { "IRGRP", S_IRGRP },
+		{ "IWGRP", S_IWGRP }, { "IXGRP", S_IXGRP }, { "IROTH", S_IROTH }, { "IWOTH", S_IWOTH }, { "IXOTH", S_IXOTH } };
 }
