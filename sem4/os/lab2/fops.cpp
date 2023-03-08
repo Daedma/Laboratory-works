@@ -18,6 +18,8 @@ class file_operations
 public:
 	using command_t = bool(const std::vector<std::string_view>);
 
+	static constexpr int FAILURE_CODE = -1;
+
 	file_operations() = delete;
 
 	static int execute(std::string_view command, const std::vector<std::string_view>& args);
@@ -36,24 +38,21 @@ private:
 	static bool mode(const std::vector<std::string_view>& args);
 
 	static bool help(const std::vector<std::string_view>& args);
-private:
-
-	static void init();
 
 private:
-
-	static bool is_initialized;
 
 	const static std::map<std::string_view, std::function<command_t>> commands;
 };
-
-bool file_operations::is_initialized = false;
 
 int main(int argc, char const* argv[])
 {
 	if (argc > 1)
 	{
-		return	file_operations::execute(argv[1], { argv + 1, argv + argc });
+		if (file_operations::execute(argv[1], { argv + 2, argv + argc }) == file_operations::FAILURE_CODE)
+		{
+			std::cerr << "Operation failed.\n";
+			return EXIT_FAILURE;
+		}
 	}
 	else
 	{
@@ -64,9 +63,13 @@ int main(int argc, char const* argv[])
 			std::cout << ": ";
 			std::getline(std::cin, command);
 		} while (command.empty());
-		return file_operations::execute(command);
+		if (file_operations::execute(command) == file_operations::FAILURE_CODE)
+		{
+			std::cerr << "Operation failed.\n";
+			return EXIT_FAILURE;
+		};
 	}
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 bool file_operations::copy(const std::vector<std::string_view>& args)
@@ -79,19 +82,38 @@ bool file_operations::copy(const std::vector<std::string_view>& args)
 	const char* dest_path = args[1].data();
 
 	int source_desc = open(source_path, O_RDONLY);
-	if (source_desc == -1) return false;
-	int dest_desc = open(dest_path, O_WRONLY);
-	if (dest_desc == -1) return false;
+	if (source_desc == -1)
+	{
+		std::cerr << "Failed to open " << source_path << ".\n";
+		return false;
+	}
+	int dest_desc = open(dest_path, O_RDWR | O_CREAT | O_TRUNC, 0777);
+	if (dest_desc == -1)
+	{
+		std::cerr << "Failed to open/create " << dest_path << ".\n";
+		return false;
+	}
 
-	ftruncate(dest_desc, 0);
+	// if (ftruncate(dest_desc, 0) == -1)
+	// {
+	// 	std::cerr << "Failed to clear " << dest_path << ".\n";
+	// 	return false;
+	// }
 
 	char* buffer = new char[BUFFER_SIZE];
 	size_t last_read = 0;
 	do
 	{
 		last_read = read(source_desc, buffer, BUFFER_SIZE);
-		write(dest_desc, buffer, last_read);
-	} while (last_read != BUFFER_SIZE);
+		if (write(dest_desc, buffer, last_read) == 0)
+		{
+			std::cerr << "Error writing to " << dest_path << ".\n";
+			close(source_desc);
+			close(dest_desc);
+			delete[] buffer;
+			return false;
+		};
+	} while (last_read == BUFFER_SIZE);
 	fsync(dest_desc);
 	close(source_desc);
 	close(dest_desc);
