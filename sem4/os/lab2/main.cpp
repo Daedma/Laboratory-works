@@ -4,6 +4,8 @@
 #include <unistd.h>
 
 // Other
+#include <sstream>
+#include <numeric>
 #include <map>
 #include <iterator>
 #include <iostream>
@@ -20,9 +22,7 @@ public:
 
 	static int execute(std::string_view command, const std::vector<std::string_view>& args);
 
-	static int execute(std::string_view args);
-
-	static const std::string& last_error();
+	static int execute(const std::string& args);
 
 	static const std::string& actions();
 
@@ -40,17 +40,14 @@ private:
 
 	static void init();
 
-	static mode_t get_mode(const std::vector<std::string_view>& args);
 private:
 
 	static bool is_initialized;
 
-	static std::map<std::string_view, std::function<command_t>> commands;
+	const static std::map<std::string_view, std::function<command_t>> commands;
 };
 
 bool file_operations::is_initialized = false;
-
-std::map<std::string_view, std::function<file_operations::command_t>> file_operations::commands{};
 
 int main(int argc, char const* argv[])
 {
@@ -77,7 +74,6 @@ bool file_operations::copy(const std::vector<std::string_view>& args)
 	static constexpr int BUFFER_SIZE = 256;
 
 	if (args.size() < 2) return false;
-	if (!is_initialized) init();
 
 	const char* source_path = args[0].data();
 	const char* dest_path = args[1].data();
@@ -107,7 +103,6 @@ bool file_operations::copy(const std::vector<std::string_view>& args)
 bool file_operations::move(const std::vector<std::string_view>& args)
 {
 	if (args.size() < 2) return false;
-	if (!is_initialized) init();
 	const char* old_path = args[0].data();
 	const char* new_path = args[1].data();
 	return rename(old_path, new_path) != -1;
@@ -116,7 +111,6 @@ bool file_operations::move(const std::vector<std::string_view>& args)
 bool file_operations::info(const std::vector<std::string_view>& args)
 {
 	if (args.size() < 1) return false;
-	if (!is_initialized) init();
 	const char* file_name = args[0].data();
 	bool as_link = args.size() > 1 && args[1] == "-l";
 	struct stat file_info;
@@ -135,12 +129,76 @@ bool file_operations::info(const std::vector<std::string_view>& args)
 		<< "Time of last access (in seconds): " << file_info.st_atim.tv_sec << '\n'
 		<< "Time of last modification (in seconds): " << file_info.st_mtim.tv_sec << '\n'
 		<< "Time of last status change (in seconds): " << file_info.st_ctim.tv_sec << std::endl;
-	return true;
+	return true;if (ret == -1) return false;
 }
 
 bool file_operations::mode(const std::vector<std::string_view>& args)
 {
-	const static std::map < std::string, mode_t> flags = { { "ISUID", S_ISUID },
+	const static std::map<std::string_view, mode_t> flags_map = { { "ISUID", S_ISUID },
 		{ "ISGID", S_ISGID }, { "ISVTX", S_ISVTX }, { "IRUSR", S_IRUSR }, { "IWUSR", S_IWUSR }, { "IXUSR", S_IXUSR }, { "IRGRP", S_IRGRP },
 		{ "IWGRP", S_IWGRP }, { "IXGRP", S_IXGRP }, { "IROTH", S_IROTH }, { "IWOTH", S_IWOTH }, { "IXOTH", S_IXOTH } };
+	if (args.size() < 1) return false;
+	const char* file_name = args[0].data();
+	mode_t flags = 0;
+	for (const auto& i : args)
+	{
+		try
+		{
+			flags |= flags_map.at(i);
+		}
+		catch (...)
+		{
+			return false;
+		}
+	}
+	int ret = chmod(file_name, flags);
+	return ret != -1;
 }
+
+bool file_operations::help(const std::vector<std::string_view>& args)
+{
+	std::cout <<
+		"fops                           - file operations.\n"
+		"fops [<command>] [<args>...]   - run <command> with <args>.\n"
+		"List of available commands:\n"
+		<< actions();
+	return true;
+}
+
+const std::string& file_operations::actions()
+{
+	static const std::string& ops =
+		"copy <source>   <destination>  - copy data from <source> file to <destination>\n"
+		"move <old_path> <new_path>     - move file from <old_path> to <new_path>\n"
+		"info <file>                    - print information about <file>\n"
+		"mode <file>     [<flags>...]   - set mode of <file> with <flags>\n";
+	return ops;
+}
+
+int file_operations::execute(std::string_view command, const std::vector<std::string_view>& args)
+{
+	try
+	{
+		bool is_success = commands.at(command)(args);
+		return is_success ? 0 : -1;
+	}
+	catch (...)
+	{
+		std::cerr << "Unexpected command.\n";
+		return -1;
+	}
+}
+
+int file_operations::execute(const std::string& args)
+{
+	std::istringstream iss{args};
+	std::vector<std::string> split_args{std::istream_iterator<std::string>{iss}, {}};
+	if (split_args.empty())  return false;
+	return execute(split_args[0], { split_args.cbegin() + 1, split_args.cend() });
+}
+
+const std::map<std::string_view, std::function<file_operations::command_t>> file_operations::commands{
+	{"copy", file_operations::copy}, { "move", file_operations::move },
+	{ "info", file_operations::info }, { "mode", file_operations::mode },
+	{ "--help", file_operations::help }, { "help", file_operations::help }
+};
