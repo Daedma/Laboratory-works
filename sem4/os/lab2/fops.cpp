@@ -94,12 +94,6 @@ bool file_operations::copy(const std::vector<std::string_view>& args)
 		return false;
 	}
 
-	// if (ftruncate(dest_desc, 0) == -1)
-	// {
-	// 	std::cerr << "Failed to clear " << dest_path << ".\n";
-	// 	return false;
-	// }
-
 	char* buffer = new char[BUFFER_SIZE];
 	size_t last_read = 0;
 	do
@@ -140,7 +134,7 @@ bool file_operations::info(const std::vector<std::string_view>& args)
 	if (ret == -1) return false;
 	std::cout << "ID of device containing file: " << file_info.st_dev << '\n'
 		<< "Inode number: " << file_info.st_ino << '\n'
-		<< "File type and mode: " << file_info.st_mode << '\n'
+		<< "File type and mode (oct): " << std::oct << file_info.st_mode << std::dec << '\n'
 		<< "Number of hard links: " << file_info.st_nlink << '\n'
 		<< "User ID of owner: " << file_info.st_uid << '\n'
 		<< "Group ID of owner: " << file_info.st_gid << '\n'
@@ -156,25 +150,21 @@ bool file_operations::info(const std::vector<std::string_view>& args)
 
 bool file_operations::mode(const std::vector<std::string_view>& args)
 {
-	const static std::map<std::string_view, mode_t> flags_map = { { "ISUID", S_ISUID },
-		{ "ISGID", S_ISGID }, { "ISVTX", S_ISVTX }, { "IRUSR", S_IRUSR }, { "IWUSR", S_IWUSR }, { "IXUSR", S_IXUSR }, { "IRGRP", S_IRGRP },
-		{ "IWGRP", S_IWGRP }, { "IXGRP", S_IXGRP }, { "IROTH", S_IROTH }, { "IWOTH", S_IWOTH }, { "IXOTH", S_IXOTH } };
-	if (args.size() < 1) return false;
+	// const static std::map<std::string_view, mode_t> flags_map = { { "ISUID", S_ISUID },
+	// 	{ "ISGID", S_ISGID }, { "ISVTX", S_ISVTX }, { "IRUSR", S_IRUSR }, { "IWUSR", S_IWUSR }, { "IXUSR", S_IXUSR }, { "IRGRP", S_IRGRP },
+	// 	{ "IWGRP", S_IWGRP }, { "IXGRP", S_IXGRP }, { "IROTH", S_IROTH }, { "IWOTH", S_IWOTH }, { "IXOTH", S_IXOTH } };
+	if (args.size() < 2) return false;
 	const char* file_name = args[0].data();
-	mode_t flags = 0;
-	for (const auto& i : args)
+	try
 	{
-		try
-		{
-			flags |= flags_map.at(i);
-		}
-		catch (...)
-		{
-			return false;
-		}
+		mode_t flags = std::stoul(std::string{ args[1] }, 0, 8);
+		int ret = chmod(file_name, flags);
+		return ret != -1;
 	}
-	int ret = chmod(file_name, flags);
-	return ret != -1;
+	catch (...)
+	{
+		return false;
+	}
 }
 
 bool file_operations::help(const std::vector<std::string_view>& args)
@@ -193,7 +183,7 @@ const std::string& file_operations::actions()
 		"copy <source>   <destination>  - copy data from <source> file to <destination>\n"
 		"move <old_path> <new_path>     - move file from <old_path> to <new_path>\n"
 		"info <file>                    - print information about <file>\n"
-		"mode <file>     [<flags>...]   - set mode of <file> with <flags>\n";
+		"mode <file>     <flags>        - set mode of <file>. <flags> is the oct number\n";
 	return ops;
 }
 
