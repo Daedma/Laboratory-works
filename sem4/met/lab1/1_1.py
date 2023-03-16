@@ -23,7 +23,7 @@ print("A*C = ", A*C)
 # 3
 print("3 задание: ")
 A = np.array([[2, 1, -3], [0, 1, -1], [0, -2, 2]], int)
-np.linalg.eig(A)
+print(np.linalg.eig(A))
 
 # 4
 print("4 задание: ")

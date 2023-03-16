@@ -3,9 +3,9 @@
 int main()
 {
 	int result;
-	int a = 12; // инициализируйте значения a, c, d заранее
-	int c = 12;
-	int d = 12;
+	int a = 1; // инициализируйте значения a, c, d заранее
+	int c = 1;
+	int d = 1;
 
 	asm(
 		"movl %[c], %%eax;" // помещаем с в eax для деления
@@ -15,7 +15,7 @@ int main()
 		"imul %%ecx, %%ebx;" // умножаем d на 28 и помещаем результат в ebx
 		"addl %%ebx, %%eax;" // складываем c/4 и d*28, записываем в eax
 		"cdq;"
-		"push %%edx;" // помещаем в стек делимое
+		"push %%rax;" // помещаем в стек делимое
 		"movl %[c], %%ecx;" // помещаем с в ecx
 		"negl %%ecx;" // -с
 		"decl %%ecx;" // -c - 1
@@ -23,12 +23,12 @@ int main()
 		"idivl %[d];" //
 		"subl %%ecx, %%eax;" //
 		"movl %%eax, %%ebx;"
-		"pop %%eax;"
+		"pop %%rax;"
 		"idiv %%ebx;"
 		"movl %%eax, %[r];"
 		: [r] "=r" (result)
 		: [a] "r" (a), [c] "r" (c), [d] "r" (d)
-		: "%eax", "%ecx", "%ebx"
+		: "%eax", "%ecx", "%ebx", "%rax"
 	);
 	std::cout << result << std::endl;
 	std::cout << (c / 4 + 28 * d) / (a / d - c - 1) << std::endl;

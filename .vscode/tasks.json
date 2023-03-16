@@ -9,7 +9,7 @@
 				"${fileDirname}/*.cpp",
 				"-o",
 				"${fileDirname}/${fileBasenameNoExtension}",
-				"-O3",
+				"-O0",
 				"-std=c++17",
 				"-pedantic"
 			],
