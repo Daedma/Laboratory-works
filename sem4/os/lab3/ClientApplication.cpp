@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <fstream>
 #include <iostream>
+#include "CalcParameters.hpp"
 
 class ClientApplication
 {
@@ -10,20 +11,13 @@ class ClientApplication
 	constexpr static char* DEFAULT_OUTPUT_FILE = "output.txt";
 
 public:
-	ClientApplication();
-
 	int run(int argc, const char* const* argv);
 
-	struct CalcParameters
-	{
-		double x;
-		double accuracy;
-	};
 
 private:
-	double input(const std::string& filename);
+	CalcParameters input(const std::string& filename);
 
-	void send(double accuracy);
+	void send(const CalcParameters& params);
 
 	CalcParameters receive();
 
@@ -40,42 +34,43 @@ int main(int argc, char const* argv[])
 int ClientApplication::run(int argc, const char* const* argv)
 {
 	std::string infile = argc > 1 ? argv[1] : DEFAULT_INPUT_FILE;
-	double in_accuracy = input(infile);
-	send(in_accuracy);
+	CalcParameters in_params = input(infile);
+	send(in_params);
 	CalcParameters result = receive();
 	std::string outfile = argc > 2 ? argv[2] : DEFAULT_OUTPUT_FILE;
 	output(outfile, result);
+	return EXIT_SUCCESS;
 }
 
 
 
-double ClientApplication::input(const std::string& filename)
+CalcParameters ClientApplication::input(const std::string& filename)
 {
-	double accuracy;
+	CalcParameters params;
 	std::ifstream ifs;
 	ifs.exceptions();
 	ifs.open(filename);
-	if (ifs >> accuracy)
-		return accuracy;
-	return NAN;
+	if (ifs >> params.x >> params.accuracy)
+		return params;
+	return { NAN, NAN };
 }
 
-void ClientApplication::send(double accuracy)
+void ClientApplication::send(const CalcParameters& params)
 {
-	std::cout << accuracy;
+	std::cout << params.x << ' ' << params.accuracy;
 }
 
-ClientApplication::CalcParameters ClientApplication::receive()
+CalcParameters ClientApplication::receive()
 {
 	CalcParameters params;
 	std::cin >> params.x >> params.accuracy;
 	return params;
 }
 
-void ClientApplication::output(const std::string& filename, const ClientApplication::CalcParameters& params)
+void output(const std::string& filename, const CalcParameters& params)
 {
 	std::ofstream ofs;
 	ofs.exceptions();
 	ofs.open(filename);
-	ofs << "X: " << params.x << "\nAccuracy: " << params.accuracy;
+	ofs << "Summ: " << params.x << "\nAccuracy: " << params.accuracy;
 }
