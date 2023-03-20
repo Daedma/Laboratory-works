@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/damir/projects/lab_works/sem4/os/lab3/CalcParameters.hpp
+
+/home/damir/projects/lab_works/sem4/os/lab3/ServerApplication.cpp
+CalcParameters.hpp
+/home/damir/projects/lab_works/sem4/os/lab3/CalcParameters.hpp
+iostream
+-
+cmath
+-
+signal.h
+-
+

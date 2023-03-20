@@ -1,10 +1,16 @@
 #include "CalcParameters.hpp"
 #include <iostream>
 #include <cmath>
+#include <signal.h>
 
 class ServerApplication
 {
+	int stdin_desc;
+	int stdout_desc;
+
 public:
+	ServerApplication();
+
 	int run(int argc, const char* const* argv);
 
 private:
@@ -18,33 +24,67 @@ private:
 
 int main(int argc, char const* argv[])
 {
-	ServerApplication app;
-	return app.run(argc, argv);
+	try
+	{
+		ServerApplication app;
+		return app.run(argc, argv);
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << "Server crashed with an error: " << e.what() << std::endl;
+	}
 }
 
 int ServerApplication::run(int argc, const char* const* argv)
 {
-	CalcParameters accuracy = receive();
-	CalcParameters result = calc(accuracy);
+	std::clog << "Server start." << std::endl;
+	std::clog << "Server is waiting for data from the client..." << std::endl;
+	CalcParameters params = receive();
+	std::clog << "Server get data from client.\nX: " << params.x << "\nAccuracy: " << params.accuracy << std::endl;
+	std::clog << "Server start calculation...\n";
+	CalcParameters result = calc(params);
+	std::clog << "Server has finished computing.\nSum: " << params.x << "\nAccuracy: " << params.accuracy << std::endl;
+	std::clog << "Send results to client..." << std::endl;
 	send(result);
+	std::clog << "Data sent succesfully. Server exist." << std::endl;
 	return EXIT_SUCCESS;
 }
 
 CalcParameters ServerApplication::receive()
 {
+	sigset_t sigset;
+	sigemptyset(&sigset);
+	sigaddset(&sigset, SIGUSR1);
+	sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+	int sig;
+	sigwait(&sigset, &sig);
+	fdopen(stdin_desc, "r");
 	CalcParameters params;
 	std::cin >> params.x >> params.accuracy;
+	fclose(stdin);
 	return params;
 }
 
-CalcParameters ServerApplication::calc(const CalcParameters& result)
+CalcParameters ServerApplication::calc(const CalcParameters& params)
 {
-
-	return CalcParameters();
+	CalcParameters result{ 0., INFINITY };
+	for (size_t i = 0; result.accuracy > params.accuracy; ++i)
+	{
+		double cur = sin(pow(params.x, i)) / gamma(i + 2);
+		result.accuracy = abs(cur);
+		if (result.accuracy <= params.accuracy)
+			result.x += cur;
+	}
+	return result;
 }
 
 void ServerApplication::send(const CalcParameters& result)
 {
+	fdopen(stdout_desc, "w");
 	std::cout << result.x << ' ' << result.accuracy;
+	fclose(stdout);
+	signal(SIGUSR2, SIG_IGN);
+	kill(0, SIGUSR2);
 }
 
+ServerApplication::ServerApplication(): stdin_desc(fileno(stdin)), stdout_desc(fileno(stdout)) {}

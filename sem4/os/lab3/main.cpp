@@ -17,16 +17,20 @@ int main(int argc, char const* argv[])
 	{
 		close(pipefd2[0]);
 		dup2(pipefd2[1], STDOUT_FILENO);
+		// fclose(stdout);
 		close(pipefd1[1]);
 		dup2(pipefd1[0], STDIN_FILENO);
+		fclose(stdin);
 		execl("client", NULL);
 	}
 	else if (c_pid == 0) // Обработка дочернего процесса
 	{
 		close(pipefd1[0]);
 		dup2(pipefd1[1], STDOUT_FILENO);
+		// fclose(stdout);
 		close(pipefd2[1]);
 		dup2(pipefd2[0], STDIN_FILENO);
+		fclose(stdin);
 		execl("server", NULL);
 	}
 }
