@@ -25,4 +25,6 @@ iostream
 -
 CalcParameters.hpp
 /home/damir/projects/lab_works/sem4/os/lab3/CalcParameters.hpp
+unistd.h
+-
 

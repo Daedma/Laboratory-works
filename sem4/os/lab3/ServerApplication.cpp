@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cmath>
 #include <signal.h>
+#include <unistd.h>
 
 class ServerApplication
 {
@@ -38,6 +39,7 @@ int main(int argc, char const* argv[])
 int ServerApplication::run(int argc, const char* const* argv)
 {
 	std::clog << "Server start." << std::endl;
+	std::clog << "Server pid: " << getpid() << std::endl;
 	std::clog << "Server is waiting for data from the client..." << std::endl;
 	CalcParameters params = receive();
 	std::clog << "Server get data from client.\nX: " << params.x << "\nAccuracy: " << params.accuracy << std::endl;
@@ -55,12 +57,13 @@ CalcParameters ServerApplication::receive()
 	sigset_t sigset;
 	sigemptyset(&sigset);
 	sigaddset(&sigset, SIGUSR1);
-	sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+	sigprocmask(SIG_BLOCK, &sigset, NULL);
 	int sig;
 	sigwait(&sigset, &sig);
 	fdopen(stdin_desc, "r");
 	CalcParameters params;
 	std::cin >> params.x >> params.accuracy;
+	// fdopen(stdout_desc, "w");
 	fclose(stdin);
 	return params;
 }
@@ -82,9 +85,10 @@ void ServerApplication::send(const CalcParameters& result)
 {
 	fdopen(stdout_desc, "w");
 	std::cout << result.x << ' ' << result.accuracy;
+	std::cout.flush();
 	fclose(stdout);
 	signal(SIGUSR2, SIG_IGN);
-	kill(0, SIGUSR2);
+	kill(getppid(), SIGUSR2);
 }
 
 ServerApplication::ServerApplication(): stdin_desc(fileno(stdin)), stdout_desc(fileno(stdout)) {}
