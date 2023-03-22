@@ -127,6 +127,7 @@ void ClientApplication::output(const std::string& filename, const CalcParameters
 	std::ofstream ofs;
 	ofs.exceptions();
 	ofs.open(filename);
+	ofs.precision(17);
 	ofs << "Summ: " << params.x << "\nAccuracy: " << params.accuracy;
 }
 

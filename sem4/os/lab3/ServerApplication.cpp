@@ -73,12 +73,17 @@ CalcParameters ServerApplication::receive()
 CalcParameters ServerApplication::calc(const CalcParameters& params)
 {
 	CalcParameters result{ 0., INFINITY };
+	double last = std::sin(std::pow(params.x, 1)) / std::tgamma(3);
 	for (size_t i = 0; result.accuracy > params.accuracy; ++i)
 	{
-		double cur = sin(pow(params.x, i)) / std::tgamma(i + 2);
-		result.accuracy = abs(cur);
+		double cur = std::sin(std::pow(params.x, i)) / std::tgamma(i + 2);
+		result.accuracy = std::abs(std::tgamma(i + 3) / std::tgamma(i + 2));
 		if (result.accuracy > params.accuracy)
+		{
 			result.x += cur;
+			last = cur;
+		}
+		std::cerr << "Iteration#" << i << std::endl;
 	}
 	return result;
 }
