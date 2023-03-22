@@ -3,6 +3,7 @@
 #include <cmath>
 #include <signal.h>
 #include <unistd.h>
+#include <sstream>
 
 class ServerApplication
 {
@@ -45,7 +46,7 @@ int ServerApplication::run(int argc, const char* const* argv)
 	std::clog << "Server get data from client.\nX: " << params.x << "\nAccuracy: " << params.accuracy << std::endl;
 	std::clog << "Server start calculation...\n";
 	CalcParameters result = calc(params);
-	std::clog << "Server has finished computing.\nSum: " << params.x << "\nAccuracy: " << params.accuracy << std::endl;
+	std::clog << "Server has finished computing.\nSum: " << result.x << "\nAccuracy: " << result.accuracy << std::endl;
 	std::clog << "Send results to client..." << std::endl;
 	send(result);
 	std::clog << "Data sent succesfully. Server exist." << std::endl;
@@ -60,9 +61,10 @@ CalcParameters ServerApplication::receive()
 	sigprocmask(SIG_BLOCK, &sigset, NULL);
 	int sig;
 	sigwait(&sigset, &sig);
-	fdopen(stdin_desc, "r");
+	fdopen(STDIN_FILENO, "r");
 	CalcParameters params;
-	std::cin >> params.x >> params.accuracy;
+	// std::cin >> params.x >> params.accuracy;
+	std::cerr << "Server read from pipe: " << read(STDIN_FILENO, &params, sizeof(CalcParameters)) << std::endl;
 	// fdopen(stdout_desc, "w");
 	fclose(stdin);
 	return params;
@@ -73,9 +75,9 @@ CalcParameters ServerApplication::calc(const CalcParameters& params)
 	CalcParameters result{ 0., INFINITY };
 	for (size_t i = 0; result.accuracy > params.accuracy; ++i)
 	{
-		double cur = sin(pow(params.x, i)) / gamma(i + 2);
+		double cur = sin(pow(params.x, i)) / std::tgamma(i + 2);
 		result.accuracy = abs(cur);
-		if (result.accuracy <= params.accuracy)
+		if (result.accuracy > params.accuracy)
 			result.x += cur;
 	}
 	return result;
@@ -84,8 +86,11 @@ CalcParameters ServerApplication::calc(const CalcParameters& params)
 void ServerApplication::send(const CalcParameters& result)
 {
 	fdopen(stdout_desc, "w");
-	std::cout << result.x << ' ' << result.accuracy;
-	std::cout.flush();
+	// std::cout << result.x << ' ' << result.accuracy;
+	// std::cout.flush();
+	std::cerr << "Server write: " << write(stdout_desc, &result, sizeof(CalcParameters)) << std::endl;
+	// fflush(stdout);
+	fsync(STDOUT_FILENO);
 	fclose(stdout);
 	signal(SIGUSR2, SIG_IGN);
 	kill(getppid(), SIGUSR2);

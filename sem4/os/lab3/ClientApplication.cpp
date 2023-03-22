@@ -7,6 +7,8 @@
 #include <iostream>
 #include "CalcParameters.hpp"
 #include <unistd.h>
+#include <sstream>
+#include <sys/wait.h>
 
 class ClientApplication
 {
@@ -50,7 +52,6 @@ int main(int argc, char const* argv[])
 
 int ClientApplication::run(int argc, const char* const* argv)
 {
-	std::cerr << argv[0] << std::endl;
 	server_pid = to_pid(argv[0]);
 	std::clog << "Client start." << std::endl;
 	std::clog << "Client pid: " << getpid() << std::endl;
@@ -85,17 +86,23 @@ CalcParameters ClientApplication::input(const std::string& filename)
 
 void ClientApplication::send(const CalcParameters& params)
 {
-	fdopen(stdout_desc, "w");
-	std::cout << params.x << " " << params.accuracy;
-	std::cout.flush();
+	// FILE* fd = fdopen(STDOUT_FILENO, "w");
+	// std::cerr << "fd == nullptr; " << (fd == nullptr) << '\n';
+	// std::cout << params.x << " " << params.accuracy;
+	// std::cout.flush();
+	std::cerr << "Client write: " << write(STDOUT_FILENO, &params, sizeof(CalcParameters)) << " bytes\n";
+	std::cerr << "EBADF: " << (errno & EBADF) << '\n'
+		<< "EINVAL: " << (errno & EINVAL) << '\n'
+		<< "EFAULT: " << (errno & EFAULT) << '\n'
+		<< "EPIPE: " << (errno & EPIPE) << '\n'
+		<< "EAGAIN: " << (errno & EAGAIN) << '\n'
+		<< "EIO: " << (errno & EAGAIN) << '\n';
+	fsync(STDOUT_FILENO);
+	// fflush(stdout);
 	fclose(stdout);
-	fdopen(stdin_desc, "r");
-	double a = 0, b = 0;
-	std::cin >> a >> b;
-	std::cerr << a << " " << b << std::endl;
-	exit(0);
 	// fclose(stdin);
 	signal(SIGUSR1, SIG_IGN);
+	// waitpid(-1, NULL, 0);
 	kill(server_pid, SIGUSR1);
 }
 
@@ -107,9 +114,10 @@ CalcParameters ClientApplication::receive()
 	sigprocmask(SIG_BLOCK, &sigset, NULL);
 	int tmp;
 	sigwait(&sigset, &tmp);
-	fdopen(stdin_desc, "r");
+	fdopen(STDIN_FILENO, "r");
 	CalcParameters params;
-	std::cin >> params.x >> params.accuracy;
+	// std::cin >> params.x >> params.accuracy;
+	std::cerr << "Client read: " << read(STDIN_FILENO, &params, sizeof(CalcParameters)) << std::endl;
 	fclose(stdin);
 	return params;
 }
