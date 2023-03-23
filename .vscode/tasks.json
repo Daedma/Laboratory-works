@@ -3,6 +3,34 @@
 	"tasks": [
 		{
 			"type": "cppbuild",
+			"label": "Linux g++ (SFML)",
+			"command": "/usr/bin/g++",
+			"args": [
+				"${fileDirname}/*.cpp",
+				"-o",
+				"${fileDirname}/${fileBasenameNoExtension}",
+				"-O0",
+				"-std=c++17",
+				"-pedantic",
+				"-I",
+				"/home/damir/cpp-libs/SFML-2.5.1-sources/SFML-2.5.1/include",
+				"-L",
+				"/home/damir/cpp-libs/SFML-2.5.1-sources/SFML-2.5.1/build/gcc/lib",
+				"-lsfml-system",
+				"-lsfml-window",
+				"-lsfml-graphics"
+			],
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "компилятор: /usr/bin/g++"
+		},
+		{
+			"type": "cppbuild",
 			"label": "Linux g++",
 			"command": "/usr/bin/g++",
 			"args": [
