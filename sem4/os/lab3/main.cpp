@@ -7,13 +7,27 @@
 char* to_string(pid_t rhs)
 {
 	std::string tmp = std::to_string(rhs);
-	char* res = new char[tmp.size() + 1];
+	char* res = new char[tmp.size() + 1]; // Утечка памяти
 	strcpy(res, tmp.c_str());
 	return res;
 }
 
+void print_info(const char* progname)
+{
+	std::cout <<
+		progname << " - calculates the sum of a series with a given precision.\n"
+		"Usage: " << progname << " [<input_file=input.txt> [<output_file=output.txt>]].\n"
+		"In <input_file> - X and precision.\n"
+		"In <output_file> - sum and precision.\n";
+}
+
 int main(int argc, char const* argv[])
 {
+	if (argc > 1 && strcmp(argv[1], "--help") == 0)
+	{
+		print_info(argv[0]);
+		return EXIT_SUCCESS;
+	}
 	int pipefd1[2]; // Server to client
 	pipe(pipefd1);
 	int pipefd2[2]; // Client to server

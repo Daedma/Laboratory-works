@@ -7,9 +7,6 @@
 
 class ServerApplication
 {
-	int stdin_desc;
-	int stdout_desc;
-
 public:
 	ServerApplication();
 
@@ -34,6 +31,7 @@ int main(int argc, char const* argv[])
 	catch (const std::exception& e)
 	{
 		std::cerr << "Server crashed with an error: " << e.what() << std::endl;
+		return EXIT_FAILURE;
 	}
 }
 
@@ -63,9 +61,7 @@ CalcParameters ServerApplication::receive()
 	sigwait(&sigset, &sig);
 	fdopen(STDIN_FILENO, "r");
 	CalcParameters params;
-	// std::cin >> params.x >> params.accuracy;
-	std::cerr << "Server read from pipe: " << read(STDIN_FILENO, &params, sizeof(CalcParameters)) << std::endl;
-	// fdopen(stdout_desc, "w");
+	read(STDIN_FILENO, &params, sizeof(CalcParameters));
 	fclose(stdin);
 	return params;
 }
@@ -77,28 +73,24 @@ CalcParameters ServerApplication::calc(const CalcParameters& params)
 	for (size_t i = 0; result.accuracy > params.accuracy; ++i)
 	{
 		double cur = std::sin(std::pow(params.x, i)) / std::tgamma(i + 2);
-		result.accuracy = std::abs(std::tgamma(i + 3) / std::tgamma(i + 2));
+		result.accuracy = 1 / (result.x * std::tgamma(i + 2));
 		if (result.accuracy > params.accuracy)
 		{
 			result.x += cur;
 			last = cur;
 		}
-		std::cerr << "Iteration#" << i << std::endl;
 	}
 	return result;
 }
 
 void ServerApplication::send(const CalcParameters& result)
 {
-	fdopen(stdout_desc, "w");
-	// std::cout << result.x << ' ' << result.accuracy;
-	// std::cout.flush();
-	std::cerr << "Server write: " << write(stdout_desc, &result, sizeof(CalcParameters)) << std::endl;
-	// fflush(stdout);
+	fdopen(STDOUT_FILENO, "w");
+	write(STDOUT_FILENO, &result, sizeof(CalcParameters));
 	fsync(STDOUT_FILENO);
 	fclose(stdout);
 	signal(SIGUSR2, SIG_IGN);
 	kill(getppid(), SIGUSR2);
 }
 
-ServerApplication::ServerApplication(): stdin_desc(fileno(stdin)), stdout_desc(fileno(stdout)) {}
+ServerApplication::ServerApplication() {}

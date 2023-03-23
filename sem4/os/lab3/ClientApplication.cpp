@@ -9,14 +9,13 @@
 #include <unistd.h>
 #include <sstream>
 #include <sys/wait.h>
+#include <numeric>
 
 class ClientApplication
 {
 	constexpr static const char* DEFAULT_INPUT_FILE = "input.txt";
 	constexpr static const char* DEFAULT_OUTPUT_FILE = "output.txt";
 
-	int stdin_desc;
-	int stdout_desc;
 	pid_t server_pid;
 
 public:
@@ -46,6 +45,7 @@ int main(int argc, char const* argv[])
 	catch (const std::exception& e)
 	{
 		std::cerr << "Client crashed with error: " << e.what() << std::endl;
+		return EXIT_FAILURE;
 	}
 }
 
@@ -77,32 +77,23 @@ CalcParameters ClientApplication::input(const std::string& filename)
 {
 	CalcParameters params;
 	std::ifstream ifs;
-	ifs.exceptions();
+	ifs.exceptions(std::ios::failbit | std::ios::badbit);
 	ifs.open(filename);
 	if (ifs >> params.x >> params.accuracy)
+	{
+		if (!std::isnormal(params.accuracy) || !std::isnormal(params.x) || params.accuracy <= 0)
+			throw std::invalid_argument{"Invalid input"};
 		return params;
+	}
 	return { NAN, NAN };
 }
 
 void ClientApplication::send(const CalcParameters& params)
 {
-	// FILE* fd = fdopen(STDOUT_FILENO, "w");
-	// std::cerr << "fd == nullptr; " << (fd == nullptr) << '\n';
-	// std::cout << params.x << " " << params.accuracy;
-	// std::cout.flush();
-	std::cerr << "Client write: " << write(STDOUT_FILENO, &params, sizeof(CalcParameters)) << " bytes\n";
-	std::cerr << "EBADF: " << (errno & EBADF) << '\n'
-		<< "EINVAL: " << (errno & EINVAL) << '\n'
-		<< "EFAULT: " << (errno & EFAULT) << '\n'
-		<< "EPIPE: " << (errno & EPIPE) << '\n'
-		<< "EAGAIN: " << (errno & EAGAIN) << '\n'
-		<< "EIO: " << (errno & EAGAIN) << '\n';
+	write(STDOUT_FILENO, &params, sizeof(CalcParameters));
 	fsync(STDOUT_FILENO);
-	// fflush(stdout);
 	fclose(stdout);
-	// fclose(stdin);
 	signal(SIGUSR1, SIG_IGN);
-	// waitpid(-1, NULL, 0);
 	kill(server_pid, SIGUSR1);
 }
 
@@ -116,8 +107,7 @@ CalcParameters ClientApplication::receive()
 	sigwait(&sigset, &tmp);
 	fdopen(STDIN_FILENO, "r");
 	CalcParameters params;
-	// std::cin >> params.x >> params.accuracy;
-	std::cerr << "Client read: " << read(STDIN_FILENO, &params, sizeof(CalcParameters)) << std::endl;
+	read(STDIN_FILENO, &params, sizeof(CalcParameters));
 	fclose(stdin);
 	return params;
 }
@@ -125,7 +115,7 @@ CalcParameters ClientApplication::receive()
 void ClientApplication::output(const std::string& filename, const CalcParameters& params)
 {
 	std::ofstream ofs;
-	ofs.exceptions();
+	ofs.exceptions(std::ios::failbit | std::ios::badbit);
 	ofs.open(filename);
 	ofs.precision(17);
 	ofs << "Summ: " << params.x << "\nAccuracy: " << params.accuracy;
@@ -136,4 +126,4 @@ pid_t ClientApplication::to_pid(const char* bytes)
 	return std::stoi(bytes);
 }
 
-ClientApplication::ClientApplication(): stdin_desc(fileno(stdin)), stdout_desc(fileno(stdout)) {}
+ClientApplication::ClientApplication() {}
