@@ -4,14 +4,6 @@
 #include <cstring>
 #include <signal.h>
 
-char* to_string(pid_t rhs)
-{
-	std::string tmp = std::to_string(rhs);
-	char* res = new char[tmp.size() + 1]; // Утечка памяти
-	strcpy(res, tmp.c_str());
-	return res;
-}
-
 void print_info(const char* progname)
 {
 	std::cout <<
@@ -47,7 +39,7 @@ int main(int argc, char const* argv[])
 		dup2(pipefd1[0], STDIN_FILENO);
 		close(pipefd1[0]);
 		// fclose(stdin);
-		execl("client", to_string(c_pid), NULL);
+		execl("client", std::to_string(c_pid).c_str(), NULL);
 	}
 	else if (c_pid == 0) // Обработка дочернего процесса
 	{
