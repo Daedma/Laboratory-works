@@ -3,43 +3,50 @@
 int main()
 {
 	int result;
-	int a = 1; // инициализируйте значения a, c, d заранее
-	int c = 1;
-	int d = 1231242246;
+	int a, c, d;
+	std::cout << "Enter a: ";
+	std::cin >> a;
+	std::cout << "Enter c: ";
+	std::cin >> c;
+	std::cout << "Enter d: ";
+	std::cin >> d;
+
 	int overf = 0, zerrof = 0;
 
 	__asm__ volatile (
-		"movl %[c], %%eax\n\t"
-		"movl $4, %%ecx\n\t"
-		"cltd\n\t"
-		"idivl %%ecx\n\t"
-		"imull $28, %[d], %%ecx\n\t"
-		"jo error_of\n\t"
-		"addl %%ecx, %%eax\n\t"
-		"jo error_of\n\t"
-		"movl %%eax, %%ebx\n\t"
-		"jo error_of\n\t"
-		"movl %[a], %%eax\n\t"
-		"cmpl $0l, %[d]\n\t"
-		"jz error_zf\n\t"
-		"cltd\n\t"
-		"idivl %[d]\n\t"
-		"movl %%eax, %%ecx\n\t"
-		"movl %%ebx, %%eax\n\t"
-		"subl %[c], %%ecx\n\t"
-		"jo error_of\n\t"
-		"subl $1, %%ecx\n\t"
-		"jz error_zf\n\t"
-		"jo error_of\n\t"
-		"cltd\n\t"
-		"idivl %%ecx\n\t"
-		"movl %%eax, %[r]\n\t"
-		"jmp exit\n\t"
-		"error_of:\n\t"
-		"movl $1l, %[overf]\n\t"
-		"jmp exit\n\t"
-		"error_zf:\n\t"
-		"movl $1l, %[zerrof]\n\t"
+		"xorl %[overf], %[overf]\n\t" // обнуляем флаг деления на ноль
+		"xorl %[zerrof], %[zerrof]\n\t" // обнуляем флаг переполнение
+		"movl %[c], %%eax\n\t" // помещаем c в регистр eax для деления
+		"movl $4, %%ecx\n\t" // помещаем 4 в регистр ecx для деления
+		"cltd\n\t" // == cdq; расширяем eax в edx:eax
+		"idivl %%ecx\n\t" // производим деление с на 4, частное записывается в регистр eax, остаток в edx
+		"imull $28, %[d], %%ecx\n\t" // умножаем d на 28, результат записывается в регистр ecx
+		"jo error_of\n\t" // ошибка переполнения
+		"addl %%ecx, %%eax\n\t" // eax: c / 4 + d * 28
+		"jo error_of\n\t" // ошибка переполнения
+		"movl %%eax, %%ebx\n\t" // ebx: с / 4 + d * 28
+		"jo error_of\n\t" // ошибка переполнения
+		"movl %[a], %%eax\n\t" // eax: a
+		"cmpl $0, %[d]\n\t" // сравниваем d с нулем
+		"jz error_zf\n\t" // ошибка деления на ноль
+		"cltd\n\t" // расширяем eax до edx:eax
+		"idivl %[d]\n\t" // eax: a / d, edx: a % d
+		"movl %%eax, %%ecx\n\t" // ecx: a / d
+		"movl %%ebx, %%eax\n\t" // eax: c / 4 + d * 28
+		"subl %[c], %%ecx\n\t" // ecx: a / d - c
+		"jo error_of\n\t" // ошибка переполнения
+		"subl $1, %%ecx\n\t" // ecx: a / d - c - 1
+		"jz error_zf\n\t" // ошибка деления на ноль
+		"jo error_of\n\t" // ошибка переполнения
+		"cltd\n\t" // расширяем eax до edx:eax
+		"idivl %%ecx\n\t" // eax: (c / 4 + 28 * d) / (a / d - c - 1), edx: (c / 4 + 28 * d) % (a / d - c - 1)
+		"movl %%eax, %[r]\n\t" // result: (c / 4 + 28 * d) / (a / d - c - 1)
+		"jmp exit\n\t" // выход из вставки
+		"error_of:\n\t" // обработка ошибки переполнения
+		"movl $1, %[overf]\n\t" // overf: 1
+		"jmp exit\n\t" // выход из вставки
+		"error_zf:\n\t" // обработка ошибки деления на ноль
+		"movl $1, %[zerrof]\n\t" // zerrof: 1
 		"exit:\n\t"
 		: [r] "=r" (result), [overf] "=r" (overf), [zerrof] "=r" (zerrof)
 		: [a] "r" (a), [c] "r" (c), [d] "r" (d)
@@ -55,7 +62,7 @@ int main()
 	}
 	else
 	{
-		std::cout << result << std::endl;
-		std::cout << (c / 4 + 28 * d) / (a / d - c - 1) << std::endl;
+		std::cout << "Asm result: " << result << std::endl;
+		std::cout << "Cpp result: " << (c / 4 + 28 * d) / (a / d - c - 1) << std::endl;
 	}
 }
