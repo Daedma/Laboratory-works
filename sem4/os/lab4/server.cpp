@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <Windows.h>
 #include <string>
+#include <memory>
 #include <vector>
 #include <algorithm>
 #include "types.hpp"
@@ -12,55 +13,93 @@
 // Также следует предусмотреть значение для бесконечного времени.
 // Требуется не менее трех одновременно запускаемых процессов - клиентов.
 
-void run_child(float lifetime, size_t number)
+namespace OS_Lab
 {
-	OpenSemaphore(EVENT_ALL_ACCESS, FALSE, SEMAPHORE_NAME);
 
-}
-
-void run_childs(size_t n, size_t max, const std::vector<float>& lifetimes)
-{
-	std::vector<float> sorted_lt = lifetimes;
-	std::sort(sorted_lt.begin(), sorted_lt.end());
-
-	CreateSemaphore(NULL, 0, max, SEMAPHORE_NAME);
-	for (size_t i = 0; i != n; ++i)
+	class ServerApplication
 	{
-		run_child(sorted_lt[i], i + 1);
-	}
+		std::vector<float> m_lifetimes;
+
+		std::vector<std::string> m_args;
+
+		std::vector<std::unique_ptr<PROCESS_INFORMATION>> m_pinfo;
+
+		HANDLE m_pipe;
+
+	public:
+		ServerApplication(int argc, char const* argv[]);
+
+		int run();
+
+	private:
+		void get_childs_number();
+
+		void get_childs_lifetimes();
+
+		void init_pipe();
+
+		void run_childs();
+
+		void send_lifetimes();
+
+		void wait_childs();
+
+		std::wstring get_pipename(size_t n)
+		{
+			return LR"(\\OSLABServer\pipe\)" + std::to_wstring(n);
+		}
+	};
 }
 
 int main(int argc, char const* argv[])
 {
-	if (argc > 2)
+	OS_Lab::ServerApplication app(argc, argv);
+	return app.run();
+}
+
+void OS_Lab::ServerApplication::init_pipe()
+{
+	HANDLE pipe = CreateNamedPipe(get_pipename(i).c_str(),
+		PIPE_ACCESS_DUPLEX,
+		PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
+		PIPE_WAIT, sizeof(message), sizeof(message),
+		0, NULL);
+	// for (size_t i = 0; i != m_lifetimes.size(); ++i)
+	// {
+	// 	HANDLE pipe = CreateNamedPipe(get_pipename(i).c_str(),
+	// 		PIPE_ACCESS_DUPLEX,
+	// 		PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
+	// 		PIPE_WAIT, sizeof(message), sizeof(message),
+	// 		0, NULL);
+	// 	m_pipes.emplace_back(pipe);
+	// }
+}
+
+void OS_Lab::ServerApplication::run_childs()
+{
+	for (size_t i = 0; i != m_lifetimes.size(); ++i)
 	{
-		size_t n = std::stoull(argv[1]); //TODO handle exception
-		if (argc < n + 3)
+		STARTUPINFO cif;
+		ZeroMemory(&cif, sizeof(STARTUPINFO));
+		cif.cb = sizeof(STARTUPINFO);
+		if (!CreateProcess(L"client.exe", get_pipename(i).data(),
+			NULL, NULL, FALSE, NULL, NULL, NULL, &cif, m_pinfo[i].get()))
 		{
-			throw std::invalid_argument{"too less arguments"};
+			//TODO handle error
 		}
-		size_t max = std::stoull(argv[2]);
-		std::vector<float> lifetimes;
-		for (size_t i = 3; i != n + 3; ++i)
-		{
-			lifetimes.emplace_back(std::stof(argv[i]));
-		}
-		std::vector<HANDLE> pipes;
-		for (size_t i = 0; i != max; ++i)
-		{
-			std::wstring pipe_name = LR"(\\LAB4Server\pipe\)" + std::to_wstring(i);
-			HANDLE pipe = CreateNamedPipe(pipe_name.c_str(),
-				PIPE_ACCESS_OUTBOUND,
-				PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
-				PIPE_NOWAIT, sizeof(message), sizeof(message),
-				0, NULL);
-			pipes.emplace_back(pipe);
-		}
-		run_childs(n, max, lifetimes);
 	}
-	else
+}
+
+void OS_Lab::ServerApplication::send_lifetimes()
+{
+	for (size_t i = 0; i != m_lifetimes.size(); ++i)
 	{
-		// TODO print usage info
+		ConnectNamedPipe()
+			WriteFile(m_pipes[i], std::addressof(m_lifetimes[i]), sizeof(float), NULL, NULL);
 	}
-	return 0;
+}
+
+void OS_Lab::ServerApplication::wait_childs()
+{
+
 }
