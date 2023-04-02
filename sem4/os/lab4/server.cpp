@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <algorithm>
+#include <iterator>
 #include "types.hpp"
 
 // С процесса - сервера запускается n процессов клиентов.
@@ -24,7 +25,7 @@ namespace OS_Lab
 
 		std::vector<std::unique_ptr<PROCESS_INFORMATION>> m_pinfo;
 
-		HANDLE m_pipe;
+		std::vector<HANDLE> m_pipes;
 
 	public:
 		ServerApplication(int argc, char const* argv[]);
@@ -32,9 +33,6 @@ namespace OS_Lab
 		int run();
 
 	private:
-		void get_childs_number();
-
-		void get_childs_lifetimes();
 
 		void init_pipe();
 
@@ -44,10 +42,10 @@ namespace OS_Lab
 
 		void wait_childs();
 
-		std::wstring get_pipename(size_t n)
-		{
-			return LR"(\\OSLABServer\pipe\)" + std::to_wstring(n);
-		}
+		void console_input();
+
+		void init_from_args();
+
 	};
 }
 
@@ -59,33 +57,40 @@ int main(int argc, char const* argv[])
 
 void OS_Lab::ServerApplication::init_pipe()
 {
-	HANDLE pipe = CreateNamedPipe(get_pipename(i).c_str(),
-		PIPE_ACCESS_DUPLEX,
-		PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
-		PIPE_WAIT, sizeof(message), sizeof(message),
-		0, NULL);
-	// for (size_t i = 0; i != m_lifetimes.size(); ++i)
-	// {
-	// 	HANDLE pipe = CreateNamedPipe(get_pipename(i).c_str(),
-	// 		PIPE_ACCESS_DUPLEX,
-	// 		PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
-	// 		PIPE_WAIT, sizeof(message), sizeof(message),
-	// 		0, NULL);
-	// 	m_pipes.emplace_back(pipe);
-	// }
+	for (size_t i = 0; i != m_lifetimes.size(); ++i)
+	{
+		HANDLE pipe = CreateNamedPipeA(OSLAB_PIPENAME,
+			PIPE_ACCESS_OUTBOUND,
+			PIPE_TYPE_MESSAGE | PIPE_WAIT,
+			PIPE_UNLIMITED_INSTANCES, sizeof(float), sizeof(float), 2000, NULL);
+		if (pipe == INVALID_HANDLE_VALUE)
+		{
+			std::cerr << "Pipe creating failed\n";
+		}
+		m_pipes.emplace_back(pipe);
+	}
 }
 
 void OS_Lab::ServerApplication::run_childs()
 {
+	m_pinfo.resize(m_lifetimes.size());
+	for (auto& i : m_pinfo)
+	{
+		i.reset(new PROCESS_INFORMATION);
+	}
 	for (size_t i = 0; i != m_lifetimes.size(); ++i)
 	{
-		STARTUPINFO cif;
-		ZeroMemory(&cif, sizeof(STARTUPINFO));
-		cif.cb = sizeof(STARTUPINFO);
-		if (!CreateProcess(L"client.exe", get_pipename(i).data(),
-			NULL, NULL, FALSE, NULL, NULL, NULL, &cif, m_pinfo[i].get()))
+		STARTUPINFOA cif;
+		ZeroMemory(&cif, sizeof(STARTUPINFOA));
+		cif.cb = sizeof(STARTUPINFOA);
+		if (!CreateProcessA("./client.exe", NULL,
+			NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &cif, m_pinfo[i].get()))
 		{
-			//TODO handle error
+			std::cerr << "Process creating has failure!\n";
+		}
+		else
+		{
+			std::cout << "Process #" << (i + 1) << " has been created." << std::endl;
 		}
 	}
 }
@@ -94,12 +99,83 @@ void OS_Lab::ServerApplication::send_lifetimes()
 {
 	for (size_t i = 0; i != m_lifetimes.size(); ++i)
 	{
-		ConnectNamedPipe()
-			WriteFile(m_pipes[i], std::addressof(m_lifetimes[i]), sizeof(float), NULL, NULL);
+		ConnectNamedPipe(m_pipes[i], NULL);
+		WriteFile(m_pipes[i], std::addressof(m_lifetimes[i]), sizeof(float), NULL, NULL);
+		FlushFileBuffers(m_pipes[i]);
+		// std::clog << "Lifetime is sended to process number " << (i + 1) << " : " << m_lifetimes[i] << std::endl;
+		DisconnectNamedPipe(m_pipes[i]);
 	}
 }
 
 void OS_Lab::ServerApplication::wait_childs()
 {
+
+}
+
+OS_Lab::ServerApplication::ServerApplication(int argc, char const* argv[])
+{
+	m_args.resize(argc);
+	std::copy(argv, argv + argc, m_args.begin());
+}
+
+int OS_Lab::ServerApplication::run()
+{
+	if (m_args.size() > 2)
+	{
+		init_from_args();
+	}
+	else
+	{
+		console_input();
+	}
+	init_pipe();
+	// std::cout << "pipe is inititialized\n";
+	run_childs();
+	// std::cout << "childs is runned\n";
+	send_lifetimes();
+	// std::cout << "lifetimes is sended\n";
+	wait_childs();
+	return EXIT_SUCCESS;
+}
+
+void OS_Lab::ServerApplication::init_from_args()
+{
+	try
+	{
+		size_t n = std::stoull(m_args[1]);
+		if (m_args.size() - 2 < n)
+		{
+			throw std::invalid_argument{"Too less arguments"};
+		}
+		m_lifetimes.resize(n);
+		std::transform(std::next(m_args.cbegin(), 2), m_args.cend(), m_lifetimes.begin(),
+			[](const std::string& val) {return std::stof(val);});
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
+
+}
+
+void OS_Lab::ServerApplication::console_input()
+{
+	try
+	{
+		std::cout << "Enter number of processes: ";
+		size_t n;
+		std::cin.exceptions(std::ios::failbit);
+		std::cin >> n;
+		m_lifetimes.resize(n);
+		for (size_t i = 0; i != n; ++i)
+		{
+			std::cout << "Enter the lifetime of process number " << (i + 1) << " : ";
+			std::cin >> m_lifetimes[i];
+		}
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
 
 }
