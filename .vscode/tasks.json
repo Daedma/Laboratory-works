@@ -94,6 +94,33 @@
 		},
 		{
 			"type": "cppbuild",
+			"label": "Windows clang++ (SFML)",
+			"command": "C:/LLVM/bin/clang++",
+			"args": [
+				"${fileDirname}/*.cpp",
+				"-o",
+				"${fileDirname}/${fileBasenameNoExtension}.exe",
+				"-O0",
+				"-std=c++17",
+				"-I",
+				"C:\\Libs\\SFML-2.5.1\\include",
+				"-L",
+				"C:\\Libs\\SFML-2.5.1\\sfml-builds\\clang 14.0.6 (dr)\\lib\\Debug",
+				"-lsfml-system-d",
+				"-lsfml-window-d",
+				"-lsfml-graphics-d"
+			],
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "компилятор: C:/LLVM/bin/clang++"
+		},
+		{
+			"type": "cppbuild",
 			"label": "Windows clang++ (source dir)",
 			"command": "C:/LLVM/bin/clang++",
 			"args": [
