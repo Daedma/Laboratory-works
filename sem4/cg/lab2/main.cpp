@@ -107,9 +107,11 @@ private:
 		float scale_x = dest.getSize().x / std::abs(m_max_corner.x - m_min_corner.x) * 0.75f;
 		float scale_y = dest.getSize().y / std::abs(m_max_corner.y - m_min_corner.y) * 0.75f;
 		float scale = std::min(scale_x, scale_y);
+		trans.translate(dest.getSize().x, dest.getSize().y);
+		trans.scale(-1.f, -1.f);
+		trans.translate(dest.getSize().x / 8, dest.getSize().y / 8);
 		trans.scale(scale, scale);
 		trans.translate(-m_min_corner.x, -m_min_corner.y);
-		// trans.translate(dest.getSize().x / 8, dest.getSize().y / 8);
 		std::mt19937 gen(std::random_device{}());
 		std::uniform_int_distribution<uint32_t> d(0xFF'00'00, 0xFF'FF'FF);
 		for (const auto& i : m_polygons)
@@ -124,19 +126,19 @@ private:
 
 	void print_polygon(const Polygon& poly, sf::Image& image, const sf::Color& color)
 	{
-		// sf::Vector2i max_corner{ static_cast<int>(std::max({ 0.f, poly.v0.x, poly.v1.x, poly.v2.x })),
-			// static_cast<int>(std::max({ 0.f, poly.v0.y, poly.v1.y, poly.v2.y })) };
-		// sf::Vector2i min_corner{static_cast<int>(std::min({ static_cast<float>(image.getSize().x), poly.v0.x, poly.v1.x, poly.v2.x })),
-			// static_cast<int>(std::min({ static_cast<float>(image.getSize().y), poly.v0.y, poly.v1.y, poly.v2.y }))};
-		sf::Vector2i max_corner{ static_cast<int>(std::max({ poly.v0.x, poly.v1.x, poly.v2.x })),
-			static_cast<int>(std::max({ poly.v0.y, poly.v1.y, poly.v2.y })) };
-		sf::Vector2i min_corner{static_cast<int>(std::min({ poly.v0.x, poly.v1.x, poly.v2.x })),
-			static_cast<int>(std::min({ poly.v0.y, poly.v1.y, poly.v2.y }))};
-		if (min_corner.x > image.getSize().x || min_corner.y > image.getSize().y || max_corner.x < 0 || max_corner.y < 0) return;
-		if (min_corner.x < 0) min_corner.x = 0;
-		if (min_corner.y < 0) min_corner.y = 0;
-		if (max_corner.x > image.getSize().x) max_corner.x = image.getSize().x;
-		if (max_corner.y > image.getSize().y) max_corner.y = image.getSize().y;
+		sf::Vector2i max_corner{ static_cast<int>(std::max({ 0.f, poly.v0.x, poly.v1.x, poly.v2.x })),
+			static_cast<int>(std::max({ 0.f, poly.v0.y, poly.v1.y, poly.v2.y })) };
+		sf::Vector2i min_corner{static_cast<int>(std::min({ static_cast<float>(image.getSize().x), poly.v0.x, poly.v1.x, poly.v2.x })),
+			static_cast<int>(std::min({ static_cast<float>(image.getSize().y), poly.v0.y, poly.v1.y, poly.v2.y }))};
+		// sf::Vector2i max_corner{ static_cast<int>(std::max({ poly.v0.x, poly.v1.x, poly.v2.x })),
+		// 	static_cast<int>(std::max({ poly.v0.y, poly.v1.y, poly.v2.y })) };
+		// sf::Vector2i min_corner{static_cast<int>(std::min({ poly.v0.x, poly.v1.x, poly.v2.x })),
+		// 	static_cast<int>(std::min({ poly.v0.y, poly.v1.y, poly.v2.y }))};
+		// if (min_corner.x > image.getSize().x || min_corner.y > image.getSize().y || max_corner.x < 0 || max_corner.y < 0) return;
+		// if (min_corner.x < 0) min_corner.x = 0;
+		// if (min_corner.y < 0) min_corner.y = 0;
+		// if (max_corner.x > image.getSize().x) max_corner.x = image.getSize().x;
+		// if (max_corner.y > image.getSize().y) max_corner.y = image.getSize().y;
 		for (int i = min_corner.x; i != max_corner.x; ++i)
 			for (int j = min_corner.y; j != max_corner.y; ++j)
 			{
@@ -150,7 +152,7 @@ private:
 					poly.v2.x, poly.v2.y);
 				if (bar_coord.x > 0 && bar_coord.y > 0 && bar_coord.z > 0)
 				{
-					// image.setPixel(i, j, color);
+					image.setPixel(i, j, color);
 				}
 			}
 
@@ -182,11 +184,14 @@ private:
 int main()
 {
 	sf::Image image;
-	image.create(100, 100);
-	// Object3d obj;
-	// obj.load("model_2.obj");
-	std::cout << "obj is loaded\n";
-	// obj.print(image);
-	std::cout << "obj is printed\n";
-	std::cout << image.saveToFile("result.png") << '\n';
+	image.create(1000, 1000);
+	Object3d model_1;
+	model_1.load("model_1.obj");
+	model_1.print(image);
+	image.saveToFile("model_1.png");
+	image.create(1000, 1000);
+	model_1.load("model_2.obj");
+	model_1.print(image);
+	image.saveToFile("model_2.png");
+
 }
