@@ -1,0 +1,10 @@
+^C:\USERS\HDAMI\PROJECTS\LABORATORY-WORKS\SEM4\OS\LAB4\BUILD\CMAKEFILES\278398FCD3EDF0FA0D5011E6565F2AAE\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/hdami/projects/Laboratory-works/sem4/os/lab4 -BC:/Users/hdami/projects/Laboratory-works/sem4/os/lab4/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/hdami/projects/Laboratory-works/sem4/os/lab4/build/lab4.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

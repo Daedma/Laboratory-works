@@ -51,8 +51,15 @@ namespace OS_Lab
 
 int main(int argc, char const* argv[])
 {
-	OS_Lab::ServerApplication app(argc, argv);
-	return app.run();
+	try
+	{
+		OS_Lab::ServerApplication app(argc, argv);
+		return app.run();
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+	}
 }
 
 void OS_Lab::ServerApplication::init_pipe()
@@ -60,8 +67,8 @@ void OS_Lab::ServerApplication::init_pipe()
 	for (size_t i = 0; i != m_lifetimes.size(); ++i)
 	{
 		HANDLE pipe = CreateNamedPipeA(OSLAB_PIPENAME,
-			PIPE_ACCESS_OUTBOUND,
-			PIPE_TYPE_MESSAGE | PIPE_WAIT,
+			PIPE_ACCESS_DUPLEX,
+			PIPE_TYPE_MESSAGE | PIPE_WAIT | PIPE_READMODE_MESSAGE,
 			PIPE_UNLIMITED_INSTANCES, sizeof(float), sizeof(float), 2000, NULL);
 		if (pipe == INVALID_HANDLE_VALUE)
 		{
@@ -90,7 +97,7 @@ void OS_Lab::ServerApplication::run_childs()
 		}
 		else
 		{
-			std::cout << "Process #" << (i + 1) << " has been created." << std::endl;
+			std::cout << "Process #" << (i) << " has been created." << std::endl;
 		}
 	}
 }
@@ -99,8 +106,9 @@ void OS_Lab::ServerApplication::send_lifetimes()
 {
 	for (size_t i = 0; i != m_lifetimes.size(); ++i)
 	{
+		message m{ m_lifetimes[i], i };
 		ConnectNamedPipe(m_pipes[i], NULL);
-		WriteFile(m_pipes[i], std::addressof(m_lifetimes[i]), sizeof(float), NULL, NULL);
+		WriteFile(m_pipes[i], std::addressof(m), sizeof(message), NULL, NULL);
 		FlushFileBuffers(m_pipes[i]);
 		// std::clog << "Lifetime is sended to process number " << (i + 1) << " : " << m_lifetimes[i] << std::endl;
 		DisconnectNamedPipe(m_pipes[i]);
@@ -109,7 +117,29 @@ void OS_Lab::ServerApplication::send_lifetimes()
 
 void OS_Lab::ServerApplication::wait_childs()
 {
-
+	for (HANDLE i : m_pipes)
+	{
+		DWORD openMode = PIPE_NOWAIT | PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE;
+		SetNamedPipeHandleState(i, &openMode, NULL, NULL);
+	}
+	message m;
+	while (!m_pipes.empty())
+	{
+		for (auto i = m_pipes.begin(); i != m_pipes.end(); ++i)
+		{
+			ConnectNamedPipe(*i, NULL);
+			if (ReadFile(*i, &m, sizeof(message), NULL, NULL))
+			{
+				std::cout << "Process #" << m.number << " finished.\n";
+				DisconnectNamedPipe(*i);
+				CloseHandle(*i);
+				i = m_pipes.erase(i);
+				if (i == m_pipes.end()) break;
+			}
+		}
+		// Sleep(100);
+	}
+	std::cout << "All processes were been finished.\n";
 }
 
 OS_Lab::ServerApplication::ServerApplication(int argc, char const* argv[])
@@ -140,42 +170,49 @@ int OS_Lab::ServerApplication::run()
 
 void OS_Lab::ServerApplication::init_from_args()
 {
-	try
+	size_t n = std::stoull(m_args[1]);
+	if (m_args.size() - 2 < n)
 	{
-		size_t n = std::stoull(m_args[1]);
-		if (m_args.size() - 2 < n)
-		{
-			throw std::invalid_argument{"Too less arguments"};
-		}
-		m_lifetimes.resize(n);
-		std::transform(std::next(m_args.cbegin(), 2), m_args.cend(), m_lifetimes.begin(),
-			[](const std::string& val) {return std::stof(val);});
+		throw std::invalid_argument{"Too less arguments"};
 	}
-	catch (const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-	}
+	m_lifetimes.resize(n);
+	std::transform(std::next(m_args.cbegin(), 2), m_args.cend(), m_lifetimes.begin(),
+		[](const std::string& val) {
+			float res = std::stof(val);
+			if (res < 0)
+			{
+				throw std::invalid_argument{"Lifetime cannot be negative"};
+			}
+			if (std::abs(res) == INFINITY)
+			{
+				return DEFAULT_LIFETIME;
+			}
+			return res;
+		});
+
 
 }
 
 void OS_Lab::ServerApplication::console_input()
 {
-	try
+	std::cout << "Enter number of processes: ";
+	size_t n;
+	std::cin.exceptions(std::ios::failbit);
+	std::cin >> n;
+	m_lifetimes.resize(n);
+	for (size_t i = 0; i != n; ++i)
 	{
-		std::cout << "Enter number of processes: ";
-		size_t n;
-		std::cin.exceptions(std::ios::failbit);
-		std::cin >> n;
-		m_lifetimes.resize(n);
-		for (size_t i = 0; i != n; ++i)
+		std::cout << "Enter the lifetime of process number " << i << " : ";
+		std::string ts;
+		std::cin >> ts;
+		m_lifetimes[i] = std::stof(ts);
+		if (m_lifetimes[i] < 0)
 		{
-			std::cout << "Enter the lifetime of process number " << (i + 1) << " : ";
-			std::cin >> m_lifetimes[i];
+			throw std::invalid_argument{"Lifetime cannot be negative"};
+		}
+		if (std::abs(m_lifetimes[i]) == INFINITY)
+		{
+			m_lifetimes[i] = DEFAULT_LIFETIME;
 		}
 	}
-	catch (const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-	}
-
 }
