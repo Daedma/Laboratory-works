@@ -14,6 +14,8 @@
 				"-pedantic",
 				"-I",
 				"/home/damir/cpp-libs/SFML-2.5.1-sources/SFML-2.5.1/include",
+				"-I",
+				"/home/damir/cpp-libs/Mathter/include",
 				"-L",
 				"/home/damir/cpp-libs/SFML-2.5.1-sources/SFML-2.5.1/build/gcc/lib",
 				"-lsfml-system",
