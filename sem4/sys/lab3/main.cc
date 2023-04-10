@@ -1,5 +1,5 @@
 int a = 0, b = 0;
-volatile int result = 0;
+int result = 0;
 
 int main()
 {
