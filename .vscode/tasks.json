@@ -41,7 +41,9 @@
 				"${fileDirname}/${fileBasenameNoExtension}",
 				"-O0",
 				"-std=c++17",
-				"-pedantic"
+				"-pedantic",
+				"-mmmx",
+				"-msse2"
 			],
 			"options": {
 				"cwd": "${fileDirname}"
