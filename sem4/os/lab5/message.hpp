@@ -2,6 +2,8 @@
 #include <chrono>
 #include <memory>
 #include <iostream>
+#include <iterator>
+#include <algorithm>
 
 struct Message
 {
@@ -24,26 +26,33 @@ struct Message
 
 	inline static constexpr size_t OFFSET_MESSAGE = OFFSET_USERNAME + MAX_USERNAME_SIZE;
 
-	bool operator<(const Message& rhs)
+	bool operator<(const Message& rhs) const
 	{
 		return time < rhs.time;
 	}
 
-	void to_bytes(char* dest)
+	void to_bytes(char* dest) const
 	{
 		std::memset(dest, 0, MAX_SIZE);
 		std::memcpy(dest + OFFSET_TIME, &time, sizeof(std::chrono::time_point<std::chrono::system_clock>));
-		std::memcpy(dest + OFFSET_USERNAME, user.data(), user.size() + 1);
-		std::memcpy(dest + OFFSET_MESSAGE, content.data(), content.size() + 1);
+		std::memcpy(dest + OFFSET_USERNAME, user.data(), user.size());
+		std::memcpy(dest + OFFSET_MESSAGE, content.data(), content.size());
 	}
 
 	void from_bytes(char* source)
 	{
 		std::memcpy(&time, source + OFFSET_TIME, sizeof(std::chrono::time_point<std::chrono::system_clock>));
-		user = source + OFFSET_USERNAME;
-		content = source + OFFSET_MESSAGE;
+		user = (std::string(source + OFFSET_USERNAME, MAX_USERNAME_SIZE));
+		content = (std::string(source + OFFSET_MESSAGE, MAX_MESSAGE_SIZE));
 	}
 
+	struct less
+	{
+		bool operator()(const Message& lhs, const Message& rhs) const
+		{
+			return lhs < rhs;
+		}
+	};
 };
 
 std::ostream& operator<<(std::ostream& os, const Message& message)
@@ -55,6 +64,6 @@ std::ostream& operator<<(std::ostream& os, const Message& message)
 	const auto secs = duration_cast<seconds>(d - hrs - mins);
 	os << "[" << hrs.count() << ":" << mins.count()
 		<< ":" << secs.count() << "] " << message.user << " : "
-		<< message.content;
+		<< message.content.c_str();
 	return os;
 }

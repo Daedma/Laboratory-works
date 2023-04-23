@@ -1,6 +1,6 @@
 namespace connection_info
 {
-	inline constexpr const char* ADDRESS = "::1";
+	inline constexpr const char* ADDRESS = "127.0.0.1";
 
 	inline constexpr short SERVER_PORT = 1488;
 
