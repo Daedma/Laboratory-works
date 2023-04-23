@@ -21,11 +21,13 @@
 class Client
 {
 public:
-	Client() = default;
+	Client()
+	{};
 
 	~Client()
 	{
 		delete[] m_buffer;
+		// shutdown(m_sock, SD_SEND);
 		closesocket(m_sock);
 	}
 
@@ -51,6 +53,7 @@ private:
 
 	SOCKET m_sock;
 
+
 	std::string m_username;
 
 	HANDLE m_history_mutex;
@@ -58,6 +61,8 @@ private:
 	std::set<Message, Message::less> m_history;
 
 	char* m_buffer = new char[BUFFER_SIZE];
+
+	bool get_status();
 
 };
 
@@ -87,7 +92,7 @@ int main(int argc, char const* argv[])
 		do
 		{
 			std::cin >> username;
-		} while (username.size() > 8);
+		} while (username.size() > Message::MAX_USERNAME_SIZE);
 		Client client;
 		client.join(username);
 		std::string command;
@@ -129,6 +134,7 @@ int main(int argc, char const* argv[])
 		system("pause");
 		return EXIT_FAILURE;
 	}
+	WSACleanup();
 }
 
 void Client::join(const std::string& username)
@@ -144,11 +150,19 @@ void Client::join(const std::string& username)
 		m_sock = NULL;
 		throw connection_error{"failed connect to server."};
 	}
-	m_username = username;
-	m_username.resize(Message::MAX_USERNAME_SIZE);
-	send(m_sock, m_username.data(), Message::MAX_USERNAME_SIZE, NULL);
-	std::cout << "Connected to server.\n";
-	CreateThread(NULL, 0, receive_messages, this, NULL, NULL);
+	if (get_status())
+	{
+		m_username = username;
+		m_username.resize(Message::MAX_USERNAME_SIZE);
+		send(m_sock, m_username.data(), Message::MAX_USERNAME_SIZE, NULL);
+		std::cout << "Connected to server.\n";
+		CreateThread(NULL, 0, receive_messages, this, NULL, NULL);
+	}
+	else
+	{
+		m_sock = NULL;
+		throw connection_error{"failed connect to server."};
+	}
 }
 
 void Client::sendMessage(const std::string& message)
@@ -194,5 +208,13 @@ DWORD Client::receive_messages(LPVOID pclient)
 
 void Client::detach()
 {
+	// shutdown(m_sock, SD_SEND);
 	closesocket(m_sock);
+}
+
+bool Client::get_status()
+{
+	int status = 0;
+	recv(m_sock, (char*)&status, sizeof(int), NULL);
+	return status == 1;
 }

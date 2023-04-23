@@ -62,8 +62,10 @@ std::ostream& operator<<(std::ostream& os, const Message& message)
 	const auto hrs = duration_cast<hours>(d);
 	const auto mins = duration_cast<minutes>(d - hrs);
 	const auto secs = duration_cast<seconds>(d - hrs - mins);
-	os << "[" << hrs.count() << ":" << mins.count()
-		<< ":" << secs.count() << "] " << message.user << " : "
+	os << "[" << (hrs.count() % 24) << ((hrs.count() % 24) < 10 ? '0' : '\0') << ":"
+		<< mins.count() << (mins.count() < 10 ? '0' : '\0') << ":"
+		<< secs.count() << (secs.count() < 10 ? '0' : '\0') << "] "
+		<< message.user << " : "
 		<< message.content.c_str();
 	return os;
 }

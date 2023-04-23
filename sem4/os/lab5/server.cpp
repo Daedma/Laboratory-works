@@ -44,7 +44,12 @@ private:
 
 	static void process_message(const Message& mess);
 
-	static constexpr const char* SEMAPHORE_NAME = "client count in chat";
+	static void add_client(SOCKET sock);
+
+	static void remove_client(SOCKET sock);
+
+	static void send_status(SOCKET sock);
+
 };
 
 int main(int argc, char const* argv[])
@@ -61,6 +66,7 @@ int main(int argc, char const* argv[])
 	Server* server = Server::get_instance();
 	server->init();
 	server->connect_clients();
+	WSACleanup();
 	return 0;
 }
 
@@ -89,9 +95,6 @@ void Server::connect_clients()
 		{
 			accept_socket = accept(m_sock, (SOCKADDR*)&addr, &addr_size);
 		}
-		WaitForSingleObject(m_clients_mutex, INFINITE);
-		m_clients.emplace_back(accept_socket);
-		ReleaseMutex(m_clients_mutex);
 		ClientParams params{ addr, accept_socket };
 		CreateThread(NULL, 0, process_client, (LPVOID)&params, 0, NULL);
 		accept_socket = SOCKET_ERROR;
@@ -111,10 +114,7 @@ DWORD Server::process_client(LPVOID addr)
 		int return_code = recv(sock, buffer, Message::MAX_SIZE, MSG_WAITALL);
 		if (return_code == SOCKET_ERROR)
 		{
-			// Client detached
-			WaitForSingleObject(server->m_clients_mutex, INFINITE);
-			server->m_clients.erase(std::find(server->m_clients.begin(), server->m_clients.end(), sock));
-			ReleaseMutex(server->m_clients_mutex);
+			remove_client(sock);
 			closesocket(sock);
 			Message notify;
 			notify.time = std::chrono::system_clock::now();
@@ -133,6 +133,8 @@ DWORD Server::process_client(LPVOID addr)
 
 std::string Server::init_client(SOCKET sock)
 {
+	send_status(sock);
+	add_client(sock);
 	char* buffer = new char[Message::MAX_USERNAME_SIZE];
 	int recv_bytes = recv(sock, buffer, Message::MAX_USERNAME_SIZE, MSG_WAITALL);
 	std::string name(buffer, Message::MAX_USERNAME_SIZE);
@@ -157,4 +159,24 @@ void Server::process_message(const Message& mess)
 	std::cout << mess << std::endl;
 	ReleaseMutex(get_instance()->m_out_mutex);
 	delete[] buffer;
+}
+
+void Server::add_client(SOCKET sock)
+{
+	WaitForSingleObject(get_instance()->m_clients_mutex, INFINITE);
+	get_instance()->m_clients.emplace_back(sock);
+	ReleaseMutex(get_instance()->m_clients_mutex);
+}
+
+void Server::remove_client(SOCKET sock)
+{
+	WaitForSingleObject(get_instance()->m_clients_mutex, INFINITE);
+	get_instance()->m_clients.erase(std::find(get_instance()->m_clients.begin(), get_instance()->m_clients.end(), sock));
+	ReleaseMutex(get_instance()->m_clients_mutex);
+}
+
+void Server::send_status(SOCKET sock)
+{
+	int status = 1;
+	send(sock, (char*)&status, sizeof(int), MSG_OOB);
 }
