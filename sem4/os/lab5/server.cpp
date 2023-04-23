@@ -44,7 +44,7 @@ private:
 
 	static void process_message(const Message& mess);
 
-	static void add_client(SOCKET sock);
+	static void add_client(SOCKET sock, const std::string& username);
 
 	static void remove_client(SOCKET sock);
 
@@ -95,8 +95,15 @@ void Server::connect_clients()
 		{
 			accept_socket = accept(m_sock, (SOCKADDR*)&addr, &addr_size);
 		}
-		ClientParams params{ addr, accept_socket };
-		CreateThread(NULL, 0, process_client, (LPVOID)&params, 0, NULL);
+		if (accept_socket == SOCKET_ERROR)
+		{
+			std::cerr << "Error in accept function : " << WSAGetLastError() << '\n';
+		}
+		else
+		{
+			ClientParams params{ addr, accept_socket };
+			CreateThread(NULL, 0, process_client, (LPVOID)&params, 0, NULL);
+		}
 		accept_socket = SOCKET_ERROR;
 	}
 }
@@ -104,11 +111,13 @@ void Server::connect_clients()
 DWORD Server::process_client(LPVOID addr)
 {
 	Server* server = get_instance();
-	WaitForSingleObject(server->m_semaphore, INFINITE);
 	ClientParams* params = (ClientParams*)addr;
 	SOCKET sock = params->sock;
 	std::string username = init_client(sock);
 	char* buffer = new char[Message::MAX_SIZE];
+	WaitForSingleObject(server->m_semaphore, INFINITE);
+	send_status(sock);
+	add_client(sock, username);
 	while (true)
 	{
 		int return_code = recv(sock, buffer, Message::MAX_SIZE, MSG_WAITALL);
@@ -133,16 +142,16 @@ DWORD Server::process_client(LPVOID addr)
 
 std::string Server::init_client(SOCKET sock)
 {
-	send_status(sock);
-	add_client(sock);
+	// send_status(sock);
+	// add_client(sock);
 	char* buffer = new char[Message::MAX_USERNAME_SIZE];
 	int recv_bytes = recv(sock, buffer, Message::MAX_USERNAME_SIZE, MSG_WAITALL);
 	std::string name(buffer, Message::MAX_USERNAME_SIZE);
 	Message notify;
-	notify.time = std::chrono::system_clock::now();
-	notify.user = "Server";
-	notify.content = std::string{ name.c_str() } + " has been connected.";
-	process_message(notify);
+	// notify.time = std::chrono::system_clock::now();
+	// notify.user = "Server";
+	// notify.content = std::string{ name.c_str() } + " has been connected.";
+	// process_message(notify);
 	delete[] buffer;
 	return name;
 }
@@ -161,11 +170,16 @@ void Server::process_message(const Message& mess)
 	delete[] buffer;
 }
 
-void Server::add_client(SOCKET sock)
+void Server::add_client(SOCKET sock, const std::string& username)
 {
 	WaitForSingleObject(get_instance()->m_clients_mutex, INFINITE);
 	get_instance()->m_clients.emplace_back(sock);
 	ReleaseMutex(get_instance()->m_clients_mutex);
+	Message notify;
+	notify.time = std::chrono::system_clock::now();
+	notify.user = "Server";
+	notify.content = std::string{ username.c_str() } + " has been connected.";
+	process_message(notify);
 }
 
 void Server::remove_client(SOCKET sock)

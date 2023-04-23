@@ -95,6 +95,7 @@ int main(int argc, char const* argv[])
 		} while (username.size() > Message::MAX_USERNAME_SIZE);
 		Client client;
 		client.join(username);
+		std::cout << "You have successfully joined the chat!" << std::endl;
 		std::string command;
 		std::string message;
 		while (true)
@@ -150,12 +151,12 @@ void Client::join(const std::string& username)
 		m_sock = NULL;
 		throw connection_error{"failed connect to server."};
 	}
+	m_username = username;
+	m_username.resize(Message::MAX_USERNAME_SIZE);
+	send(m_sock, m_username.data(), Message::MAX_USERNAME_SIZE, NULL);
+	std::cout << "Connected to server.\n";
 	if (get_status())
 	{
-		m_username = username;
-		m_username.resize(Message::MAX_USERNAME_SIZE);
-		send(m_sock, m_username.data(), Message::MAX_USERNAME_SIZE, NULL);
-		std::cout << "Connected to server.\n";
 		CreateThread(NULL, 0, receive_messages, this, NULL, NULL);
 	}
 	else
