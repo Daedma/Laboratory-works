@@ -68,28 +68,38 @@ void Server::handleNewConnection(sf::TcpSocket* client)
 void Server::processClient(sf::TcpSocket* client)
 {
 	m_semaphore.acquire();
-	std::string username = addToChat(client);
-	client->setBlocking(true);
-	Message message;
-	while (true)
+	try
 	{
-		sf::Packet pack;
-		sf::Socket::Status status = client->receive(pack);
-		if (status != sf::Socket::Done)
+		std::string username = addToChat(client);
+		client->setBlocking(true);
+		Message message;
+		while (true)
 		{
-			// Client disconnected
-			makeLog("Lost connection to user " + username);
-			removeFromChat(client, username);
-			detachClient(client);
-			m_semaphore.release();
-			makeLog(std::format("User {} successfully removed from chat", username));
-			makeLog(std::format("Current number of users in the chat: {}\nQueue size: {}",
-				static_cast<size_t>(m_usersInChat),
-				static_cast<size_t>(m_activeConnections - m_usersInChat)));
-			return;
+			sf::Packet pack;
+			sf::Socket::Status status = client->receive(pack);
+			if (status != sf::Socket::Done)
+			{
+				// Client disconnected
+				makeLog("Lost connection to user " + username);
+				removeFromChat(client, username);
+				detachClient(client);
+				m_semaphore.release();
+				makeLog(std::format("User {} successfully removed from chat", username));
+				makeLog(std::format("Current number of users in the chat: {}\nQueue size: {}",
+					static_cast<size_t>(m_usersInChat),
+					static_cast<size_t>(m_activeConnections - m_usersInChat)));
+				return;
+			}
+			pack >> message;
+			processMessage(message);
 		}
-		pack >> message;
-		processMessage(message);
+	}
+	catch (const std::exception& e)
+	{
+		makeLog(e.what());
+		detachClient(client);
+		m_semaphore.release();
+		return;
 	}
 }
 
@@ -99,9 +109,17 @@ std::string Server::addToChat(sf::TcpSocket* client)
 		client->getRemoteAddress().toString(), client->getRemotePort()));
 	sf::Packet pack;
 	pack << Query::Code::USERNAME;
-	client->send(pack);
+	if (client->send(pack) != sf::Socket::Done)
+	{
+		throw std::runtime_error{std::format("Lost connection with client [{}:{}]",
+			client->getRemoteAddress().toString(), client->getRemotePort())};
+	}
 	pack.clear();
-	client->receive(pack);
+	if (client->receive(pack) != sf::Socket::Done)
+	{
+		throw std::runtime_error{std::format("Lost connection with client [{}:{}]",
+			client->getRemoteAddress().toString(), client->getRemotePort())};
+	}
 	std::string username;
 	pack >> username;
 	m_inChatMutex.lock();
@@ -153,14 +171,17 @@ void Server::processMessage(const Message& message)
 
 void Server::makeLog(const std::string& message)
 {
+	auto const time = std::chrono::current_zone()
+		->to_local(std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now()));
+	std::string serverLog = std::format("[{:%Y-%m-%d, %H:%M:%S}] {}", time, message);
 	m_logOutMutex.lock();
 	if (m_duplicateToStderr)
 	{
-		std::clog << message << std::endl;
+		std::clog << serverLog << std::endl;
 	}
 	if (m_logOut)
 	{
-		(*m_logOut) << message << std::endl;
+		(*m_logOut) << serverLog << std::endl;
 	}
 	m_logOutMutex.unlock();
 }

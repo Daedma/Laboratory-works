@@ -21,4 +21,7 @@ target_link_directories(client PUBLIC "C:\\Libs\\SFML-2.5.1\\sfml-builds\\msvc\\
 target_link_libraries(client 
 				"ws2_32" 
 				"sfml-system-d" 
-				"sfml-network-d")
+				"sfml-network-d"
+				"tgui-d"
+				"sfml-graphics-d"
+				"sfml-window-d")

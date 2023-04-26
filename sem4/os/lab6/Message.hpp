@@ -19,7 +19,7 @@ struct Message
 	{
 		std::string result;
 		auto beginOfDay = std::chrono::floor<std::chrono::days>(time);
-		auto clockTime = std::chrono::hh_mm_ss(time - beginOfDay);
+		auto clockTime = std::chrono::hh_mm_ss(std::chrono::floor<std::chrono::seconds>(time - beginOfDay));
 		result = std::format("[{:%T}] {} : {}", clockTime, user, content);
 		return result;
 	}

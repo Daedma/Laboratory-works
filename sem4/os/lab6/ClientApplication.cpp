@@ -15,9 +15,11 @@ class ClientApplication
 
 public:
 
-	ClientApplication(size_t width, size_t height) :
+	ClientApplication(unsigned int width, unsigned int height) :
 		m_window({ width, height }, "Chat"), m_gui(m_window)
 	{
+		m_window.setFramerateLimit(60);
+		tgui::Theme::setDefault("themes\\Black.txt");
 		turnToRegistration();
 	}
 
@@ -59,6 +61,17 @@ private:
 				m_gui.get<tgui::ChatBox>("Chat")->removeAllLines();
 				m_client.processChat(updateChatBox);
 			}
+			m_window.clear();
+			m_gui.draw();
+			m_window.display();
+		}
+		if (!m_client.isInChat())
+		{
+			tgui::MessageBox::Ptr waitingBox = tgui::MessageBox::create("Info", "The connection to the server was lost");
+			waitingBox->setOrigin(0.5f, 0.5f);
+			waitingBox->setPosition("50%", "50%");
+			m_gui.add(waitingBox);
+			m_gui.mainLoop();
 		}
 	}
 
@@ -79,6 +92,9 @@ private:
 				}
 				m_gui.handleEvent(event);
 			}
+			m_window.clear();
+			m_gui.draw();
+			m_window.display();
 		}
 	}
 
@@ -107,6 +123,9 @@ private:
 				}
 				m_gui.handleEvent(event);
 			}
+			m_window.clear();
+			m_gui.draw();
+			m_window.display();
 		}
 		if (!m_window.isOpen())
 		{
@@ -139,16 +158,21 @@ private:
 
 		tgui::Button::Ptr buttonSend = tgui::Button::create("Send");
 		buttonSend->setPosition("70%", "80%");
-		buttonSend->setSize(200, 80);
+		// buttonSend->setSize(200, 80);
 		buttonSend->onClick([this, inputField]() mutable {
-			m_client.sendMessage(inputField->getText().toStdString());
+			std::string content = inputField->getText().toStdString();
+			if (!content.empty())
+			{
+				m_client.sendMessage(content);
+				inputField->setText("");
+			}
 			});
 		m_gui.add(buttonSend, "Send");
 
 		tgui::Button::Ptr buttonLeave = tgui::Button::create("Leave");
-		buttonSend->setPosition("70%", "90%");
-		buttonSend->setSize(200, 80);
-		buttonSend->onClick([this]() mutable {
+		buttonLeave->setPosition("70%", "90%");
+		// buttonSend->setSize(200, 80);
+		buttonLeave->onClick([this]() mutable {
 			m_client.detach();
 			});
 		m_gui.add(buttonLeave, "Leave");
@@ -157,6 +181,11 @@ private:
 	void turnToRegistration()
 	{
 		m_gui.removeAllWidgets();
+
+		tgui::Label::Ptr inviteLabel = tgui::Label::create("Enter your username:");
+		inviteLabel->setOrigin(0.5f, 0.5f);
+		inviteLabel->setPosition("50%", "30%");
+		m_gui.add(inviteLabel);
 
 		tgui::EditBox::Ptr inputField = tgui::EditBox::create();
 		inputField->setOrigin(0.5f, 0.5f);
