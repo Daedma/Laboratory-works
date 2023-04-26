@@ -14,9 +14,10 @@ target_link_libraries(server
 				"sfml-network-d")
 
 add_executable(client Client.cpp ClientApplication.cpp)
-target_include_directories(client PUBLIC "C:\\Libs\\SFML-2.5.1\\include")
+target_include_directories(client PUBLIC "C:\\Libs\\SFML-2.5.1\\include" "C:\\Libs\\TGUI-0.9.5\\include")
 target_link_directories(client PUBLIC "C:\\Libs\\SFML-2.5.1\\sfml-builds\\msvc\\lib\\Debug"
-									  "C:\\Libs\\SFML-2.5.1\\extlibs\\libs-msvc-universal\\x64")
+									  "C:\\Libs\\SFML-2.5.1\\extlibs\\libs-msvc-universal\\x64"
+									  "C:\\Libs\\TGUI-0.9.5\\build\\msvc\\lib\\Debug")
 target_link_libraries(client 
 				"ws2_32" 
 				"sfml-system-d" 

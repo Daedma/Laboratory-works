@@ -26,13 +26,14 @@ void Client::initFromConfig(const std::string& config)
 	m_serverPort = port;
 }
 
-void Client::joinAs(const std::string& username)
+bool Client::joinAs(const std::string& username)
 {
 	sf::Socket::Status status = m_sock.connect(m_serverIp, m_serverPort);
 	if (status != sf::Socket::Status::Done)
 	{
 		// TODO handle error
 		std::cerr << "Failed to connect to server\n";
+		return false;
 	}
 	else
 	{
@@ -48,12 +49,13 @@ void Client::joinAs(const std::string& username)
 		m_sock.send(pack);
 		m_username = username;
 		std::thread{std::mem_fn(&Client::receiveMessages), this}.detach();
+		return true;
 	}
 }
 
 void Client::receiveMessages()
 {
-	while (true)
+	while (m_inChat)
 	{
 		sf::Packet pack;
 		if (m_sock.receive(pack) != sf::Socket::Status::Done)

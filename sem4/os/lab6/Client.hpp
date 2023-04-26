@@ -26,10 +26,17 @@ class Client
 	std::atomic_bool m_inChat = false;
 
 	std::atomic_bool m_isDirty = false;
+
 public:
 	Client(const std::string& config = "server.ini");
 
-	void joinAs(const std::string& username);
+	bool joinAs(const std::string& username);
+
+	void setUsername(const std::string& username) { m_username = username; }
+
+	bool isAvailableName() const { return m_username.size() >= 3 && m_username.size() <= 8; }
+
+	bool join() { return joinAs(m_username); }
 
 	void sendMessage(const std::string& content);
 
