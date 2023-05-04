@@ -176,6 +176,13 @@ private:
 			m_client.detach();
 			});
 		m_gui.add(buttonLeave, "Leave");
+
+		tgui::Button::Ptr buttonAutor = tgui::Button::create("get credits");
+		buttonAutor->setPosition("70%", "85%");
+		buttonAutor->onClick([this]() mutable {
+			m_client.sendMessage("Damir Khismatov");
+			});
+		m_gui.add(buttonAutor);
 	}
 
 	void turnToRegistration()
