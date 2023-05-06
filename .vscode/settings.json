@@ -99,5 +99,9 @@
 		"c:\\Program Files\\Java\\javafx-sdk-19\\lib\\javafx-swt.jar",
 		"c:\\Program Files\\Java\\libs\\json-simple-1.1.jar"
 	],
-	"cmake.configureOnOpen": false
+	"cmake.configureOnOpen": false,
+	"lldb.displayFormat": "auto",
+	"lldb.showDisassembly": "always",
+	"lldb.dereferencePointers": true,
+	"lldb.consoleMode": "commands"
 }

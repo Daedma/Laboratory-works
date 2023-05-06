@@ -1,148 +1,174 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"type": "cppbuild",
-			"label": "Linux g++ (SFML)",
-			"command": "/usr/bin/g++",
-			"args": [
-				"${fileDirname}/*.cpp",
-				"-o",
-				"${fileDirname}/${fileBasenameNoExtension}",
-				"-O0",
-				"-std=c++17",
-				"-pedantic",
-				"-I",
-				"/home/damir/cpp-libs/SFML-2.5.1-sources/SFML-2.5.1/include",
-				"-I",
-				"/home/damir/cpp-libs/Mathter/include",
-				"-L",
-				"/home/damir/cpp-libs/SFML-2.5.1-sources/SFML-2.5.1/build/gcc/lib",
-				"-lsfml-system",
-				"-lsfml-window",
-				"-lsfml-graphics"
-			],
-			"options": {
-				"cwd": "${fileDirname}"
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"group": "build",
-			"detail": "компилятор: /usr/bin/g++"
-		},
-		{
-			"type": "cppbuild",
-			"label": "Linux g++",
-			"command": "/usr/bin/g++",
-			"args": [
-				"${fileDirname}/*.cpp",
-				"-o",
-				"${fileDirname}/${fileBasenameNoExtension}",
-				"-O0",
-				"-std=c++17",
-				"-pedantic",
-				"-mmmx",
-				"-msse2"
-			],
-			"options": {
-				"cwd": "${fileDirname}"
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"group": "build",
-			"detail": "компилятор: /usr/bin/g++"
-		},
-		{
-			"type": "cppbuild",
-			"label": "Linux g++ (source dir)",
-			"command": "/usr/bin/g++",
-			"args": [
-				"${fileDirname}/*.cpp",
-				"${fileDirname}/source/*.cpp",
-				"-o",
-				"${fileDirname}/${fileBasenameNoExtension}",
-				"-O3",
-				"-std=c++17",
-				"-pedantic"
-			],
-			"options": {
-				"cwd": "${fileDirname}"
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"group": "build",
-			"detail": "компилятор: /usr/bin/g++"
-		},
-		{
-			"type": "cppbuild",
-			"label": "Windows clang++",
-			"command": "C:/LLVM/bin/clang++",
-			"args": [
-				"${fileDirname}/*.cpp",
-				"-o",
-				"${fileDirname}/${fileBasenameNoExtension}.exe",
-				"-O0",
-				"-std=c++17"
-			],
-			"options": {
-				"cwd": "${fileDirname}"
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"group": "build",
-			"detail": "компилятор: C:/LLVM/bin/clang++"
-		},
-		{
-			"type": "cppbuild",
-			"label": "Windows clang++ (SFML)",
-			"command": "C:/LLVM/bin/clang++",
-			"args": [
-				"${fileDirname}/*.cpp",
-				"-o",
-				"${fileDirname}/${fileBasenameNoExtension}.exe",
-				"-O0",
-				"-std=c++17",
-				"-I",
-				"C:\\Libs\\SFML-2.5.1\\include",
-				"-L",
-				"C:\\Libs\\SFML-2.5.1\\sfml-builds\\clang 14.0.6 (dr)\\lib\\Debug",
-				"-lsfml-system-d",
-				"-lsfml-window-d",
-				"-lsfml-graphics-d"
-			],
-			"options": {
-				"cwd": "${fileDirname}"
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"group": "build",
-			"detail": "компилятор: C:/LLVM/bin/clang++"
-		},
-		{
-			"type": "cppbuild",
-			"label": "Windows clang++ (source dir)",
-			"command": "C:/LLVM/bin/clang++",
-			"args": [
-				"${fileDirname}/*.cpp",
-				"${fileDirname}/source/*.cpp",
-				"-o",
-				"${fileDirname}/${fileBasenameNoExtension}.exe",
-				"-O3",
-				"-std=c++17"
-			],
-			"options": {
-				"cwd": "${fileDirname}"
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"group": "build",
-			"detail": "компилятор: C:/LLVM/bin/clang++"
-		}
-	]
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "Linux g++ (SFML)",
+            "command": "/usr/bin/g++",
+            "args": [
+                "${fileDirname}/*.cpp",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}",
+                "-O0",
+                "-std=c++17",
+                "-pedantic",
+                "-I",
+                "/home/damir/cpp-libs/SFML-2.5.1-sources/SFML-2.5.1/include",
+                "-I",
+                "/home/damir/cpp-libs/Mathter/include",
+                "-L",
+                "/home/damir/cpp-libs/SFML-2.5.1-sources/SFML-2.5.1/build/gcc/lib",
+                "-lsfml-system",
+                "-lsfml-window",
+                "-lsfml-graphics"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "detail": "компилятор: /usr/bin/g++"
+        },
+        {
+            "type": "cppbuild",
+            "label": "Linux g++",
+            "command": "/usr/bin/g++",
+            "args": [
+                "${fileDirname}/*.cpp",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}",
+                "-O0",
+                "-std=c++17",
+                "-pedantic",
+                "-mmmx",
+                "-msse2"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "detail": "компилятор: /usr/bin/g++"
+        },
+        {
+            "type": "cppbuild",
+            "label": "Linux g++ (source dir)",
+            "command": "/usr/bin/g++",
+            "args": [
+                "${fileDirname}/*.cpp",
+                "${fileDirname}/source/*.cpp",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}",
+                "-O3",
+                "-std=c++17",
+                "-pedantic"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "detail": "компилятор: /usr/bin/g++"
+        },
+        {
+            "type": "cppbuild",
+            "label": "Windows clang++",
+            "command": "C:/LLVM/bin/clang++",
+            "args": [
+                "${fileDirname}/*.cpp",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}.exe",
+                "-g",
+				"-fdiagnostics-color=always",
+                "-O0",
+                "-std=c++17"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "detail": "компилятор: C:/LLVM/bin/clang++"
+        },
+        {
+            "type": "cppbuild",
+            "label": "Windows clang++ (SFML)",
+            "command": "C:/LLVM/bin/clang++",
+            "args": [
+                "${fileDirname}/*.cpp",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}.exe",
+                "-O0",
+                "-std=c++17",
+                "-I",
+                "C:\\Libs\\SFML-2.5.1\\include",
+                "-L",
+                "C:\\Libs\\SFML-2.5.1\\sfml-builds\\clang 14.0.6 (dr)\\lib\\Debug",
+                "-lsfml-system-d",
+                "-lsfml-window-d",
+                "-lsfml-graphics-d"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "detail": "компилятор: C:/LLVM/bin/clang++"
+        },
+        {
+            "type": "cppbuild",
+            "label": "Windows clang++ (source dir)",
+            "command": "C:/LLVM/bin/clang++",
+            "args": [
+                "${fileDirname}/*.cpp",
+                "${fileDirname}/source/*.cpp",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}.exe",
+                "-O3",
+                "-std=c++17"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "detail": "компилятор: C:/LLVM/bin/clang++"
+        },
+        {
+            "type": "cppbuild",
+            "label": "C/C++: clang++.exe сборка активного файла",
+            "command": "C:/LLVM/bin/clang++.exe",
+            "args": [
+                "-fcolor-diagnostics",
+                "-fansi-escape-codes",
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+            ],
+            "options": {
+                "cwd": "C:/LLVM/bin"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Задача создана отладчиком."
+        }
+    ]
 }

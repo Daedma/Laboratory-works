@@ -14,5 +14,7 @@
 *.png
 *.obj
 *.dll
+*.ilk
+*.pdb
 !CMakeLists.txt
 build/
