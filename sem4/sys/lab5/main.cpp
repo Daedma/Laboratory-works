@@ -10,30 +10,27 @@ int main()
 	std::cout << "d : ";
 	std::cin >> d;
 	double result = 0;
-	int64_t four = 4;
-	int64_t twei = 28;
+	double four = 4;
+	double twei = 28;
+	double one = 1;
 
 
 	asm volatile(
-		"finit;"            // {}
-		"fldl %[c];"         // {c}
-		"fildq %[four];"     // {4, c}
-		"fdivp;"            // {c/4}
-		"fildq %[twei];"     // {28, c/4}
-		"fldl %[d];"         // {d, 28, c/4}
-		"fmulp;"             // {28 * d, c/4}
-		"faddp;"            // {28 * d + c/4}
-		"fldl %[a];"         // {a, 28 * d + c/4}
-		"fldl %[d];"         // {d, a, 28 * d + c/4}
-		"fdivp;"            // {a/d, 28 * d + c/4}
-		"fldl %[c];"         // {c, a/d, 28 * d + c/4}
-		"fsubp;"            // {a/d - c, 28 * d + c/4}
-		"fld1;"             // {1, a/d - c, 28 * d + c/4}
-		"fsubp;"            // {a/d - c - 1, 28 * d + c/4}
-		"fdivp;"            // {(c / 4 + 28 * d) / (a / d - c - 1)}
-		"fstpl %[result];"   // {}
+		"finit;"              // {}
+		"fldl %[c];"          // {c}
+		"fdivl %[four];"      // {c/4}
+		"fldl %[d];"          // {d, c/4}
+		"fmull %[twei];"      // {28*d, c/4}
+		"fadd;"               // {d*28 + c/4, c/4}
+		"fldl %[a];"          // {a, d*28 + c/4, c/4}
+		"fdivl %[d];"         // {a/d, d*28 + c/4, c/4}
+		"fsubl %[c];"         // {a/d - c, d*28 + c/4, c/4}
+		"fsubl %[one];"       // {a/d - c - 1, d*28 + c/4, c/4}
+		"fxch %%st(1);"       // {d*28 + c/4, a/d - c - 1, c/4}
+		"fdiv;"               // {(c / 4 + 28 * d) / (a / d - c - 1), d*28 + c/4, c/4}
+		"fstpl %[result];"    //
 		: [result] "=m" (result)
-		: [a] "m"(a), [d]"m"(d), [c]"m"(c), [four] "m" (four), [twei] "m" (twei)
+		: [a] "m" (a), [d] "m" (d), [c] "m" (c), [four] "m" (four), [twei] "m" (twei), [one] "m" (one)
 		: "memory"
 		);
 	std::cout << "asm : " << result << std::endl;
