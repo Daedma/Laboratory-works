@@ -84,8 +84,6 @@
                 "${fileDirname}/*.cpp",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}.exe",
-                "-g",
-				"-fdiagnostics-color=always",
                 "-O0",
                 "-std=c++17"
             ],
@@ -145,30 +143,6 @@
             ],
             "group": "build",
             "detail": "компилятор: C:/LLVM/bin/clang++"
-        },
-        {
-            "type": "cppbuild",
-            "label": "C/C++: clang++.exe сборка активного файла",
-            "command": "C:/LLVM/bin/clang++.exe",
-            "args": [
-                "-fcolor-diagnostics",
-                "-fansi-escape-codes",
-                "-g",
-                "${file}",
-                "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
-            ],
-            "options": {
-                "cwd": "C:/LLVM/bin"
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "detail": "Задача создана отладчиком."
         }
     ]
 }
