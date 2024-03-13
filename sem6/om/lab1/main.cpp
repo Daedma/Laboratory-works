@@ -76,24 +76,39 @@ std::pair<size_t, size_t> getFibonacciPairAbove(double val)
 
 double fibonacciMethod(std::function<double(double)> func, double left, double right, double eps = DEFAULT_ACCURACY)
 {
-	double x1 = left, x2 = right, dx;
 	auto [fn, fnm1] = getFibonacciPairAbove((right - left) / eps);
-	while (fn != fnm1 && (x2 - x1) > eps)
+	size_t fnm2 = fn - fnm1;
+	double dx = right - left;
+	double x1 = left + (fnm2 * dx) / fn;
+	double x2 = left + (fnm1 * dx) / fn;
+	double fx1 = func(x1);
+	double fx2 = func(x2);
+	fn = fnm1;
+	fnm1 = fnm2;
+	fnm2 = fn - fnm1;
+	while (fn != fnm1)
 	{
-		dx = right - left;
-		size_t fnm2 = fn - fnm1;
-		x1 = left + (fnm2 * dx) / fn;
-		x2 = left + (fnm1 * dx) / fn;
-		fn = fnm1;
-		fnm1 = fnm2;
-		if (func(x1) < func(x2))
+		if (fx1 < fx2)
 		{
 			right = x2;
+			dx = right - left;
+			x2 = x1;
+			x1 = left + (fnm2 * dx) / fn;
+			fx2 = fx1;
+			fx1 = func(x1);
 		}
 		else
 		{
 			left = x1;
+			dx = right - left;
+			x1 = x2;
+			x2 = left + (fnm1 * dx) / fn;
+			fx1 = fx2;
+			fx2 = func(x2);
 		}
+		fn = fnm1;
+		fnm1 = fnm2;
+		fnm2 = fn - fnm1;
 	}
 	return (x1 + x2) * .5;
 }
