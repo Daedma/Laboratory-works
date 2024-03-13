@@ -1,8 +1,8 @@
 // ЛР 1: Одномерные методы: 1) Дихотомия 2) Золотое сечение 3) Фибоначчи
 
+// #include <limits>
 #include <iostream>
 #include <functional>
-#include <limits>
 #include <cmath>
 #include <vector>
 #include <utility>
@@ -10,17 +10,16 @@
 namespace
 {
 	constexpr double DEFAULT_ACCURACY = 1.e-6;
+	constexpr size_t MAX_ITERATIONS = 1703;
 }
 
-double dihotomia(std::function<double(double)> func, double left, double right, double eps = DEFAULT_ACCURACY, size_t iterMax = std::numeric_limits<size_t>::max())
+double dihotomia(std::function<double(double)> func, double left, double right, double eps = DEFAULT_ACCURACY, size_t iterMax = MAX_ITERATIONS)
 {
-	double x1, x2, middle;
-	for (size_t i = 0; i != iterMax && (x2 - x1) >= eps; ++i)
+	double middle;
+	for (size_t i = 0; i != iterMax && (right - left) >= eps; ++i)
 	{
 		middle = (right + left) * .5;
-		x1 = middle - eps;
-		x2 = middle + eps;
-		if (func(x1) > func(x2))
+		if (func(middle - eps) > func(middle + eps))
 		{
 			left = middle;
 		}
@@ -32,7 +31,7 @@ double dihotomia(std::function<double(double)> func, double left, double right, 
 	return middle;
 }
 
-double goldenRatioDihotomia(std::function<double(double)> func, double left, double right, double eps = DEFAULT_ACCURACY, size_t iterMax = std::numeric_limits<size_t>::max())
+double goldenRatioDihotomia(std::function<double(double)> func, double left, double right, double eps = DEFAULT_ACCURACY, size_t iterMax = MAX_ITERATIONS)
 {
 	constexpr double REVERSE_PHI = 0.6180339887498948;
 	double x1 = left, x2 = right, dx;
@@ -53,33 +52,27 @@ double goldenRatioDihotomia(std::function<double(double)> func, double left, dou
 	return (x2 + x1) * 0.5;
 }
 
-size_t fibonacciNumber(size_t n)
+std::pair<size_t, size_t> getFibonacciPairAbove(double val)
 {
-	static std::vector<size_t> cash{0, 1};
-	if (n <= cash.size())
+	size_t cur = 1, prev = 0;
+	while (cur <= val)
 	{
-		return cash[n - 1];
+		cur += prev;
+		prev = cur - prev;
 	}
-	return fibonacciNumber(n - 1) + fibonacciNumber(n - 2);
-}
-
-std::pair<size_t, size_t> getFibonacciAbove(double val)
-{
-	size_t i = 1;
-	while (fibonacciNumber(i) <= val) { ++i; };
-	return { fibonacciNumber(i), fibonacciNumber(i - 1) };
+	return { cur, prev };
 }
 
 double fibonacciMethod(std::function<double(double)> func, double left, double right, double eps = DEFAULT_ACCURACY)
 {
-	double x1 = left, x2 = right, dx = right - left;
-	auto [fn, fnm1] = getFibonacciAbove((right - left) / eps);
-	while (fn != fnm1 && (x2 - x1) < eps)
+	double x1 = left, x2 = right, dx;
+	auto [fn, fnm1] = getFibonacciPairAbove((right - left) / eps);
+	while (fn != fnm1 && (x2 - x1) > eps)
 	{
 		dx = right - left;
 		size_t fnm2 = fn - fnm1;
-		x1 = left + static_cast<double>(fnm1) / fn * dx;
-		x2 = left + static_cast<double>(fnm2) / fn * dx;
+		x1 = left + (fnm2 * dx) / fn;
+		x2 = left + (fnm1 * dx) / fn;
 		fn = fnm1;
 		fnm1 = fnm2;
 		if (func(x1) < func(x2))
@@ -96,7 +89,8 @@ double fibonacciMethod(std::function<double(double)> func, double left, double r
 
 int main()
 {
-	std::cout << dihotomia([](double x) {return x * x - 3;}, -1, 4) << '\n';
-	std::cout << goldenRatioDihotomia([](double x) {return x * x * x * x + 4;}, -3, 2) << '\n';
-	std::cout << fibonacciMethod([](double x) {return x * x - 4;}, -1, 2) << '\n';
+	auto f = [](double x) {return -(x - 3) * pow(x + 6, 2) + 3;}; // -6
+	std::cout << dihotomia(f, -8, -2) << '\n';
+	std::cout << goldenRatioDihotomia(f, -8, -2) << '\n';
+	std::cout << fibonacciMethod(f, -8, -2) << '\n';
 }
