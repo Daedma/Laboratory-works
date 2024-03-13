@@ -34,19 +34,30 @@ double dihotomia(std::function<double(double)> func, double left, double right, 
 double goldenRatioDihotomia(std::function<double(double)> func, double left, double right, double eps = DEFAULT_ACCURACY, size_t iterMax = MAX_ITERATIONS)
 {
 	constexpr double REVERSE_PHI = 0.6180339887498948;
-	double x1 = left, x2 = right, dx;
+	double dx = right - left;
+	double x1 = right - dx * REVERSE_PHI, x2 = left + dx * REVERSE_PHI;
+	double fx1 = func(x1);
+	double fx2 = func(x2);
+
 	for (size_t i = 0; i != iterMax && (x2 - x1) >= eps; ++i)
 	{
-		dx = right - left;
-		x1 = right - dx * REVERSE_PHI;
-		x2 = left + dx * REVERSE_PHI;
-		if (func(x1) >= func(x2))
+		if (fx1 >= fx2)
 		{
 			left = x1;
+			dx = right - left;
+			x1 = x2;
+			x2 = left + dx * REVERSE_PHI;
+			fx1 = fx2;
+			fx2 = func(x2);
 		}
 		else
 		{
 			right = x2;
+			dx = right - left;
+			x2 = x1;
+			x1 = right - dx * REVERSE_PHI;
+			fx2 = fx1;
+			fx1 = func(x1);
 		}
 	}
 	return (x2 + x1) * 0.5;
