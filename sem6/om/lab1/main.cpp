@@ -15,31 +15,33 @@ namespace
 
 double dihotomia(std::function<double(double)> func, double left, double right, double eps = DEFAULT_ACCURACY, size_t iterMax = MAX_ITERATIONS)
 {
-	double middle;
-	for (size_t i = 0; i != iterMax && (right - left) >= eps; ++i)
+	size_t i = 0;
+	for (; i != iterMax && (right - left) >= eps * 2; ++i)
 	{
-		middle = (right + left) * .5;
 		if (func(middle - eps) > func(middle + eps))
 		{
-			left = middle;
+			left = (right + left) * .5;
 		}
 		else
 		{
-			right = middle;
+			right = (right + left) * .5;
 		}
 	}
-	return middle;
+	std::cout << "dihotomia::probes:" << i * 2 << '\n';
+	std::cout << "dihotomia::range  :"<< right - left << '\n';
+	return (right + left) * .5;
 }
 
-double goldenRatioDihotomia(std::function<double(double)> func, double left, double right, double eps = DEFAULT_ACCURACY, size_t iterMax = MAX_ITERATIONS)
+double goldenRatio(std::function<double(double)> func, double left, double right, double eps = DEFAULT_ACCURACY, size_t iterMax = MAX_ITERATIONS)
 {
 	constexpr double REVERSE_PHI = 0.6180339887498948;
 	double dx = right - left;
 	double x1 = right - dx * REVERSE_PHI, x2 = left + dx * REVERSE_PHI;
 	double fx1 = func(x1);
 	double fx2 = func(x2);
+	size_t i = 0;
 
-	for (size_t i = 0; i != iterMax && (x2 - x1) >= eps; ++i)
+	for (; i != iterMax && (right - left) >= eps * 2; ++i)
 	{
 		if (fx1 >= fx2)
 		{
@@ -60,23 +62,27 @@ double goldenRatioDihotomia(std::function<double(double)> func, double left, dou
 			fx1 = func(x1);
 		}
 	}
+	std::cout << "goldenRatio::probes:" << i + 2 << '\n';
+	std::cout << "goldenRatio::range  :" << rhs - lhs << '\n';
 	return (x2 + x1) * 0.5;
 }
 
-std::pair<size_t, size_t> getFibonacciPairAbove(double val)
+std::pair<size_t, size_t> getFibonacciPairAbove(double val, size_t & i)
 {
 	size_t cur = 1, prev = 0;
 	while (cur <= val)
 	{
+		i++;
 		cur += prev;
 		prev = cur - prev;
 	}
 	return { cur, prev };
 }
 
-double fibonacciMethod(std::function<double(double)> func, double left, double right, double eps = DEFAULT_ACCURACY)
+double fibonacci(std::function<double(double)> func, double left, double right, double eps = DEFAULT_ACCURACY)
 {
-	auto [fn, fnm1] = getFibonacciPairAbove((right - left) / eps);
+	size_t i = 0;
+	auto [fn, fnm1] = getFibonacciPairAbove((right - left) / eps, i);
 	size_t fnm2 = fn - fnm1;
 	double dx = right - left;
 	double x1 = left + (fnm2 * dx) / fn;
@@ -86,7 +92,8 @@ double fibonacciMethod(std::function<double(double)> func, double left, double r
 	fn = fnm1;
 	fnm1 = fnm2;
 	fnm2 = fn - fnm1;
-	while (fn != fnm1)
+	std::cout << "fibonacci::probes:" << i + 2 << '\n';
+	while (--i)
 	{
 		if (fx1 < fx2)
 		{
@@ -110,6 +117,7 @@ double fibonacciMethod(std::function<double(double)> func, double left, double r
 		fnm1 = fnm2;
 		fnm2 = fn - fnm1;
 	}
+	std::cout << "fibonacci::range  :" << rhs - lhs << '\n';
 	return (x1 + x2) * .5;
 }
 
@@ -117,6 +125,13 @@ int main()
 {
 	auto f = [](double x) {return -(x - 3) * pow(x + 6, 2) + 3;}; // -6
 	std::cout << dihotomia(f, -8, -2) << '\n';
-	std::cout << goldenRatioDihotomia(f, -8, -2) << '\n';
-	std::cout << fibonacciMethod(f, -8, -2) << '\n';
+	std::cout << goldenRatio(f, -8, -2) << '\n';
+	std::cout << fibonacci(f, -8, -2) << '\n';
 }
+/*int main()
+{
+	auto f = [](double x) {return x * (x - 5); }; // 2.5
+	std::cout << dihotomia  (f, -5.0, 5.0) << '\n';
+	std::cout << goldenRatio(f, -5.0, 5.0) << '\n';
+	std::cout << fibonacci  (f, -5.0, 5.0, 2e-6) << '\n';
+}*/
