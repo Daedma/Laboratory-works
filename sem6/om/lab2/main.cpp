@@ -37,6 +37,12 @@ std::ostream& operator<<(std::ostream& os, const Vector<N>& rhs)
 	return os << ')';
 }
 
+template <typename T>
+inline int sgn(T val)
+{
+	return (T(0) <= val) - (val < T(0));
+}
+
 template<int N, typename Func>
 Vector<N> dihotomia(Func func, Vector<N> left, Vector<N> right, double eps = DEFAULT_ACCURACY, size_t iterMax = MAX_ITERATIONS)
 {
@@ -149,36 +155,25 @@ Vector<N> fibonacciMethod(Func func, Vector<N> left, Vector<N> right, double eps
 }
 
 template<int N, typename Func>
-Vector<N> perCoordDescend(Func func, const Vector<N>& start, double eps = DEFAULT_ACCURACY, size_t iterMax = MAX_ITERATIONS)
+Vector<N> perCoordDescend(Func func, Vector<N> start, double eps = DEFAULT_ACCURACY, size_t iterMax = MAX_ITERATIONS)
 {
-	Vector<N> x0{ start };
-	Vector<N> x1(start);
-	double step = 1.;
-	double xi, y1, y0;
-	size_t optCoordN = 0, coordId;
-	for (size_t i = 0; i < iterMax; ++i)
+	Vector<N> ort(0.);
+	Vector<N> cur;
+	for (size_t i = 0; i != iterMax; i++)
 	{
-		coordId = i % x0.Dimension();
-		x1[coordId] -= eps;
-		y0 = func(x1);
-		x1[coordId] += 2. * eps;
-		y1 = func(x1);
-		x1[coordId] = y0 > y1 ? x1[coordId] += step : x1[coordId] -= step;
-		xi = x0[coordId];
-		x1 = goldenRatioDihotomia(func, x0, x1, eps, iterMax);
-		x0 = x1;
-		if (abs(x1[coordId] - xi) < eps)
+		ort[i % N] = 1.;
+		int sign = sgn(func(start - ort * eps) - func(start + ort * eps));
+		cur = goldenRatioDihotomia(func,
+			start + sign * ort, start, eps, iterMax);
+		if (mathter::LengthSquared(cur - start) < eps * eps)
 		{
-			++optCoordN;
-			if (optCoordN == x1.Dimension())
-			{
-				return x0;
-			}
-			continue;
+			return cur;
 		}
-		optCoordN = 0;
+		start = cur;
+		ort[i % N] = 0.;
 	}
-	return x0;
+	return cur;
+
 }
 
 static double test_func_2(const Vector<2>& x)
