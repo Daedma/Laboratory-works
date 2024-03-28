@@ -63,8 +63,8 @@ Vector<N> goldenRatioDihotomia(Func func, Vector<N> left, Vector<N> right, doubl
 	constexpr double REVERSE_PHI = 0.6180339887498948;
 	Vector<N> dx = right - left;
 	Vector<N> x1 = right - dx * REVERSE_PHI, x2 = left + dx * REVERSE_PHI;
-	size_t fx1 = func(x1);
-	size_t fx2 = func(x2);
+	double fx1 = func(x1);
+	double fx2 = func(x2);
 
 	eps *= 4. * eps;
 	for (size_t i = 0; i != iterMax && mathter::LengthSquared(x2 - x1) >= eps; ++i)
@@ -115,7 +115,7 @@ Vector<N> fibonacciMethod(Func func, Vector<N> left, Vector<N> right, double eps
 	size_t fnm2 = fn - fnm1;
 	Vector<N> dx = right - left;
 	Vector<N> x1 = left + (fnm2 * dx) / fn;
-	Vector<N>x2 = left + (fnm1 * dx) / fn;
+	Vector<N> x2 = left + (fnm1 * dx) / fn;
 	double fx1 = func(x1);
 	double fx2 = func(x2);
 	fn = fnm1;
@@ -148,6 +148,39 @@ Vector<N> fibonacciMethod(Func func, Vector<N> left, Vector<N> right, double eps
 	return (x1 + x2) * .5;
 }
 
+template<int N, typename Func>
+Vector<N> perCoordDescend(Func func, const Vector<N>& start, double eps = DEFAULT_ACCURACY, size_t iterMax = MAX_ITERATIONS)
+{
+	Vector<N> x0{ start };
+	Vector<N> x1(start);
+	double step = 1.;
+	double xi, y1, y0;
+	size_t optCoordN = 0, coordId;
+	for (size_t i = 0; i < iterMax; ++i)
+	{
+		coordId = i % x0.Dimension();
+		x1[coordId] -= eps;
+		y0 = func(x1);
+		x1[coordId] += 2. * eps;
+		y1 = func(x1);
+		x1[coordId] = y0 > y1 ? x1[coordId] += step : x1[coordId] -= step;
+		xi = x0[coordId];
+		x1 = goldenRatioDihotomia(func, x0, x1, eps, iterMax);
+		x0 = x1;
+		if (abs(x1[coordId] - xi) < eps)
+		{
+			++optCoordN;
+			if (optCoordN == x1.Dimension())
+			{
+				return x0;
+			}
+			continue;
+		}
+		optCoordN = 0;
+	}
+	return x0;
+}
+
 static double test_func_2(const Vector<2>& x)
 {
 	return (x[0] - 5) * x[0] + (x[1] - 3) * x[1]; // min at point x = 2.5, y = 1.5
@@ -169,5 +202,9 @@ int main(int argc, char const* argv[])
 	std::cout << "golden_ratio          : " << goldenRatioDihotomia(test_func_2, x_1, x_0) << "\n";
 	std::cout << "fibonacci             : " << fibonacciMethod(test_func_2, x_1, x_0) << "\n";
 	std::cout << "\n";
+
+	Vector<2> x_start = { -14, -33.98 };
+	std::cout << "x_start = " << x_start << "\n";
+	std::cout << "per_coord_descend     : " << perCoordDescend(test_func_2, x_start) << "\n";
 	return 0;
 }
