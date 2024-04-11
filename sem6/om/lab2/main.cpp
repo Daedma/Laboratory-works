@@ -47,10 +47,12 @@ template<int N, typename Func>
 Vector<N> dihotomia(Func func, Vector<N> left, Vector<N> right, double eps = DEFAULT_ACCURACY, size_t iterMax = MAX_ITERATIONS)
 {
 	Vector<N> middle, direction;
-	for (size_t i = 0; i != iterMax && mathter::LengthSquared(right - left) >= eps * eps; ++i)
+	size_t i = 0;
+	direction = mathter::Normalize(right - left) * eps;
+	eps *= 4 * eps;
+	for (; i != iterMax && mathter::LengthSquared(right - left) >= eps; ++i)
 	{
-		middle = (right + left) * .5;
-		direction = mathter::Normalize(right - left) * eps;
+		middle = (right + left) * 0.5;
 		if (func(middle - direction) > func(middle + direction))
 		{
 			left = middle;
@@ -60,20 +62,22 @@ Vector<N> dihotomia(Func func, Vector<N> left, Vector<N> right, double eps = DEF
 			right = middle;
 		}
 	}
+	std::cout << "Iterations > " << i * 2 << '\n';
+	std::cout << "Accuracy > " << mathter::Distance(right, left) << '\n';
 	return (left + right) * .5;
 }
 
 template<int N, typename Func>
-Vector<N> goldenRatioDihotomia(Func func, Vector<N> left, Vector<N> right, double eps = DEFAULT_ACCURACY, size_t iterMax = MAX_ITERATIONS)
+Vector<N> goldenRatio(Func func, Vector<N> left, Vector<N> right, double eps = DEFAULT_ACCURACY, size_t iterMax = MAX_ITERATIONS)
 {
 	constexpr double REVERSE_PHI = 0.6180339887498948;
 	Vector<N> dx = right - left;
 	Vector<N> x1 = right - dx * REVERSE_PHI, x2 = left + dx * REVERSE_PHI;
 	double fx1 = func(x1);
 	double fx2 = func(x2);
-
+	size_t i = 0;
 	eps *= 4. * eps;
-	for (size_t i = 0; i != iterMax && mathter::LengthSquared(x2 - x1) >= eps; ++i)
+	for (; i != iterMax && mathter::LengthSquared(x2 - x1) >= eps; ++i)
 	{
 		if (fx1 >= fx2)
 		{
@@ -94,12 +98,14 @@ Vector<N> goldenRatioDihotomia(Func func, Vector<N> left, Vector<N> right, doubl
 			fx1 = func(x1);
 		}
 	}
+	std::cout << "Iterations > " << i + 2 << '\n';
+	std::cout << "Accuracy > " << mathter::Distance(right, left) << '\n';
 	return (x2 + x1) * 0.5;
 }
 
 std::pair<size_t, size_t> getFibonacciPairAbove(double val, size_t& outIterations)
 {
-	size_t cur = 1, prev = 0;
+	size_t cur = 1, prev = 1;
 	while (cur <= val)
 	{
 		cur += prev;
@@ -110,10 +116,10 @@ std::pair<size_t, size_t> getFibonacciPairAbove(double val, size_t& outIteration
 }
 
 template<int N, typename Func>
-Vector<N> fibonacciMethod(Func func, Vector<N> left, Vector<N> right, double eps = DEFAULT_ACCURACY, size_t iterMax = MAX_ITERATIONS)
+Vector<N> fibonacci(Func func, Vector<N> left, Vector<N> right, double eps = DEFAULT_ACCURACY, size_t iterMax = MAX_ITERATIONS)
 {
 	size_t it = 0;
-	auto [fn, fnm1] = getFibonacciPairAbove(mathter::Distance(right, left) / eps, it);
+	auto [fn, fnm1] = getFibonacciPairAbove(mathter::Distance(right, left) / (eps), it);
 	if (it > iterMax)
 	{
 		return (Vector<N>(NAN));
@@ -127,7 +133,8 @@ Vector<N> fibonacciMethod(Func func, Vector<N> left, Vector<N> right, double eps
 	fn = fnm1;
 	fnm1 = fnm2;
 	fnm2 = fn - fnm1;
-	while (it-- != 0)
+	std::cout << "Iterations > " << it + 2 << '\n';
+	while (it--)
 	{
 		if (fx1 < fx2)
 		{
@@ -151,6 +158,7 @@ Vector<N> fibonacciMethod(Func func, Vector<N> left, Vector<N> right, double eps
 		fnm1 = fnm2;
 		fnm2 = fn - fnm1;
 	}
+	std::cout << "Accuracy > " << mathter::Distance(right, left) << '\n';
 	return (x1 + x2) * .5;
 }
 
@@ -159,7 +167,8 @@ Vector<N> perCoordDescend(Func func, Vector<N> start, double eps = DEFAULT_ACCUR
 {
 	Vector<N> ort(0.);
 	Vector<N> cur;
-	for (size_t i = 0; i != iterMax; i++)
+	size_t i = 0;
+	for (; i != iterMax; i++)
 	{
 		ort[i % N] = 1.;
 		int sign = sgn(func(start - ort * eps) - func(start + ort * eps));
@@ -172,6 +181,8 @@ Vector<N> perCoordDescend(Func func, Vector<N> start, double eps = DEFAULT_ACCUR
 		start = cur;
 		ort[i % N] = 0.;
 	}
+	std::cout << "Accuracy" << mathter::Distance(cur, start) << '\n';
+	std::cout << "Iterations > " << i + 2 << '\n';
 	return cur;
 
 }
@@ -194,10 +205,9 @@ int main(int argc, char const* argv[])
 	std::cout << "x_0 = " << x_0 << ", x_1 = " << x_1 << "\n";
 	///  Для реализации по-координтаного спуска необходимо реализовать один из следующих трех методов для работы с vec_n
 	std::cout << "bisect                : " << dihotomia(test_func_2, x_1, x_0) << "\n";
-	std::cout << "golden_ratio          : " << goldenRatioDihotomia(test_func_2, x_1, x_0) << "\n";
-	std::cout << "fibonacci             : " << fibonacciMethod(test_func_2, x_1, x_0) << "\n";
+	std::cout << "golden_ratio          : " << goldenRatio(test_func_2, x_1, x_0) << "\n";
+	std::cout << "fibonacci             : " << fibonacci(test_func_2, x_1, x_0, DEFAULT_ACCURACY * 8) << "\n";
 	std::cout << "\n";
-
 	Vector<2> x_start = { -14, -33.98 };
 	std::cout << "x_start = " << x_start << "\n";
 	std::cout << "per_coord_descend     : " << perCoordDescend(test_func_2, x_start) << "\n";
