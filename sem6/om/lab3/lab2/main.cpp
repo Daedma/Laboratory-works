@@ -14,7 +14,8 @@
 #include <cmath>
 #include <utility>
 #include "Mathter/Vector.hpp"
-#include "Mathter/Matrix.hpp" 
+#include "Mathter/Matrix.hpp"
+#include "Mathter/IoStream.hpp" 
 
 namespace
 {
@@ -27,21 +28,6 @@ using Vector = mathter::Vector<double, N>;
 
 template<int Rows, int Columns>
 using Matrix = mathter::Matrix<double, Rows, Columns, mathter::eMatrixOrder::PRECEDE_VECTOR>;
-
-template<int N>
-std::ostream& operator<<(std::ostream& os, const Vector<N>& rhs)
-{
-	os << '(';
-	if (rhs.Dimension())
-	{
-		for (size_t i = 0; i != rhs.Dimension() - 1; i++)
-		{
-			os << rhs[i] << ';';
-		}
-		os << rhs[rhs.Dimension() - 1];
-	}
-	return os << ')';
-}
 
 template <typename T>
 inline int sgn(T val)
