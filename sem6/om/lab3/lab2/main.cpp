@@ -4,11 +4,17 @@
 // 6) Градиентный спуск спуск
 // 7) метод сопряжённых градиентов
 
+// ЛР 4:
+// 8) Определение типа mat_mn(c++) / Matrix(c#) и вспомогательных функций и операторов к нему.
+// 9) Метод Ньютона - Рафсона.
+// 10)Функции внешнего и внутреннего штрафа.
+
 #include <iostream>
 #include <functional>
 #include <cmath>
 #include <utility>
 #include "Mathter/Vector.hpp"
+#include "Mathter/Matrix.hpp" 
 
 namespace
 {
@@ -18,6 +24,9 @@ namespace
 
 template<int N>
 using Vector = mathter::Vector<double, N>;
+
+template<int Rows, int Columns>
+using Matrix = mathter::Matrix<double, Rows, Columns, mathter::eMatrixOrder::PRECEDE_VECTOR>;
 
 template<int N>
 std::ostream& operator<<(std::ostream& os, const Vector<N>& rhs)
@@ -40,18 +49,50 @@ inline int sgn(T val)
 	return (T(0) <= val) - (val < T(0));
 }
 
+
 template<int N, typename Func>
-Vector<N> gradient(Func func, const Vector<N> x, double eps)
+double partialDerivative(Func func, uint32_t nvar, const Vector<N>& x, double eps)
+{
+	Vector<N> xipe = x;
+	xipe[nvar] += eps;
+	return (func(xipe) - func(x)) / eps;
+}
+
+template<int N, typename Func>
+Vector<N> gradient(Func func, const Vector<N>& x, double eps)
 {
 	Vector<N> result;
 	for (int i = 0; i != N; ++i)
 	{
-		Vector<N> xipe = x;
-		xipe[i] += eps;
-		result[i] = (func(xipe) - func(x)) / eps;
+		result[i] = partialDerivative(func, i, x, eps);
 	}
 	return result;
 }
+
+template<int N, typename Func>
+double partialDerivative2(Func func, uint32_t nvar1, uint32_t nvar2, const Vector<N>& x, double eps)
+{
+	Vector<N> xipe = x;
+	xipe[nvar1] += eps;
+	return (partialDerivative(func, nvar2, xipe, eps * 0.5) - partialDerivative(func, nvar2, x, eps * 0.5)) / eps;
+}
+
+
+template<int N, typename Func>
+Matrix<N, N> hessian(Func func, const Vector<N> x, double eps)
+{
+	Matrix<N, N> result;
+	for (int i = 0; i != N; ++i)
+	{
+		for (int j = i; j != N; ++j)
+		{
+			result(i, j) = result(j, i) = partialDerivative2(func, i, j, x, eps);
+		}
+	}
+	return result;
+}
+
+
 
 template<int N, typename Func>
 Vector<N> goldenRatio(Func func, Vector<N> left, Vector<N> right, double eps = DEFAULT_ACCURACY, size_t iterMax = MAX_ITERATIONS)
@@ -128,6 +169,26 @@ Vector<N> conjGradientDescend(Func func, Vector<N> start, double eps = DEFAULT_A
 	return cur;
 }
 
+template<int N, typename Func>
+Vector<N> newtoneRaphson(Func func, Vector<N> start, double eps = DEFAULT_ACCURACY, size_t iterMax = MAX_ITERATIONS)
+{
+	Vector<N> cur;
+	Vector<N> grad;
+	Matrix<N, N> hess;
+	for (size_t i = 0; i != iterMax; ++i)
+	{
+		grad = gradient(func, start, eps);
+		hess = mathter::Inverse(hessian(func, start, eps));
+		cur = start - hess * grad;
+		if (mathter::LengthSquared(cur - start) < eps * eps)
+		{
+			return cur;
+		}
+		start = cur;
+	}
+	return cur;
+}
+
 static double test_func_2(const Vector<2>& x)
 {
 	return (x[0] - 5) * x[0] + (x[1] - 3) * x[1]; // min at point x = 2.5, y = 1.5
@@ -142,5 +203,11 @@ int main(int argc, char const* argv[])
 	std::cout << "x_start = " << x_start << "\n";
 	std::cout << "gradient_descend      : " << gradientDescent(test_func_2, x_start) << "\n";
 	std::cout << "conj_gradient_descend : " << conjGradientDescend(test_func_2, x_start) << "\n";
+
+	std::cout << "\n////////////////////\n";
+	std::cout << "/// Lab. work #4 ///\n";
+	std::cout << "////////////////////\n\n";
+	x_start = { -12.0, -15.0 };
+	std::cout << "newtone_raphson       : " << newtoneRaphson(test_func_2, x_start) << "\n";
 	return 0;
 }
