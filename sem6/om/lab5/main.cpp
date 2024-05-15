@@ -150,9 +150,23 @@ void init_table(const lpproblem* pdata, matrix_t* pout)
 	}
 }
 
-void init_basis(const lpproblem* pdata, matrix_t* pout)
+void init_basis(const lpproblem* pdata, vector_t* pout)
 {
+	*pout = vnew(pdata->areaa.nrow);
+	for (size_t i = 0; i != pout->size; ++i)
+	{
+		pout->pdata[i] = i + pdata->areaa.ncol;
+	}
+}
 
+bool simplex_iteration(matrix_t* ptable, vector_t* pbasis)
+{
+ // TODO
+}
+
+void write_solution(const matrix_t* ptable, const vector_t* pbasis, lpsolution* ppout)
+{
+ // TODO
 }
 
 void lpsolve(const lpproblem* pdata, lpsolution* pout)
@@ -160,7 +174,9 @@ void lpsolve(const lpproblem* pdata, lpsolution* pout)
 	matrix_t table;
 	init_table(pdata, &table);
 	vector_t basis;
-
+	init_basis(pdata, &basis);
+	while (simplex_iteration(&table, &basis));
+	write_solution(&table, &basis, pout);
 }
 
 // using value_type = double;
