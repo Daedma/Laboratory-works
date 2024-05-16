@@ -121,7 +121,7 @@ void vprint(const vector_t* v)
 	std::cout << "[";
 	for (size_t i = 0; i < v->size - 1; ++i)
 	{
-		std::cout << vget(v, i) << '; ';
+		std::cout << vget(v, i) << "; ";
 	}
 	if (v->size != 0)
 	{
@@ -148,7 +148,7 @@ void mprint(matrix_t* m)
 		v.size = m->ncol;
 		vprint(&v);
 	}
-	std::cout << "\n";
+	std::cout << "}\n";
 }
 
 struct lpproblem
@@ -178,9 +178,9 @@ void init_table(const lpproblem* pdata, matrix_t* pout)
 		*i = -(*i);
 	}
 	mcassign(pout, &pdata->areab, 0, pdata->areaa.ncol + pdata->areab.size);
-	for (size_t i = pdata->areaa.ncol; i != pdata->areaa.nrow; ++i)
+	for (size_t i = 0; i != pdata->areaa.nrow; ++i)
 	{
-		mget(pout, i, i) = 1;
+		mget(pout, i, i + pdata->areaa.ncol) = 1;
 	}
 }
 
@@ -205,26 +205,33 @@ bool simplex_iteration(matrix_t* ptable, vector_t* pbasis)
 	}
 	for (size_t i = 0; i != pbasis->size; ++i)
 	{
-		if (abs(mget(ptable, i, ptable->ncol - 1) / mget(ptable, i, curj)) <
-			abs(mget(ptable, curi, ptable->ncol - 1) / mget(ptable, curi, curj)))
+		if (mget(ptable, i, curj) < 0)
 		{
-			curi = i;
+			if (abs(mget(ptable, i, ptable->ncol - 1) / mget(ptable, i, curj)) <
+				abs(mget(ptable, curi, ptable->ncol - 1) / mget(ptable, curi, curj)))
+			{
+				curi = i;
+			}
 		}
 	}
+
+	std::cout << "curi=" << curi << ", curj=" << curj << "\n";
+
 	vget(pbasis, curi) = curj;
 	num_t curval = mget(ptable, curi, curj);
 
-	for (size_t i = 0; i != ptable->nrow;++i)
+	for (size_t j = 0; j != ptable->ncol;++j)
 	{
-		mget(ptable, i, curj) /= curval;
+		mget(ptable, curi, j) /= curval;
 	}
 	for (size_t i = 0; i != ptable->nrow; ++i)
 	{
 		if (i != curi)
 		{
+			num_t coeff = mget(ptable, i, curj);
 			for (size_t j = 0; j != ptable->ncol; ++j)
 			{
-				mget(ptable, i, j) -= mget(ptable, i, curj) * mget(ptable, curi, j);
+				mget(ptable, i, j) -= coeff * mget(ptable, curi, j);
 			}
 		}
 	}
@@ -251,13 +258,70 @@ void lpsolve(const lpproblem* pdata, lpsolution* pout)
 {
 	matrix_t table;
 	init_table(pdata, &table);
+	std::cout << "INITIAL TABLE:\n";
+	mprint(&table);
+	std::cout << '\n';
+
 	vector_t basis;
 	init_basis(pdata, &basis);
-	while (simplex_iteration(&table, &basis));
+	std::cout << "INITIAL BASIS:\n";
+	vprint(&basis);
+	std::cout << '\n';
+
+	while (simplex_iteration(&table, &basis))
+	{
+		std::cout << "TABLE:\n";
+		mprint(&table);
+		std::cout << '\n';
+
+		std::cout << "BASIS:\n";
+		vprint(&basis);
+		std::cout << '\n';
+	}
 	write_solution(&table, &basis, pout);
 	delete[] table.pdata;
 	delete[] basis.pdata;
 }
+
+int main(int argc, char const* argv[])
+{
+	matrix_t A = mnew(3, 2);
+	A.pdata[0] = -2;
+	A.pdata[1] = 6;
+	A.pdata[2] = 3;
+	A.pdata[3] = 2;
+	A.pdata[4] = 2;
+	A.pdata[5] = -1;
+
+	vector_t C = vnew(2);
+	C.pdata[0] = 2;
+	C.pdata[1] = 3;
+
+	vector_t B = vnew(3);
+	B.pdata[0] = 40;
+	B.pdata[1] = 28;
+	B.pdata[2] = 14;
+
+	lpproblem data;
+	data.areaa = A;
+	data.areab = B;
+	data.funcc = C;
+
+	lpsolution solution;
+
+	lpsolve(&data, &solution);
+
+	std::cout << "Minimum: " << solution.val << '\n';
+	std::cout << "Minimal value: ";
+	vprint(&solution.point);
+
+	delete[] A.pdata;
+	delete[] B.pdata;
+	delete[] C.pdata;
+	delete[] solution.point.pdata;
+	return 0;
+}
+
 
 // int main(int argc, char const* argv[])
 // {
