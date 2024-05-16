@@ -116,6 +116,40 @@ num_t* mcassign(matrix_t* dest, const vector_t* src, size_t i, size_t j)
 	return dest->pdata + (i + 1) * dest->ncol + j;
 }
 
+void vprint(const vector_t* v)
+{
+	std::cout << "[";
+	for (size_t i = 0; i < v->size - 1; ++i)
+	{
+		std::cout << vget(v, i) << '; ';
+	}
+	if (v->size != 0)
+	{
+		std::cout << vget(v, v->size - 1);
+	}
+	std::cout << "]";
+}
+
+void mprint(matrix_t* m)
+{
+	std::cout << "{";
+	for (size_t i = 0; i < m->nrow - 1; ++i)
+	{
+		vector_t v;
+		v.pdata = m->pdata + i * m->ncol;
+		v.size = m->ncol;
+		vprint(&v);
+		std::cout << "\n";
+	}
+	if (m->nrow != 0)
+	{
+		vector_t v;
+		v.pdata = m->pdata + (m->nrow - 1) * m->ncol;
+		v.size = m->ncol;
+		vprint(&v);
+	}
+	std::cout << "\n";
+}
 
 struct lpproblem
 {
@@ -161,12 +195,56 @@ void init_basis(const lpproblem* pdata, vector_t* pout)
 
 bool simplex_iteration(matrix_t* ptable, vector_t* pbasis)
 {
- // TODO
+	const size_t cdepvar = ptable->ncol - pbasis->size;
+	size_t curj = 0;
+	size_t curi = 0;
+	for (;curj != cdepvar && mget(ptable, ptable->nrow - 1, curj) >= 0; ++curj);
+	if (curj == cdepvar)
+	{
+		return false;
+	}
+	for (size_t i = 0; i != pbasis->size; ++i)
+	{
+		if (abs(mget(ptable, i, ptable->ncol - 1) / mget(ptable, i, curj)) <
+			abs(mget(ptable, curi, ptable->ncol - 1) / mget(ptable, curi, curj)))
+		{
+			curi = i;
+		}
+	}
+	vget(pbasis, curi) = curj;
+	num_t curval = mget(ptable, curi, curj);
+
+	for (size_t i = 0; i != ptable->nrow;++i)
+	{
+		mget(ptable, i, curj) /= curval;
+	}
+	for (size_t i = 0; i != ptable->nrow; ++i)
+	{
+		if (i != curi)
+		{
+			for (size_t j = 0; j != ptable->ncol; ++j)
+			{
+				mget(ptable, i, j) -= mget(ptable, i, curj) * mget(ptable, curi, j);
+			}
+		}
+	}
+	return true;
 }
 
-void write_solution(const matrix_t* ptable, const vector_t* pbasis, lpsolution* ppout)
+void write_solution(const matrix_t* ptable, const vector_t* pbasis, lpsolution* pout)
 {
- // TODO
+	pout->point = vnew(ptable->ncol - pbasis->size);
+	for (size_t i = 0; i != pout->point.size; ++i)
+	{
+		for (size_t j = 0; j != pbasis->size; ++j)
+		{
+			if (vget(pbasis, j) == i)
+			{
+				vget(&pout->point, i) = mget(ptable, j, ptable->ncol - 1);
+			}
+		}
+	}
+	pout->val = mget(ptable, ptable->nrow - 1, ptable->ncol - 1);
 }
 
 void lpsolve(const lpproblem* pdata, lpsolution* pout)
@@ -177,105 +255,9 @@ void lpsolve(const lpproblem* pdata, lpsolution* pout)
 	init_basis(pdata, &basis);
 	while (simplex_iteration(&table, &basis));
 	write_solution(&table, &basis, pout);
+	delete[] table.pdata;
+	delete[] basis.pdata;
 }
-
-// using value_type = double;
-
-// template<int N>
-// using Vector = mathter::Vector<value_type, N>;
-
-// template<int Rows, int Columns>
-// using Matrix = mathter::Matrix<value_type, Rows, Columns, mathter::eMatrixOrder::PRECEDE_VECTOR>;
-
-// template<int NVariables, int NConditions>
-// Vector<NVariables> simplex_method(const Vector<NVariables>& c, const Matrix<NConditions, NVariables>& a, const Vector<NConditions>& b)
-// {
-// 	// init
-// 	Vector<NConditions> basis;
-// 	std::iota(basis.begin(), basis.end(), NVariables + 1);
-// 	Vector<NVariables> free;
-// 	std::iota(free.begin(), free.end(), 1);
-// 	Matrix<NConditions + 1, NConditions + NVariables + 1> table = mathter::Zero();
-// 	for (uint32_t i = 0; i != a.Height(); ++i)
-// 	{
-// 		for (uint32_t j = 0; j != a.Width(); ++j)
-// 		{
-// 			table(i, j) = a(i, j);
-// 		}
-
-// 	}
-// 	for (uint32_t i = 0; i != NConditions; ++i)
-// 	{
-// 		table(i, i + NVariables) = 1;
-// 	}
-// 	for (uint32_t i = 0; i != NConditions; ++i)
-// 	{
-// 		table(i, NConditions + NVariables) = b[i];
-// 	}
-// 	for (uint32_t i = 0; i != NVariables; ++i)
-// 	{
-// 		table(NConditions, i) = -c[i];
-// 	}
-// 	std::cout << "basis : " << basis << std::endl;
-// 	std::cout << "free  : " << free << std::endl;
-// 	std::cout << table << std::endl;
-
-// 	bool solution_is_find = false;
-
-// 	while (!solution_is_find)
-// 	{
-// 		uint32_t curi = 0, curj = 0;
-// 		for (; curj < NConditions + NVariables && table(NConditions, curj) >= 0; curj++);
-// 		if (curj == NConditions + NVariables)
-// 		{
-// 			break;
-// 		}
-// 		value_type rat = INFINITY;
-// 		for (int i = 0;i != NConditions; ++i)
-// 		{
-// 			if (abs(table(i, NConditions + NVariables) / table(i, curj)) < rat)
-// 			{
-// 				rat = abs(table(i, NConditions + NVariables) / table(i, curj));
-// 				std::cout << rat << '\n';
-// 				curi = i;
-// 			}
-// 		}
-// 		std::swap(basis[curi], free[curj]);
-// 		std::cout << "cur : " << curi << ' ' << curj << "(" << table(curi, curj) << ")" << std::endl;
-// 		table(curi, curj) = 1 / table(curi, curj);
-// 		for (int i = 0; i != NConditions + NVariables + 1; ++i)
-// 		{
-// 			if (i != curj)
-// 			{
-// 				table(curi, i) *= table(curi, curj);
-// 			}
-// 		}
-// 		for (int i = 0; i != NConditions + 1; ++i)
-// 		{
-// 			if (i != curi)
-// 			{
-// 				table(i, curj) *= -table(curi, curj);
-// 			}
-// 		}
-// 		for (size_t i = 0; i != NConditions + 1; i++)
-// 		{
-// 			for (int j = 0; j != NConditions + NVariables + 1; ++j)
-// 			{
-// 				if (i != curi && j != curj)
-// 				{
-// 					table(i, j) -= table(i, curj) * table(curi, j) / table(curi, curj);
-// 				}
-// 			}
-// 		}
-
-// 		std::cout << "basis : " << basis << std::endl;
-// 		std::cout << "free  : " << free << std::endl;
-// 		std::cout << table << std::endl;
-
-// 		// return free;
-// 	}
-// 	return free;
-// }
 
 // int main(int argc, char const* argv[])
 // {
