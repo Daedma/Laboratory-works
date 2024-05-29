@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <limits>
 #include <iomanip>
+#include <numeric>
 
 template<typename T>
 class SimplexMethod
@@ -19,9 +20,9 @@ public:
 	{
 		return solution;
 	}
-	const std::vector<T>& getObjectiveValues() const
+	const T getObjectiveValue() const
 	{
-		return objectiveValues;
+		return objectiveValue;
 	}
 
 private:
@@ -29,37 +30,25 @@ private:
 	void pivot(int pivotRow, int pivotCol);
 	int findPivotRow(int pivotCol);
 	int findPivotCol();
-	void addArtificialVariables();
-	void removeArtificialVariables();
 	bool isOptimal();
 
 	std::vector<std::vector<T>> tableau;
 	std::vector<T> solution;
-	std::vector<T> objectiveValues;
-	std::vector<int> artificialVariables;
-	int numIterations;
-	int m;
-	int n;
+	T objectiveValue;
+	size_t numIterations;
+	size_t m;
+	size_t n;
 };
 
 template<typename T>
 SimplexMethod<T>::SimplexMethod(const std::vector<std::vector<T>>& A,
 	const std::vector<T>& b,
-	const std::vector<T>& c)
+	const std::vector<T>& c) : m(A.size()), n(A[0].size())
 {
-// Проверяем, что размеры векторов соответствуют требуемым
-	if (A.empty() || b.empty() || c.empty() || A.size() != b.size() || A[0].size() != c.size())
-	{
-		throw std::invalid_argument("Invalid sizes of input vectors.");
-	}
+	// Initialize tableau
+	tableau.resize(m + 1, std::vector<T>(n + m + 1));
 
-	m = A.size();
-	n = A[0].size();
-
-	// Формируем исходную симплекс-таблицу
-	tableau.resize(m + 1, std::vector<T>(n + m + 1, (T(0))));
-
-	// Заполняем таблицу ограничениями
+	// Fill tableau with A, b, and c
 	for (int i = 0; i < m; ++i)
 	{
 		for (int j = 0; j < n; ++j)
@@ -69,74 +58,45 @@ SimplexMethod<T>::SimplexMethod(const std::vector<std::vector<T>>& A,
 		tableau[i][n + i] = 1;
 		tableau[i][n + m] = b[i];
 	}
-
-	// Заполняем таблицу целевой функцией
 	for (int j = 0; j < n; ++j)
 	{
 		tableau[m][j] = -c[j];
 	}
 	tableau[m][n + m] = 0;
 
-	// Инициализируем вектора решения и значений целевой функции
+	// Initialize other variables
 	solution.resize(n);
-	objectiveValues.push_back(tableau[m][n + m]);
-
-	// Инициализируем счетчик итераций
 	numIterations = 0;
-	printTable();
 }
 
 template<typename T>
 bool SimplexMethod<T>::solve()
 {
-	while (true)
+	printTable();
+	while (!isOptimal())
 	{
-// Добавляем искусственные переменные, если необходимо
-		if (tableau[0][tableau.size() - 1] < 0)
-		{
-			addArtificialVariables();
-		}
-
-		// Проверяем, является ли текущее решение оптимальным
-		if (isOptimal())
-		{
-			removeArtificialVariables();
-			return true;
-		}
-
-		// Выбираем опорный столбец
 		int pivotCol = findPivotCol();
 		if (pivotCol == -1)
 		{
-// Решение не существует или неограниченно
-			removeArtificialVariables();
-			return false;
+			return false; // No solution
 		}
-
-		// Выбираем опорную строку
 		int pivotRow = findPivotRow(pivotCol);
-
-		// Выполняем пересчет таблицы
-		pivot(pivotRow, pivotCol);
-
-		// Обновляем вектор решения и значение целевой функции
-		for (int j = 0; j < tableau[0].size(); ++j)
+		if (pivotRow == -1)
 		{
-			if (tableau[pivotRow][j] != 0)
-			{
-				solution[tableau[0][j] - 1] = tableau[pivotRow][tableau[0].size() - 1] / tableau[pivotRow][j];
-			}
-			else
-			{
-				solution[tableau[0][j] - 1] = 0;
-			}
+			return false; // Unbounded solution
 		}
-		objectiveValues.push_back(tableau[tableau.size() - 1][tableau[0].size() - 1]);
-
-		// Увеличиваем счетчик итераций
-		numIterations++;
+		pivot(pivotRow, pivotCol);
+		++numIterations;
 		printTable();
 	}
+
+	for (int j = 0; j < n; ++j)
+	{
+		solution[j] = tableau[j][n + m];
+	}
+	objectiveValue = -tableau[m][n + m];
+
+	return true;
 }
 
 template<typename T>
@@ -144,28 +104,25 @@ void SimplexMethod<T>::pivot(int pivotRow, int pivotCol)
 {
 	T pivotElement = tableau[pivotRow][pivotCol];
 
-	// Делим опорную строку на опорный элемент
-	for (int j = 0; j < tableau[0].size(); ++j)
+	// Divide the pivot row by the pivot element
+	for (int j = 0; j <= n + m; ++j)
 	{
 		tableau[pivotRow][j] /= pivotElement;
 	}
 
-	// Вычитаем опорную строку из всех остальных строк, умноженную на соответствующий элемент
-	for (int i = 0; i < tableau.size(); ++i)
+	// Perform row operations to eliminate the pivot column
+	for (int i = 0; i < m + 1; ++i)
 	{
-		if (i != pivotRow)
+		if (i == pivotRow)
 		{
-			T multiplier = tableau[i][pivotCol];
-			for (int j = 0; j < tableau[0].size(); ++j)
-			{
-				tableau[i][j] -= multiplier * tableau[pivotRow][j];
-			}
+			continue;
+		}
+		T factor = tableau[i][pivotCol];
+		for (int j = 0; j <= n + m; ++j)
+		{
+			tableau[i][j] -= factor * tableau[pivotRow][j];
 		}
 	}
-
-	// Обновляем индексы базисных переменных
-	std::swap(tableau[0][pivotCol], tableau[0][tableau[0].size() - n]);
-	std::swap(tableau[pivotRow][tableau[0].size() - n], tableau[pivotRow][tableau[0].size() - 1]);
 }
 
 template<typename T>
@@ -198,7 +155,7 @@ int SimplexMethod<T>::findPivotCol()
 
 	for (int j = 0; j != tableau[0].size() - 1; ++j)
 	{
-		if (tableau[tableau.size() - 1][j] < 0 && tableau[0][j] >= 0)
+		if (tableau[tableau.size() - 1][j] < 0)
 		{
 			T coeff = -tableau[tableau.size() - 1][j];
 			if (coeff > maxCoeff)
@@ -213,134 +170,30 @@ int SimplexMethod<T>::findPivotCol()
 }
 
 template<typename T>
-void SimplexMethod<T>::addArtificialVariables()
-{
-	int m = tableau.size() - 1;
-	int n = tableau[0].size() - m - 1;
-
-	// Добавляем искусственные переменные в таблицу
-	for (int i = 0; i < m; ++i)
-	{
-		tableau[i][tableau[0].size() - n - 1 - i] = 1;
-		tableau[tableau.size() - 1][tableau[0].size() - n - 1 - i] = 1;
-	}
-
-	// Обновляем индексы базисных переменных
-	for (int i = 0; i < m; ++i)
-	{
-		std::swap(tableau[0][tableau[0].size() - n - 1 - i], tableau[0][n + i]);
-	}
-
-	// Сохраняем индексы искусственных переменных
-	artificialVariables.resize(m);
-	for (int i = 0; i < m; ++i)
-	{
-		artificialVariables[i] = tableau[0].size() - n - 1 - i;
-	}
-}
-
-template<typename T>
-void SimplexMethod<T>::removeArtificialVariables()
-{
-// Удаляем столбцы искусственных переменных из таблицы
-	for (int i = 0; i < artificialVariables.size(); ++i)
-	{
-		for (int j = 0; j < tableau.size(); ++j)
-		{
-			tableau[j].erase(tableau[j].begin() + artificialVariables[i]);
-		}
-		tableau[0].erase(tableau[0].begin() + artificialVariables[i]);
-	}
-
-	// Обновляем размеры таблицы
-	for (int i = 0; i < tableau.size(); ++i)
-	{
-		tableau[i].resize(tableau[0].size());
-	}
-
-	// Очищаем вектор индексов искусственных переменных
-	artificialVariables.clear();
-}
-
-template<typename T>
 bool SimplexMethod<T>::isOptimal()
 {
-	for (int j = 0; j < tableau[0].size() - 1; ++j)
+	for (size_t j = 0; j != tableau[0].size() - 1; ++j)
 	{
 		if (tableau[tableau.size() - 1][j] < 0)
 		{
 			return false;
 		}
 	}
-
-	// Проверяем, что все искусственные переменные равны нулю
-	for (int i = 0; i < artificialVariables.size(); ++i)
-	{
-		if (tableau[i][tableau[0].size() - 1] > 0)
-		{
-			return false;
-		}
-	}
-
 	return true;
 }
 
 template<typename T>
 void SimplexMethod<T>::printTable() const
 {
-	std::cout << "Iteration " << numIterations << ":" << std::endl;
-
-	// Выводим заголовки таблицы
-	std::cout << "  ";
-	for (size_t j = 0; j < tableau[0].size(); ++j)
+	for (int i = 0; i < m + 1; ++i)
 	{
-		if (j < m && tableau[0][j] == j + 1)
+		for (int j = 0; j < n + m + 1; ++j)
 		{
-			std::cout << "x" << j + 1 << " ";
-		}
-		else if (j == tableau[0].size() - 1)
-		{
-			std::cout << "b  ";
-		}
-		else
-		{
-			std::cout << "   ";
-		}
-	}
-	std::cout << std::endl;
-
-	// Выводим строки таблицы
-	for (size_t i = 0; i < tableau.size(); ++i)
-	{
-		if (i < m && tableau[i][tableau[0].size() - 1] == 1)
-		{
-			std::cout << "x" << i + 1 << ": ";
-		}
-		else if (i == tableau.size() - 1)
-		{
-			std::cout << "f: ";
-		}
-		else
-		{
-			std::cout << "  ";
-		}
-		for (size_t j = 0; j < tableau[i].size(); ++j)
-		{
-			std::cout << tableau[i][j] << " ";
+			std::cout << std::setw(10) << tableau[i][j];
 		}
 		std::cout << std::endl;
 	}
-
-	// Выводим значения базисных переменных
-	std::cout << "Basic variables:" << std::endl;
-	for (size_t i = 0; i < m; ++i)
-	{
-		if (tableau[i][tableau[0].size() - 1] == 1)
-		{
-			std::cout << "x" << i + 1 << ": " << solution[i] << std::endl;
-		}
-	}
-	std::cout << "f: " << -objectiveValues.back() << std::endl;
+	std::cout << std::endl;
 }
 
 // template<typename T>
