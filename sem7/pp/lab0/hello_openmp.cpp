@@ -1,11 +1,14 @@
 // OpenMP header
+#include <cstdlib>
 #include <omp.h>
 #include <chrono>
 #include <iostream>
 
 int main(int argc, char* argv[])
 {
-	int nthreads, tid;
+	int nthreads = std::atoi(argv[1]);
+	omp_set_num_threads(nthreads);
+	int tid;
 
 	// Begin of parallel region
 	#pragma omp parallel private(nthreads, tid)
