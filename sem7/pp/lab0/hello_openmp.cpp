@@ -1,7 +1,7 @@
 // OpenMP header
 #include <omp.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <chrono>
+#include <iostream>
 
 int main(int argc, char* argv[])
 {
@@ -10,17 +10,19 @@ int main(int argc, char* argv[])
 	// Begin of parallel region
 	#pragma omp parallel private(nthreads, tid)
 	{
+		auto start = std::chrono::steady_clock::now();
 		// Getting thread number
 		tid = omp_get_thread_num();
-		printf("Welcome to GFG from thread = %d\n",
-			tid);
+		std::cout << "Hello world from thread " << tid << std::endl;
 
 		if (tid == 0) {
 
 			// Only master thread does this
 			nthreads = omp_get_num_threads();
-			printf("Number of threads = %d\n",
-				nthreads);
+			std::cout << "Number of threads: " << nthreads << std::endl;
 		}
+		auto end = std::chrono::steady_clock::now();
+		auto diff = end - start;
+		std::cout << std::chrono::duration<double, std::milli>(diff).count() << " ms" << std::endl;
 	}
 }
