@@ -16,6 +16,7 @@
 *.dll
 *.ilk
 *.pdb
+*.ini
 !CMakeLists.txt
 build/
 .vscode/settings.json
