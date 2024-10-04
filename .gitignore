@@ -18,3 +18,7 @@
 *.pdb
 !CMakeLists.txt
 build/
+.vscode/settings.json
+!**/vcpkg.json
+!**/vcpkg-configuration.json
+!**/CMakePresets.json
