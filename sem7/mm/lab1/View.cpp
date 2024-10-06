@@ -449,11 +449,6 @@ View::View()
 	//ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
 	//IM_ASSERT(font != nullptr);
 
-	// Our state
-	show_demo_window = true;
-	show_another_window = false;
-	clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
 	// Main loop
 	done = false;
 }
@@ -473,58 +468,6 @@ View::~View()
 	SDL_Quit();
 }
 
-static ImVec2 window_pos = ImVec2(100, 100);
-static ImVec2 window_size = ImVec2(400, 400);
-static float scale = 1.0f;
-static float angle = 0.0f;
-static ImVec2 center = ImVec2(window_size.x / 2, window_size.y / 2);
-static ImVec2 point_pos = center;
-static ImVector<ImVec2> points;
-
-static void DrawCircleWindow()
-{
-	ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always);
-	ImGui::SetNextWindowSize(window_size, ImGuiCond_Always);
-	ImGui::Begin("Moving Point", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-
-	ImDrawList* draw_list = ImGui::GetWindowDrawList();
-	ImVec2 mouse_pos = ImGui::GetMousePos();
-	ImVec2 window_pos = ImGui::GetWindowPos();
-
-	// Обработка изменения масштаба с помощью колеса мыши
-	if (ImGui::IsWindowHovered() && ImGui::IsMousePosValid() && ImGui::GetIO().MouseWheel != 0.0f)
-	{
-		scale += ImGui::GetIO().MouseWheel * 0.1f;
-		scale = std::max(0.1f, scale);
-	}
-
-	// Обработка перемещения окна перетаскиванием
-	if (ImGui::IsWindowHovered() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
-	{
-		ImVec2 delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Left);
-		window_pos.x += delta.x;
-		window_pos.y += delta.y;
-		ImGui::ResetMouseDragDelta(ImGuiMouseButton_Left);
-	}
-
-	// Вычисление позиции точки на основе угла и масштаба
-	ImVec2 point_pos;
-	point_pos.x = center.x + std::cos(angle) * 100.0f * scale;
-	point_pos.y = center.y + std::sin(angle) * 100.0f * scale;
-	points.push_back(point_pos);
-
-	// Отрисовка точки и траектории
-	draw_list->AddCircleFilled(point_pos, 5.0f * scale, IM_COL32(255, 0, 0, 255));
-	for (int i = 1; i < points.size(); i++)
-	{
-		draw_list->AddLine(points[i - 1], points[i], IM_COL32(255, 0, 0, 255), 2.0f * scale);
-	}
-
-	// Обновление угла для движения по кругу
-	angle += 0.01f;
-
-	ImGui::End();
-}
 
 void View::draw()
 {
@@ -599,39 +542,148 @@ void View::drawWidgets()
 	if (show_demo_window)
 		ImGui::ShowDemoWindow(&show_demo_window);
 
-	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
+	drawSystemVisualisation();
+
+	drawSystemSetup();
+
+	drawSystemState();
+
+	drawFileActions();
+}
+
+void View::drawSystemSetup()
+{
+	ImGui::Begin("Right Window", &show_right_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+	ImGui::SetWindowPos(ImVec2(w - ImGui::GetWindowWidth(), 0));
+	ImGui::SetWindowSize(ImVec2(400, h));
+
+	ImGui::InputFloat("Time Step", &time_step);
+	ImGui::InputFloat("Simulation Time", &simulation_time);
+
+	ImGui::Text("Difference Schemes");
+	ImGui::RadioButton("Euler", &selected_scheme, 0);
+	ImGui::SameLine();
+	ImGui::RadioButton("Verlet", &selected_scheme, 1);
+	ImGui::SameLine();
+	ImGui::RadioButton("Euler-Cromer", &selected_scheme, 2);
+	ImGui::SameLine();
+	ImGui::RadioButton("Beeman", &selected_scheme, 3);
+
+	ImGui::InputInt("Number of Planets", &num_planets);
+
+	if (num_planets > 0)
 	{
-		static float f = 0.0f;
-		static int counter = 0;
+		positions.resize(num_planets);
+		velocities.resize(num_planets);
+		masses.resize(num_planets);
 
-		ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-		ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-		ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-		ImGui::Checkbox("Another Window", &show_another_window);
-
-		ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-		ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-		if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-			counter++;
-		ImGui::SameLine();
-		ImGui::Text("counter = %d", counter);
-
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
-		ImGui::End();
+		for (int i = 0; i < num_planets; i++)
+		{
+			ImGui::Text("Planet %d", i + 1);
+			ImGui::InputFloat2("Position", &positions[i].x);
+			ImGui::InputFloat2("Velocity", &velocities[i].x);
+			ImGui::InputFloat("Mass", &masses[i]);
+		}
 	}
 
+	ImGui::End();
+}
 
-	DrawCircleWindow();
+void View::drawSystemState()
+{
+	ImGui::Begin("Left Window", &show_left_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+	ImGui::SetWindowPos(ImVec2(0, 0));
 
-	// 3. Show another simple window.
-	if (show_another_window)
+	ImGui::Text("Total Energy: %.2f", total_energy);
+	ImGui::Text("Current Time: %.2f", current_time);
+	ImGui::Text("Center of Mass Velocity: (%.2f, %.2f)", center_of_mass_velocity.x, center_of_mass_velocity.y);
+
+	if (is_model_running)
 	{
-		ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-		ImGui::Text("Hello from another window!");
-		if (ImGui::Button("Close Me"))
-			show_another_window = false;
-		ImGui::End();
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7f, 0.0f, 0.0f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.7f, 0.2f, 0.2f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.7f, 0.4f, 0.4f, 1.0f));
+		if (ImGui::Button("Stop Model", ImVec2(100, 30)))
+		{
+			is_model_running = false;
+		}
 	}
+	else
+	{
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.7f, 0.2f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.4f, 0.7f, 0.4f, 1.0f));
+		if (ImGui::Button("Start Model", ImVec2(100, 30)))
+		{
+			is_model_running = true;
+		}
+	}
+	ImGui::PopStyleColor(3);
+
+	ImGui::End();
+}
+
+void View::drawFileActions()
+{
+	ImGui::Begin("Left Bottom Window", &show_left_bottom_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+	ImGui::SetWindowPos(ImVec2(0, h - ImGui::GetWindowHeight()));
+
+	if (ImGui::Button("Save Model Parameters"))
+	{
+		// Add your code to save the model parameters here
+	}
+
+	ImGui::SameLine();
+
+	if (ImGui::Button("Load Model Parameters"))
+	{
+		// Add your code to load the model parameters here
+	}
+
+	ImGui::End();
+}
+
+void View::drawSystemVisualisation()
+{
+	ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always);
+	ImGui::SetNextWindowSize(window_size, ImGuiCond_Always);
+	ImGui::Begin("Moving Point", &show_animation_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus);
+
+	ImDrawList* draw_list = ImGui::GetWindowDrawList();
+	ImVec2 mouse_pos = ImGui::GetMousePos();
+	ImVec2 window_pos = ImGui::GetWindowPos();
+
+	// Обработка изменения масштаба с помощью колеса мыши
+	if (ImGui::IsWindowHovered() && ImGui::IsMousePosValid() && ImGui::GetIO().MouseWheel != 0.0f)
+	{
+		scale += ImGui::GetIO().MouseWheel * 0.1f;
+		scale = std::max(0.1f, scale);
+	}
+
+	// Обработка перемещения окна перетаскиванием
+	if (ImGui::IsWindowHovered() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+	{
+		ImVec2 delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Left);
+		window_pos.x += delta.x;
+		window_pos.y += delta.y;
+		ImGui::ResetMouseDragDelta(ImGuiMouseButton_Left);
+	}
+
+	// Вычисление позиции точки на основе угла и масштаба
+	ImVec2 point_pos;
+	point_pos.x = center.x + std::cos(angle) * 100.0f * scale;
+	point_pos.y = center.y + std::sin(angle) * 100.0f * scale;
+	points.push_back(point_pos);
+
+	// Отрисовка точки и траектории
+	draw_list->AddCircleFilled(point_pos, 5.0f * scale, IM_COL32(255, 0, 0, 255));
+	for (int i = 1; i < points.size(); i++)
+	{
+		draw_list->AddLine(points[i - 1], points[i], IM_COL32(255, 0, 0, 255), 2.0f * scale);
+	}
+
+	// Обновление угла для движения по кругу
+	angle += 0.01f;
+
+	ImGui::End();
 }
