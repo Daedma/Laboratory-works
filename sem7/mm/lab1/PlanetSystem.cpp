@@ -154,6 +154,7 @@ void PlanetSystem::setInitialConditions()
 
 void PlanetSystem::run()
 {
+	throwExceptionIfInProgress();
 	isValidSetup();
 	allocMemory();
 	setInitialConditions();
@@ -173,6 +174,7 @@ void PlanetSystem::run()
 			this->inProgress = false;
 		}
 		});
+	workThread->detach();
 }
 
 void PlanetSystem::stop()

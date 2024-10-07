@@ -557,12 +557,13 @@ void View::drawWidgets()
 
 void View::drawSystemSetup()
 {
-	ImGui::Begin("Right Window", &show_right_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+	ImGui::Begin("Right Window", &show_right_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_UnsavedDocument);
 	ImGui::SetWindowPos(ImVec2(w - ImGui::GetWindowWidth(), 0));
 	ImGui::SetWindowSize(ImVec2(400, h));
 
-	ImGui::InputFloat("Time Step", &time_step);
-	ImGui::InputFloat("Simulation Time", &simulation_time);
+	ImGui::InputFloat("Time Step", &time_step, .0f, .0f, "%.10g");
+	ImGui::InputFloat("Simulation Time", &simulation_time, .0f, .0f, "%.10g");
 
 	ImGui::Text("Difference Schemes");
 	ImGui::RadioButton("Euler", &selected_scheme, PlanetSystem::DiffSchemes::EULER);
@@ -588,9 +589,9 @@ void View::drawSystemSetup()
 			velocities[i] = curPlanet.velocity;
 			masses[i] = curPlanet.mass;
 			ImGui::Text("Planet %d", i + 1);
-			ImGui::InputFloat2("Position", &positions[i].x);
-			ImGui::InputFloat2("Velocity", &velocities[i].x);
-			ImGui::InputFloat("Mass", &masses[i]);
+			ImGui::InputFloat2("Position", &positions[i].x, "%.10g");
+			ImGui::InputFloat2("Velocity", &velocities[i].x, "%.10g");
+			ImGui::InputFloat("Mass", &masses[i], 0.f, 0.f, "%.10g");
 		}
 	}
 
@@ -599,12 +600,13 @@ void View::drawSystemSetup()
 
 void View::drawSystemState()
 {
-	ImGui::Begin("Left Window", &show_left_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+	ImGui::Begin("Left Window", &show_left_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_UnsavedDocument | ImGuiWindowFlags_AlwaysAutoResize);
 	ImGui::SetWindowPos(ImVec2(0, 0));
 
-	ImGui::Text("Total Energy: %.2f", total_energy);
-	ImGui::Text("Current Time: %.2f", current_time);
-	ImGui::Text("Center of Mass Velocity: (%.2f, %.2f)", center_of_mass_velocity.x, center_of_mass_velocity.y);
+	ImGui::Text("Total Energy: %.10g", total_energy);
+	ImGui::Text("Current Time: %.10g", current_time);
+	ImGui::Text("Center of Mass Velocity: (%.10g, %.10g)", center_of_mass_velocity.x, center_of_mass_velocity.y);
 
 	if (is_model_running)
 	{
@@ -651,7 +653,8 @@ void View::drawSystemState()
 
 void View::drawFileActions()
 {
-	ImGui::Begin("Left Bottom Window", &show_left_bottom_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+	ImGui::Begin("Left Bottom Window", &show_left_bottom_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_UnsavedDocument | ImGuiWindowFlags_AlwaysAutoResize);
 	ImGui::SetWindowPos(ImVec2(0, h - ImGui::GetWindowHeight()));
 
 	if (ImGui::Button("Save Model Parameters"))
@@ -673,7 +676,8 @@ void View::drawSystemVisualisation()
 {
 	ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always);
 	ImGui::SetNextWindowSize(window_size, ImGuiCond_Always);
-	ImGui::Begin("Moving Point", &show_animation_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus);
+	ImGui::Begin("Moving Point", &show_animation_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_UnsavedDocument);
 
 	ImDrawList* draw_list = ImGui::GetWindowDrawList();
 	ImVec2 mouse_pos = ImGui::GetMousePos();
