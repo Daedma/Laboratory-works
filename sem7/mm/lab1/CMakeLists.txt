@@ -7,7 +7,7 @@ find_package(Vulkan REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS qvm)
 
-add_executable(planets main.cpp View.cpp)
+add_executable(planets main.cpp View.cpp PlanetSystem.cpp)
 
 # target_include_directories(planets PUBLIC "${IMGUI_DIR}" "${IMGUI_DIR}/backends")
 

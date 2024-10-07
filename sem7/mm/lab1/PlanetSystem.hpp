@@ -4,7 +4,8 @@
 #include <thread>
 #include <memory>
 #include <stdexcept>
-#include "qvm_lite.hpp"
+#include <cmath>
+#include "boost/qvm_lite.hpp"
 
 class PlanetSystem
 {
@@ -72,19 +73,41 @@ public:
 		return previousStep.load();
 	}
 
+	double getCurrentTime(size_t step) const
+	{
+		return timeStep * step;
+	}
+
 	const std::vector<std::vector<Point>>& getPaths() const
 	{
 		return coordinates;
 	}
 
-	double getEnergyValue() const;
+	double getEnergyValue(size_t step) const;
 
-	Point getVelocityValue() const;
+	double getEnergyValue() const
+	{
+		return getEnergyValue(getLastStep());
+	}
+
+	Point getVelocityValue(size_t step) const;
+
+	Point getVelocityValue() const
+	{
+		return getVelocityValue(getLastStep());
+	}
+
+	bool isInProgress() const
+	{
+		return inProgress;
+	}
+
+	static PlanetParams createDefaultPlanet(size_t n);
 
 private:
 	// Concurency
-	std::atomic_bool inProgress = false;
-	std::atomic_size_t previousStep = -1;
+	std::atomic_bool inProgress;
+	std::atomic_size_t previousStep;
 	std::unique_ptr<std::thread> workThread;
 
 	// Initial parameters

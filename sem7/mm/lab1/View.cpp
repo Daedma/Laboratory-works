@@ -4,6 +4,8 @@
 #include <cmath>
 #include <algorithm>
 #include <vector>
+#include <iostream>
+#include "ImVec2QvmTraits.hpp"
 
 
 // Volk headers
@@ -542,6 +544,8 @@ void View::drawWidgets()
 	if (show_demo_window)
 		ImGui::ShowDemoWindow(&show_demo_window);
 
+	updateUIData();
+
 	drawSystemVisualisation();
 
 	drawSystemSetup();
@@ -561,13 +565,13 @@ void View::drawSystemSetup()
 	ImGui::InputFloat("Simulation Time", &simulation_time);
 
 	ImGui::Text("Difference Schemes");
-	ImGui::RadioButton("Euler", &selected_scheme, 0);
+	ImGui::RadioButton("Euler", &selected_scheme, PlanetSystem::DiffSchemes::EULER);
 	ImGui::SameLine();
-	ImGui::RadioButton("Verlet", &selected_scheme, 1);
+	ImGui::RadioButton("Verlet", &selected_scheme, PlanetSystem::DiffSchemes::VERLET);
 	ImGui::SameLine();
-	ImGui::RadioButton("Euler-Cromer", &selected_scheme, 2);
+	ImGui::RadioButton("Euler-Cromer", &selected_scheme, PlanetSystem::DiffSchemes::EULER_CROMER);
 	ImGui::SameLine();
-	ImGui::RadioButton("Beeman", &selected_scheme, 3);
+	ImGui::RadioButton("Beeman", &selected_scheme, PlanetSystem::DiffSchemes::BEEMAN);
 
 	ImGui::InputInt("Number of Planets", &num_planets);
 
@@ -577,8 +581,12 @@ void View::drawSystemSetup()
 		velocities.resize(num_planets);
 		masses.resize(num_planets);
 
-		for (int i = 0; i < num_planets; i++)
+		for (int i = 0; i != num_planets; ++i)
 		{
+			PlanetSystem::PlanetParams curPlanet = PlanetSystem::createDefaultPlanet(i);
+			positions[i] = curPlanet.pos;
+			velocities[i] = curPlanet.velocity;
+			masses[i] = curPlanet.mass;
 			ImGui::Text("Planet %d", i + 1);
 			ImGui::InputFloat2("Position", &positions[i].x);
 			ImGui::InputFloat2("Velocity", &velocities[i].x);
@@ -605,6 +613,7 @@ void View::drawSystemState()
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.7f, 0.4f, 0.4f, 1.0f));
 		if (ImGui::Button("Stop Model", ImVec2(100, 30)))
 		{
+			system.stop();
 			is_model_running = false;
 		}
 	}
@@ -615,7 +624,24 @@ void View::drawSystemState()
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.4f, 0.7f, 0.4f, 1.0f));
 		if (ImGui::Button("Start Model", ImVec2(100, 30)))
 		{
-			is_model_running = true;
+			try
+			{
+				startSimulation();
+				is_model_running = true;
+			}
+			catch (std::exception& e)
+			{
+				ImGui::OpenPopup("Error");
+				if (ImGui::BeginPopupModal("Error", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+				{
+					ImGui::Text("An error occurred: %s", e.what());
+					if (ImGui::Button("OK", ImVec2(120, 0)))
+					{
+						ImGui::CloseCurrentPopup();
+					}
+					ImGui::EndPopup();
+				}
+			}
 		}
 	}
 	ImGui::PopStyleColor(3);
@@ -686,4 +712,30 @@ void View::drawSystemVisualisation()
 	angle += 0.01f;
 
 	ImGui::End();
+}
+
+void View::startSimulation()
+{
+	system.setDiffScheme(static_cast<PlanetSystem::DiffSchemes>(selected_scheme));
+	system.setTimeStep(time_step);
+	system.setSimulationTime(simulation_time);
+	std::vector<PlanetSystem::PlanetParams> planets(num_planets);
+	for (size_t i = 0; i != num_planets;++i)
+	{
+		using namespace boost::qvm;
+		planets[i].pos = convert_to<PlanetSystem::Point>(positions[i]);
+		planets[i].velocity = convert_to<PlanetSystem::Point>(velocities[i]);
+		planets[i].mass = masses[i];
+	}
+	system.setSystemParams(planets);
+	system.run();
+}
+
+void View::updateUIData()
+{
+	is_model_running = system.isInProgress();
+	lastStep = system.getLastStep();
+	total_energy = system.getEnergyValue(lastStep);
+	current_time = system.getCurrentTime(lastStep);
+	center_of_mass_velocity = system.getVelocityValue(lastStep);
 }

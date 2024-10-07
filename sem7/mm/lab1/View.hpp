@@ -2,6 +2,7 @@
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_vulkan.h"
+#include "PlanetSystem.hpp"
 #include <vector>
 
 #define SDL_MAIN_HANDLED
@@ -36,6 +37,10 @@ private:
 
 	void render();
 
+	void startSimulation();
+
+	void updateUIData();
+
 private:
 	SDL_WindowFlags window_flags;
 	SDL_Window* window;
@@ -53,8 +58,8 @@ private:
 
 	// Setup window
 	bool show_right_window = true;
-	float time_step = 0.0f;
-	float simulation_time = 0.0f;
+	float time_step = 3600.0f;
+	float simulation_time = 360000000.0f;
 	int selected_scheme = 0;
 	int num_planets = 0;
 	std::vector<ImVec2> positions;
@@ -80,4 +85,8 @@ private:
 	ImVec2 center = ImVec2(window_size.x / 2, window_size.y / 2);
 	ImVec2 point_pos = center;
 	ImVector<ImVec2> points;
+
+	// Model
+	PlanetSystem system;
+	size_t lastStep = 0;
 };

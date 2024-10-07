@@ -61,26 +61,25 @@ void PlanetSystem::makeBeemanStep(size_t step)
 	}
 }
 
-double PlanetSystem::getEnergyValue() const
+double PlanetSystem::getEnergyValue(size_t step) const
 {
-	size_t lastStep = getLastStep();
 	double totalEnergy = 0.0;
 	size_t planetsCount = planets.size();
 
 	// вычисление кинетической энергии
 	for (size_t i = 0; i != planetsCount; ++i)
 	{
-		double kineticEnergy = 0.5 * planets[i].mass * boost::qvm::mag_sqr(velocities[i][lastStep]);
+		double kineticEnergy = 0.5 * planets[i].mass * boost::qvm::mag_sqr(velocities[i][step]);
 		totalEnergy += kineticEnergy;
 	}
 	// вычисление потенциальной энергии
 	for (size_t i = 0; i != planetsCount; ++i)
 	{
-		Point icoords = coordinates[i][lastStep];
+		Point icoords = coordinates[i][step];
 		double imass = planets[i].mass;
 		for (size_t j = i + 1; j != planetsCount; ++j)
 		{
-			double r = boost::qvm::mag(icoords - coordinates[j][lastStep]);
+			double r = boost::qvm::mag(icoords - coordinates[j][step]);
 			if (r > 0)
 			{
 				double potentialEnergy = -G * imass * planets[j].mass / r;
@@ -92,15 +91,14 @@ double PlanetSystem::getEnergyValue() const
 	return totalEnergy;
 }
 
-PlanetSystem::Point PlanetSystem::getVelocityValue() const
+PlanetSystem::Point PlanetSystem::getVelocityValue(size_t step) const
 {
-	size_t lastStep = getLastStep();
 	Point totalVelocity{ 0., 0. };
 	double totalMass = 0.0;
 	size_t planetsCount = planets.size();
 	for (size_t i = 0; i != planetsCount; ++i)
 	{
-		totalVelocity += planets[i].mass * velocities[i][lastStep];
+		totalVelocity += planets[i].mass * velocities[i][step];
 		totalMass += planets[i].mass;
 	}
 	if (totalMass > 0)
@@ -118,7 +116,7 @@ PlanetSystem::Point PlanetSystem::calcAcceleration(size_t nplanet, size_t step) 
 	{
 		if (i != nplanet)
 		{
-			Point distanceVector = planets[i].pos - planets[nplanet].pos;
+			Point distanceVector = coordinates[i][step] - coordinates[nplanet][step];
 			double sqrDistance = boost::qvm::mag_sqr(distanceVector);
 			if (sqrDistance > 0)
 			{ // Avoid division by zero
@@ -136,12 +134,12 @@ void PlanetSystem::allocMemory()
 	coordinates.resize(planets.size());
 	for (auto& i : coordinates)
 	{
-		i.resize(stepsCount);
+		i.resize(stepsCount + 1);
 	}
 	velocities.resize(planets.size());
 	for (auto& i : velocities)
 	{
-		i.resize(stepsCount);
+		i.resize(stepsCount + 1);
 	}
 }
 
@@ -159,6 +157,7 @@ void PlanetSystem::run()
 	isValidSetup();
 	allocMemory();
 	setInitialConditions();
+	this->previousStep = 0;
 	workThread.reset(new std::thread{
 		[this]() {
 			size_t stepsCount = std::ceil(simulationTime / timeStep);
@@ -170,6 +169,7 @@ void PlanetSystem::run()
 				++curStep;
 				this->previousStep = curStep - 1;
 			}
+			this->previousStep = curStep;
 			this->inProgress = false;
 		}
 		});
@@ -180,4 +180,33 @@ void PlanetSystem::stop()
 	workThread->detach();
 	workThread.reset();
 	inProgress = false;
+}
+
+PlanetSystem::PlanetParams PlanetSystem::createDefaultPlanet(size_t n)
+{
+	const double starMass = 1.989e30; // Масса звезды (масса Солнца)
+	const double planetMass = 5.972e24; // Масса планеты (масса Земли)
+	const double baseDistance = 1.496e11; // Базовое расстояние (1 а.е.)
+
+	PlanetParams params;
+
+	if (n == 0)
+	{
+// Звезда
+		params.pos = Point{ 0.0, 0.0 };
+		params.velocity = Point{ 0.0, 0.0 };
+		params.mass = starMass;
+	}
+	else
+	{
+	 // Планета
+		double distance = baseDistance * (n + 1); // Расстояние от звезды
+		double orbitalSpeed = std::sqrt(G * starMass / distance); // Круговая скорость
+
+		params.pos = Point{ distance, 0.0 };
+		params.velocity = Point{ 0.0, orbitalSpeed };
+		params.mass = planetMass;
+	}
+
+	return params;
 }
