@@ -4,6 +4,7 @@
 #include "imgui_impl_vulkan.h"
 #include "PlanetSystem.hpp"
 #include <vector>
+#include "boost/qvm.hpp"
 
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
@@ -68,6 +69,8 @@ private:
 
 	// State window
 	bool show_left_window = true;
+	bool show_error_popup = false;
+	std::string lastError;
 	float total_energy = 0.0f;
 	float current_time = 0.0f;
 	ImVec2 center_of_mass_velocity = ImVec2{ 0.0f, 0.0f };
@@ -80,11 +83,13 @@ private:
 	bool show_animation_window = false;
 	ImVec2 window_pos = ImVec2(0, 0);
 	ImVec2 window_size = ImVec2(880, 720);
-	float scale = 1.0f;
-	float angle = 0.0f;
-	ImVec2 center = ImVec2(window_size.x / 2, window_size.y / 2);
-	ImVec2 point_pos = center;
-	ImVector<ImVec2> points;
+	ImVec2 window_center = ImVec2(window_size.x / 2, window_size.y / 2);
+	float scale = 1.e-10f; // Масштаб
+	float offsetX = 0.0f; // Смещение по X
+	float offsetY = 0.0f; // Смещение по Y
+	bool dragging = false; // Флаг перетаскивания
+	float lastMouseX = 0.0f; // Последняя позиция мыши по X
+	float lastMouseY = 0.0f; // Последняя позиция мыши по Y
 
 	// Model
 	PlanetSystem system;

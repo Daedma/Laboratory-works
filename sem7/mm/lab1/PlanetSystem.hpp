@@ -64,6 +64,11 @@ public:
 		planets = params;
 	}
 
+	const std::vector<PlanetParams>& getSystemParams() const
+	{
+		return planets;
+	}
+
 	void run();
 
 	void stop();

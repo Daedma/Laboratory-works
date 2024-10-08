@@ -34,6 +34,290 @@ static ImGui_ImplVulkanH_Window g_MainWindowData;
 static uint32_t                 g_MinImageCount = 2;
 static bool                     g_SwapChainRebuild = false;
 
+namespace
+{
+// 	VkBuffer vertexBuffer;
+// 	VkDeviceMemory vertexBufferMemory;
+// 	VkBuffer uniformBuffer;
+// 	VkDeviceMemory uniformBufferMemory;
+// 	VkVertexInputBindingDescription bindingDescription = {};
+// 	VkVertexInputAttributeDescription attributeDescriptions[1] = {};
+// 	VkViewport viewport = {};
+// 	VkRect2D scissor = {};
+// 	VkDescriptorSetLayout descriptorSetLayout;
+// 	VkPipelineShaderStageCreateInfo shaderStages[2] = {};
+// 	VkPipeline graphicsPipeline;
+// 	VkDescriptorSet descriptorSet;
+// 	const char* vertexShaderSource = R"(
+// #version 450
+
+// layout(location = 0) in vec2 inPosition;
+// layout(set = 0, binding = 0) uniform Transform {
+//     mat4 transform;
+// } transform;
+
+// void main() {
+//     gl_Position = transform * vec4(inPosition, 0.0, 1.0);
+// }
+// )";
+
+// 	const char* fragmentShaderSource = R"(
+// #version 450
+
+// layout(location = 0) out vec4 outColor;
+
+// void main() {
+//     outColor = vec4(1.0, 0.0, 0.0, 1.0); // Красный цвет
+// }
+// )";
+
+// 	// Функции для создания буферов
+// 	void createBuffers(VkDevice device, VkPhysicalDevice physicalDevice, VkCommandPool commandPool, VkQueue graphicsQueue, const std::vector<ImVec2>& points, const glm::mat4& transformMatrix)
+// 	{
+// // Создание буфера для данных точек
+// 		VkDeviceSize bufferSize = sizeof(ImVec2) * points.size();
+// 		VkBuffer stagingBuffer;
+// 		VkDeviceMemory stagingBufferMemory;
+// 		createBuffer(device, physicalDevice, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+// 		void* data;
+// 		vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+// 		memcpy(data, points.data(), (size_t)bufferSize);
+// 		vkUnmapMemory(device, stagingBufferMemory);
+
+// 		createBuffer(device, physicalDevice, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
+
+// 		copyBuffer(device, commandPool, graphicsQueue, stagingBuffer, vertexBuffer, bufferSize);
+
+// 		vkDestroyBuffer(device, stagingBuffer, nullptr);
+// 		vkFreeMemory(device, stagingBufferMemory, nullptr);
+
+// 		// Создание буфера для матрицы преобразования
+// 		bufferSize = sizeof(glm::mat4);
+// 		createBuffer(device, physicalDevice, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffer, uniformBufferMemory);
+
+// 		vkMapMemory(device, uniformBufferMemory, 0, bufferSize, 0, &data);
+// 		memcpy(data, &transformMatrix, (size_t)bufferSize);
+// 		vkUnmapMemory(device, uniformBufferMemory);
+// 	}
+
+// 	void createBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory)
+// 	{
+// 		VkBufferCreateInfo bufferInfo = {};
+// 		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+// 		bufferInfo.size = size;
+// 		bufferInfo.usage = usage;
+// 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+// 		if (vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
+// 		{
+// 			throw std::runtime_error("failed to create buffer!");
+// 		}
+
+// 		VkMemoryRequirements memRequirements;
+// 		vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
+
+// 		VkMemoryAllocateInfo allocInfo = {};
+// 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+// 		allocInfo.allocationSize = memRequirements.size;
+// 		allocInfo.memoryTypeIndex = findMemoryType(physicalDevice, memRequirements.memoryTypeBits, properties);
+
+// 		if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
+// 		{
+// 			throw std::runtime_error("failed to allocate buffer memory!");
+// 		}
+
+// 		vkBindBufferMemory(device, buffer, bufferMemory, 0);
+// 	}
+
+// 	uint32_t findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties)
+// 	{
+// 		VkPhysicalDeviceMemoryProperties memProperties;
+// 		vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+
+// 		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+// 		{
+// 			if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+// 			{
+// 				return i;
+// 			}
+// 		}
+
+// 		throw std::runtime_error("failed to find suitable memory type!");
+// 	}
+
+// 	void copyBuffer(VkDevice device, VkCommandPool commandPool, VkQueue graphicsQueue, VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+// 	{
+// 		VkCommandBuffer commandBuffer = beginSingleTimeCommands(device, commandPool);
+
+// 		VkBufferCopy copyRegion = {};
+// 		copyRegion.size = size;
+// 		vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+// 		endSingleTimeCommands(device, commandPool, graphicsQueue, commandBuffer);
+// 	}
+
+// 	VkCommandBuffer beginSingleTimeCommands(VkDevice device, VkCommandPool commandPool)
+// 	{
+// 		VkCommandBufferAllocateInfo allocInfo = {};
+// 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+// 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+// 		allocInfo.commandPool = commandPool;
+// 		allocInfo.commandBufferCount = 1;
+
+// 		VkCommandBuffer commandBuffer;
+// 		vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer);
+
+// 		VkCommandBufferBeginInfo beginInfo = {};
+// 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+// 		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+// 		vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+// 		return commandBuffer;
+// 	}
+
+// 	void endSingleTimeCommands(VkDevice device, VkCommandPool commandPool, VkQueue graphicsQueue, VkCommandBuffer commandBuffer)
+// 	{
+// 		vkEndCommandBuffer(commandBuffer);
+
+// 		VkSubmitInfo submitInfo = {};
+// 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+// 		submitInfo.commandBufferCount = 1;
+// 		submitInfo.pCommandBuffers = &commandBuffer;
+
+// 		vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+// 		vkQueueWaitIdle(graphicsQueue);
+
+// 		vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
+// 	}
+
+// 	// Функции для создания и настройки конвейера рендеринга
+// 	void createGraphicsPipeline(VkDevice device, VkPipelineLayout pipelineLayout, VkRenderPass renderPass)
+// 	{
+// // Создание шейдерных модулей
+// 		VkShaderModule vertShaderModule = createShaderModule(device, vertexShaderSource);
+// 		VkShaderModule fragShaderModule = createShaderModule(device, fragmentShaderSource);
+
+// 		// Настройка конвейера рендеринга
+// 		VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
+// 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+// 		vertexInputInfo.vertexBindingDescriptionCount = 1;
+// 		vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+// 		vertexInputInfo.vertexAttributeDescriptionCount = 1;
+// 		vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions;
+
+// 		VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
+// 		inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+// 		inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+// 		inputAssembly.primitiveRestartEnable = VK_FALSE;
+
+// 		VkPipelineViewportStateCreateInfo viewportState = {};
+// 		viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+// 		viewportState.viewportCount = 1;
+// 		viewportState.pViewports = &viewport;
+// 		viewportState.scissorCount = 1;
+// 		viewportState.pScissors = &scissor;
+
+// 		VkPipelineRasterizationStateCreateInfo rasterizer = {};
+// 		rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+// 		rasterizer.depthClampEnable = VK_FALSE;
+// 		rasterizer.rasterizerDiscardEnable = VK_FALSE;
+// 		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+// 		rasterizer.lineWidth = 1.0f;
+// 		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+// 		rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+// 		rasterizer.depthBiasEnable = VK_FALSE;
+
+// 		VkPipelineMultisampleStateCreateInfo multisampling = {};
+// 		multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+// 		multisampling.sampleShadingEnable = VK_FALSE;
+// 		multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+
+// 		VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
+// 		colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+// 		colorBlendAttachment.blendEnable = VK_FALSE;
+
+// 		VkPipelineColorBlendStateCreateInfo colorBlending = {};
+// 		colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+// 		colorBlending.logicOpEnable = VK_FALSE;
+// 		colorBlending.logicOp = VK_LOGIC_OP_COPY;
+// 		colorBlending.attachmentCount = 1;
+// 		colorBlending.pAttachments = &colorBlendAttachment;
+// 		colorBlending.blendConstants[0] = 0.0f;
+// 		colorBlending.blendConstants[1] = 0.0f;
+// 		colorBlending.blendConstants[2] = 0.0f;
+// 		colorBlending.blendConstants[3] = 0.0f;
+
+// 		VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
+// 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+// 		pipelineLayoutInfo.setLayoutCount = 1;
+// 		pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
+// 		pipelineLayoutInfo.pushConstantRangeCount = 0;
+
+// 		if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+// 		{
+// 			throw std::runtime_error("failed to create pipeline layout!");
+// 		}
+
+// 		VkGraphicsPipelineCreateInfo pipelineInfo = {};
+// 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+// 		pipelineInfo.stageCount = 2;
+// 		pipelineInfo.pStages = shaderStages;
+// 		pipelineInfo.pVertexInputState = &vertexInputInfo;
+// 		pipelineInfo.pInputAssemblyState = &inputAssembly;
+// 		pipelineInfo.pViewportState = &viewportState;
+// 		pipelineInfo.pRasterizationState = &rasterizer;
+// 		pipelineInfo.pMultisampleState = &multisampling;
+// 		pipelineInfo.pDepthStencilState = nullptr;
+// 		pipelineInfo.pColorBlendState = &colorBlending;
+// 		pipelineInfo.pDynamicState = nullptr;
+// 		pipelineInfo.layout = pipelineLayout;
+// 		pipelineInfo.renderPass = renderPass;
+// 		pipelineInfo.subpass = 0;
+// 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+// 		pipelineInfo.basePipelineIndex = -1;
+
+// 		if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS)
+// 		{
+// 			throw std::runtime_error("failed to create graphics pipeline!");
+// 		}
+
+// 		vkDestroyShaderModule(device, fragShaderModule, nullptr);
+// 		vkDestroyShaderModule(device, vertShaderModule, nullptr);
+// 	}
+
+// 	VkShaderModule createShaderModule(VkDevice device, const std::string& code)
+// 	{
+// 		VkShaderModuleCreateInfo createInfo = {};
+// 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+// 		createInfo.codeSize = code.size();
+// 		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.c_str());
+
+// 		VkShaderModule shaderModule;
+// 		if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+// 		{
+// 			throw std::runtime_error("failed to create shader module!");
+// 		}
+
+// 		return shaderModule;
+// 	}
+
+// 	// Функция для передачи данных на GPU и выполнения рендеринга
+// 	void drawFrame(VkDevice device, VkCommandBuffer commandBuffer, VkPipeline graphicsPipeline, VkPipelineLayout pipelineLayout, VkBuffer vertexBuffer, VkBuffer uniformBuffer)
+// 	{
+// 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+
+// 		VkBuffer vertexBuffers[] = { vertexBuffer };
+// 		VkDeviceSize offsets[] = { 0 };
+// 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+
+// 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+
+// 		vkCmdDraw(commandBuffer, static_cast<uint32_t>(points.size()), 1, 0, 0);
+// 	}
+}
+
 static void check_vk_result(VkResult err)
 {
 	if (err == 0)
@@ -574,27 +858,39 @@ void View::drawSystemSetup()
 	ImGui::SameLine();
 	ImGui::RadioButton("Beeman", &selected_scheme, PlanetSystem::DiffSchemes::BEEMAN);
 
-	ImGui::InputInt("Number of Planets", &num_planets);
+	int new_num_planets = num_planets;
+	ImGui::InputInt("Number of Planets", &new_num_planets);
 
-	if (num_planets > 0)
+	if (new_num_planets > num_planets)
 	{
-		positions.resize(num_planets);
-		velocities.resize(num_planets);
-		masses.resize(num_planets);
-
-		for (int i = 0; i != num_planets; ++i)
+		// Добавляем новые планеты
+		for (int i = num_planets; i < new_num_planets; ++i)
 		{
 			PlanetSystem::PlanetParams curPlanet = PlanetSystem::createDefaultPlanet(i);
-			positions[i] = curPlanet.pos;
-			velocities[i] = curPlanet.velocity;
-			masses[i] = curPlanet.mass;
-			ImGui::Text("Planet %d", i + 1);
-			ImGui::InputFloat2("Position", &positions[i].x, "%.10g");
-			ImGui::InputFloat2("Velocity", &velocities[i].x, "%.10g");
-			ImGui::InputFloat("Mass", &masses[i], 0.f, 0.f, "%.10g");
+			positions.push_back(curPlanet.pos);
+			velocities.push_back(curPlanet.velocity);
+			masses.push_back(curPlanet.mass);
 		}
 	}
+	else if (new_num_planets < num_planets)
+	{
+		// Удаляем лишние планеты
+		positions.resize(new_num_planets);
+		velocities.resize(new_num_planets);
+		masses.resize(new_num_planets);
+	}
 
+	num_planets = new_num_planets;
+
+	for (int i = 0; i < num_planets; ++i)
+	{
+		ImGui::PushID(i);
+		ImGui::Text("Planet %d", i + 1);
+		ImGui::InputFloat2("Position", &positions[i].x, "%.10g");
+		ImGui::InputFloat2("Velocity", &velocities[i].x, "%.10g");
+		ImGui::InputFloat("Mass", &masses[i], 0.f, 0.f, "%.10g");
+		ImGui::PopID();
+	}
 	ImGui::End();
 }
 
@@ -633,21 +929,36 @@ void View::drawSystemState()
 			}
 			catch (std::exception& e)
 			{
+				show_error_popup = true;
 				ImGui::OpenPopup("Error");
-				if (ImGui::BeginPopupModal("Error", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-				{
-					ImGui::Text("An error occurred: %s", e.what());
-					if (ImGui::Button("OK", ImVec2(120, 0)))
-					{
-						ImGui::CloseCurrentPopup();
-					}
-					ImGui::EndPopup();
-				}
+				lastError = e.what();
+				// ImGui::OpenPopup("Error");
+				// if (ImGui::BeginPopupModal("Error", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+				// {
+				// 	ImGui::Text("An error occurred: %s", e.what());
+				// 	if (ImGui::Button("OK", ImVec2(120, 0)))
+				// 	{
+				// 		ImGui::CloseCurrentPopup();
+				// 	}
+				// 	ImGui::EndPopup();
+				// }
 			}
 		}
 	}
 	ImGui::PopStyleColor(3);
-
+	if (show_error_popup)
+	{
+		if (ImGui::BeginPopupModal("Error", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+		{
+			ImGui::Text("%s", lastError.c_str());
+			if (ImGui::Button("OK", ImVec2(120, 0)))
+			{
+				show_error_popup = false;
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+	}
 	ImGui::End();
 }
 
@@ -679,42 +990,73 @@ void View::drawSystemVisualisation()
 	ImGui::Begin("Moving Point", &show_animation_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_UnsavedDocument);
 
+	// Обработка ввода
+	if (ImGui::IsWindowHovered() && ImGui::IsMouseDragging(0))
+	{
+		if (!dragging)
+		{
+			dragging = true;
+			lastMouseX = ImGui::GetMousePos().x;
+			lastMouseY = ImGui::GetMousePos().y;
+		}
+		if (dragging)
+		{
+			float deltaX = ImGui::GetMousePos().x - lastMouseX;
+			float deltaY = ImGui::GetMousePos().y - lastMouseY;
+			offsetX += deltaX;
+			offsetY += deltaY;
+			lastMouseX = ImGui::GetMousePos().x;
+			lastMouseY = ImGui::GetMousePos().y;
+		}
+	}
+	else
+	{
+		dragging = false;
+	}
+
+	if (ImGui::IsWindowHovered() && ImGui::GetIO().MouseWheel != 0.0f)
+	{
+		float zoom = ImGui::GetIO().MouseWheel * 1.e-11f;
+		scale += zoom;
+		if (scale < 1.e-10f) scale = 1.e-10f;
+	}
+	// size_t step = lastStep / (current_time * scale * 1.e+3);
+	// size_t step = std::max(lastStep / 100, 1ULL);
+	size_t step = 1000;
 	ImDrawList* draw_list = ImGui::GetWindowDrawList();
-	ImVec2 mouse_pos = ImGui::GetMousePos();
-	ImVec2 window_pos = ImGui::GetWindowPos();
-
-	// Обработка изменения масштаба с помощью колеса мыши
-	if (ImGui::IsWindowHovered() && ImGui::IsMousePosValid() && ImGui::GetIO().MouseWheel != 0.0f)
+	auto paths = system.getPaths();
+	auto systemParams = system.getSystemParams();
+	// Найти максимальную массу в системе
+	double maxMass = 0.0;
+	for (const auto& params : systemParams)
 	{
-		scale += ImGui::GetIO().MouseWheel * 0.1f;
-		scale = std::max(0.1f, scale);
+		if (params.mass > maxMass)
+		{
+			maxMass = params.mass;
+		}
 	}
 
-	// Обработка перемещения окна перетаскиванием
-	if (ImGui::IsWindowHovered() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+	for (size_t planetIndex = 0; planetIndex != paths.size(); ++planetIndex)
 	{
-		ImVec2 delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Left);
-		window_pos.x += delta.x;
-		window_pos.y += delta.y;
-		ImGui::ResetMouseDragDelta(ImGuiMouseButton_Left);
+		auto& planet = paths[planetIndex];
+		for (size_t i = step; i < lastStep; i += step)
+		{
+			ImVec2 p1 = planet[i >= step ? i - step : 0];
+			ImVec2 p2 = planet[i];
+			// Масштабирование и смещение координат
+			p1.x = (p1.x * scale) + window_center.x + offsetX;
+			p1.y = (p1.y * scale) + window_center.y + offsetY;
+			p2.x = (p2.x * scale) + window_center.x + offsetX;
+			p2.y = (p2.y * scale) + window_center.y + offsetY;
+			draw_list->AddLine(p1, p2, IM_COL32(255, 255, 255, 255), 2.0f);
+		}
+		ImVec2 lastPos = planet[lastStep > 0 ? lastStep - 1 : 0];
+		lastPos.x = (lastPos.x * scale) + window_center.x + offsetX;
+		lastPos.y = (lastPos.y * scale) + window_center.y + offsetY;
+		double planetMass = systemParams[planetIndex].mass;
+		float radius = std::max(20.0f * (planetMass / maxMass), 6.); // Нормализованный радиус
+		draw_list->AddCircleFilled(lastPos, radius, IM_COL32(255, 0, 0, 255));
 	}
-
-	// Вычисление позиции точки на основе угла и масштаба
-	ImVec2 point_pos;
-	point_pos.x = center.x + std::cos(angle) * 100.0f * scale;
-	point_pos.y = center.y + std::sin(angle) * 100.0f * scale;
-	points.push_back(point_pos);
-
-	// Отрисовка точки и траектории
-	draw_list->AddCircleFilled(point_pos, 5.0f * scale, IM_COL32(255, 0, 0, 255));
-	for (int i = 1; i < points.size(); i++)
-	{
-		draw_list->AddLine(points[i - 1], points[i], IM_COL32(255, 0, 0, 255), 2.0f * scale);
-	}
-
-	// Обновление угла для движения по кругу
-	angle += 0.01f;
-
 	ImGui::End();
 }
 
