@@ -74,7 +74,7 @@ public:
 		if (inProgress)
 		{
 			size_t stepsCount = std::ceil(simulationTime / timeStep);
-			size_t curStep = previousStep + 1;
+			size_t curStep = previousStep;
 			(this->*stepper)(curStep);
 			++previousStep;
 			if (curStep == stepsCount - 1)
