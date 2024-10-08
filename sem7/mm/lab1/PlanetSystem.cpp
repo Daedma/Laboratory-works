@@ -125,6 +125,7 @@ PlanetSystem::Point PlanetSystem::calcAcceleration(size_t nplanet, size_t step) 
 			}
 		}
 	}
+	acceleration -= viscosity * velocities[nplanet][step] / planets[nplanet].mass;
 	return acceleration;
 }
 
@@ -152,35 +153,35 @@ void PlanetSystem::setInitialConditions()
 	}
 }
 
-void PlanetSystem::run()
+void PlanetSystem::run(bool inConcurency)
 {
 	throwExceptionIfInProgress();
 	isValidSetup();
 	allocMemory();
 	setInitialConditions();
-	this->previousStep = 0;
-	workThread.reset(new std::thread{
-		[this]() {
-			size_t stepsCount = std::ceil(simulationTime / timeStep);
-			size_t curStep = 0;
-			this->inProgress = true;
-			while (curStep != stepsCount)
-			{
-				(this->*stepper)(curStep);
-				++curStep;
-				this->previousStep = curStep - 1;
+	previousStep = 0;
+	inProgress = true;
+	if (inConcurency)
+	{
+		std::thread{
+			[this]() {
+				size_t stepsCount = std::ceil(simulationTime / timeStep);
+				size_t curStep = 0;
+				while (curStep != stepsCount && this->inProgress)
+				{
+					(this->*stepper)(curStep);
+					++curStep;
+					this->previousStep = curStep - 1;
+				}
+				this->previousStep = curStep;
+				this->inProgress = false;
 			}
-			this->previousStep = curStep;
-			this->inProgress = false;
-		}
-		});
-	workThread->detach();
+		}.detach();
+	}
 }
 
 void PlanetSystem::stop()
 {
-	workThread->detach();
-	workThread.reset();
 	inProgress = false;
 }
 

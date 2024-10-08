@@ -63,9 +63,11 @@ private:
 	float simulation_time = 360000000.0f;
 	int selected_scheme = 0;
 	int num_planets = 0;
+	float viscosity_coefficient = 0.0f;
 	std::vector<ImVec2> positions;
 	std::vector<ImVec2> velocities;
 	std::vector<float> masses;
+	bool isConcurency = false;
 
 	// State window
 	bool show_left_window = true;

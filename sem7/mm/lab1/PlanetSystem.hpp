@@ -69,7 +69,22 @@ public:
 		return planets;
 	}
 
-	void run();
+	void makeStep()
+	{
+		if (inProgress)
+		{
+			size_t stepsCount = std::ceil(simulationTime / timeStep);
+			size_t curStep = previousStep + 1;
+			(this->*stepper)(curStep);
+			++previousStep;
+			if (curStep == stepsCount - 1)
+			{
+				inProgress = false;
+			}
+		}
+	}
+
+	void run(bool inConcurency = false);
 
 	void stop();
 
@@ -107,19 +122,25 @@ public:
 		return inProgress;
 	}
 
+	void setViscosity(double value)
+	{
+		throwExceptionIfInProgress();
+		viscosity = value;
+	}
+
 	static PlanetParams createDefaultPlanet(size_t n);
 
 private:
 	// Concurency
 	std::atomic_bool inProgress;
 	std::atomic_size_t previousStep;
-	std::unique_ptr<std::thread> workThread;
 
 	// Initial parameters
 	double timeStep = 0.;
 	void(PlanetSystem::* stepper)(size_t) = nullptr;
 	double simulationTime = 0.;
 	std::vector<PlanetParams> planets;
+	double viscosity = 0.;
 
 	// Result
 	std::vector<std::vector<Point>> coordinates;
@@ -157,6 +178,10 @@ private:
 		if (planets.empty())
 		{
 			throw std::runtime_error("No planets in the system.");
+		}
+		if (viscosity < 0.)
+		{
+			throw std::runtime_error("Viscosity must be non-negative.");
 		}
 
 		// Check if all planets have valid parameters
