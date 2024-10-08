@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <vector>
 #include <iostream>
+#include <fstream>
+#include <string>
 #include "ImVec2QvmTraits.hpp"
 
 
@@ -968,16 +970,54 @@ void View::drawFileActions()
 		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_UnsavedDocument | ImGuiWindowFlags_AlwaysAutoResize);
 	ImGui::SetWindowPos(ImVec2(0, h - ImGui::GetWindowHeight()));
 
+	ImGui::InputText("File Path", file_path, IM_ARRAYSIZE(file_path));
+
 	if (ImGui::Button("Save Model Parameters"))
 	{
-		// Add your code to save the model parameters here
+		std::ofstream file(file_path);
+		if (file.is_open())
+		{
+			file << time_step << "\n";
+			file << simulation_time << "\n";
+			file << selected_scheme << "\n";
+			file << num_planets << "\n";
+
+			for (int i = 0; i < num_planets; ++i)
+			{
+				file << positions[i].x << " " << positions[i].y << "\n";
+				file << velocities[i].x << " " << velocities[i].y << "\n";
+				file << masses[i] << "\n";
+			}
+
+			file.close();
+		}
 	}
 
 	ImGui::SameLine();
 
 	if (ImGui::Button("Load Model Parameters"))
 	{
-		// Add your code to load the model parameters here
+		std::ifstream file(file_path);
+		if (file.is_open())
+		{
+			file >> time_step;
+			file >> simulation_time;
+			file >> selected_scheme;
+			file >> num_planets;
+
+			positions.resize(num_planets);
+			velocities.resize(num_planets);
+			masses.resize(num_planets);
+
+			for (int i = 0; i < num_planets; ++i)
+			{
+				file >> positions[i].x >> positions[i].y;
+				file >> velocities[i].x >> velocities[i].y;
+				file >> masses[i];
+			}
+
+			file.close();
+		}
 	}
 
 	ImGui::End();

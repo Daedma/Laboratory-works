@@ -78,6 +78,7 @@ private:
 
 	// File window
 	bool show_left_bottom_window = true;
+	char file_path[256] = "";
 
 	// Animation
 	bool show_animation_window = false;
