@@ -9,8 +9,6 @@ find_package(Boost REQUIRED COMPONENTS qvm)
 
 add_executable(planets main.cpp View.cpp PlanetSystem.cpp)
 
-# target_include_directories(planets PUBLIC "${IMGUI_DIR}" "${IMGUI_DIR}/backends")
-
 target_link_libraries(planets
         PRIVATE
         $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
