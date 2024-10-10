@@ -5,7 +5,6 @@
 #define TYPE double
 #define K 3
 #define N 6300000
-#define THREADS_COUNT 3
 #define Q 26
 
 void fill_array(TYPE* a, int size)
@@ -70,11 +69,13 @@ TYPE parallel_sum_atomic(TYPE* a, int size)
 
 int main(int argc, char* argv[])
 {
+	int nthreads = atoi(argv[1]);
+	omp_set_num_threads(nthreads);
 // Вывод параметров индивидуального варианта
 	printf("Type: %s\n", "double");
 	printf("K: %d\n", K);
 	printf("N: %d\n", N);
-	printf("Threads count: %d\n", THREADS_COUNT);
+	printf("Threads count: [3, 9, 12]");
 	printf("Q: %d\n", Q);
 
 	// Создание массивов
