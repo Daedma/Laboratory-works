@@ -1,0 +1,16 @@
+Type: double
+K: 3
+N: 6300000
+Threads count: 12
+Q: 26
+Sequential time: 0.071050
+Parallel initialization time: 0.001223
+Parallel time (critical): 0.008029
+Parallel time (atomic): 1.246488
+Parallel time (reduction): 0.010783
+Speedup (critical with init): 7.679363
+Speedup (atomic with init): 0.056944
+Speedup (reduction with init): 5.917605
+Speedup (critical without init): 8.849449
+Speedup (atomic without init): 0.057000
+Speedup (reduction without init): 6.588937

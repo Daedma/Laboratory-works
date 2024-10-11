@@ -1,0 +1,13 @@
+Type: double
+K: 3
+N: 6300000
+Threads count: 12
+Q: 26
+Sequential time: 0.00000009536743164
+Broadcast time: 0.08601826429367065
+Parallel time (point-to-point): 0.25672303438186644
+Parallel time (reduce): 0.00403777360916138
+Speedup (point-to-point with broadcast): 0.00000027824902342
+Speedup (reduce with broadcast): 0.00000105897876324
+Speedup (point-to-point without broadcast): 0.00000037147983963
+Speedup (reduce without broadcast): 0.00002361881592971
