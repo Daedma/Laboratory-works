@@ -6,6 +6,7 @@
 #define K 3
 #define N 6300000
 #define Q 26
+#define CHUNK 1000
 
 #ifdef SLOWER
 #define REPEAT_Q_TIMES for (int _rqt = 0; _rqt < Q; ++_rqt)
@@ -13,9 +14,10 @@
 #define REPEAT_Q_TIMES
 #endif
 
+
 void fill_array(TYPE* a, int size)
 {
-	for (int i = 0; i != size; ++i)
+	for (int i = 0; i < size; ++i)
 	{
 		a[i] = (TYPE)rand() / RAND_MAX;
 	}
@@ -24,7 +26,7 @@ void fill_array(TYPE* a, int size)
 TYPE sequential_sum(TYPE* a, int size)
 {
 	TYPE sum = 0;
-	for (int i = 0; i != size; ++i)
+	for (int i = 0; i < size; ++i)
 	{
 		REPEAT_Q_TIMES sum += a[i];
 	}
@@ -34,8 +36,8 @@ TYPE sequential_sum(TYPE* a, int size)
 TYPE parallel_sum_static(TYPE* a, int size)
 {
 	TYPE sum = 0;
-#pragma omp parallel for reduction(+:sum)
-	for (int i = 0; i != size; ++i)
+#pragma omp parallel for reduction(+:sum) shedule(static, CHUNK)
+	for (int i = 0; i < size; ++i)
 	{
 		REPEAT_Q_TIMES sum += a[i];
 	}
@@ -45,18 +47,10 @@ TYPE parallel_sum_static(TYPE* a, int size)
 TYPE parallel_sum_dynamic(TYPE* a, int size)
 {
 	TYPE sum = 0;
-#pragma omp parallel
+#pragma omp parallel for reduction(+:sum) shedule(dynamic, CHUNK)
+	for (int i = 0; i < size; ++i)
 	{
-		TYPE local_sum = 0;
-#pragma omp for
-		for (int i = 0; i != size; ++i)
-		{
-			REPEAT_Q_TIMES local_sum += a[i];
-		}
-#pragma omp critical
-		{
-			sum += local_sum;
-		}
+		REPEAT_Q_TIMES sum += a[i];
 	}
 	return sum;
 }
@@ -64,12 +58,10 @@ TYPE parallel_sum_dynamic(TYPE* a, int size)
 TYPE parallel_sum_guided(TYPE* a, int size)
 {
 	TYPE sum = 0;
-#pragma omp parallel for
-	for (int i = 0; i != size; ++i)
+#pragma omp parallel for reduction(+:sum) shedule(guided, CHUNK)
+	for (int i = 0; i < size; ++i)
 	{
-		REPEAT_Q_TIMES
-#pragma omp atomic
-			sum += a[i];
+		REPEAT_Q_TIMES sum += a[i];
 	}
 	return sum;
 }
@@ -79,7 +71,7 @@ int main(int argc, char* argv[])
 	int nthreads = atoi(argv[1]);
 	omp_set_num_threads(nthreads);
 // Вывод параметров индивидуального варианта
-	printf("Type: %s\n", "double");
+	printf("Type: %s\n", "double\n");
 	printf("K: %d\n", K);
 	printf("N: %d\n", N);
 	printf("Threads count: [3, 9, 12]");
@@ -87,7 +79,7 @@ int main(int argc, char* argv[])
 
 	// Создание массивов
 	TYPE* a[K];
-	for (int i = 0; i != K; ++i)
+	for (int i = 0; i < K; ++i)
 	{
 		a[i] = (TYPE*)malloc(N * sizeof(TYPE));
 		fill_array(a[i], N);
@@ -95,10 +87,10 @@ int main(int argc, char* argv[])
 
 	// Замер времени последовательного алгоритма
 	double ts = 0;
-	for (int i = 0; i != 20; ++i)
+	for (int i = 0; i < 20; ++i)
 	{
 		double st_time = omp_get_wtime();
-		for (int j = 0; j != K; ++j)
+		for (int j = 0; j < K; ++j)
 		{
 			sequential_sum(a[j], N);
 		}
@@ -109,7 +101,7 @@ int main(int argc, char* argv[])
 
 	// Замер времени инициализации параллельной области
 	double tp = 0;
-	for (int i = 0; i != 20; ++i)
+	for (int i = 0; i < 20; ++i)
 	{
 		double st_time = omp_get_wtime();
 #pragma omp parallel
@@ -122,57 +114,57 @@ int main(int argc, char* argv[])
 	tp /= 20;
 
 	// Замер времени параллельных алгоритмов
-	double tc = 0, ta = 0, tr = 0;
-	for (int i = 0; i != 20; ++i)
+	double tst = 0, td = 0, tg = 0;
+	for (int i = 0; i < 20; ++i)
 	{
 		double st_time = omp_get_wtime();
-		for (int j = 0; j < K; j++)
+		for (int j = 0; j < K; ++j)
+		{
+			parallel_sum_static(a[j], N);
+		}
+		double end_time = omp_get_wtime();
+		tst += end_time - st_time;
+
+		st_time = omp_get_wtime();
+		for (int j = 0; j < K; ++j)
 		{
 			parallel_sum_dynamic(a[j], N);
 		}
-		double end_time = omp_get_wtime();
-		tc += end_time - st_time;
+		end_time = omp_get_wtime();
+		td += end_time - st_time;
 
 		st_time = omp_get_wtime();
-		for (int j = 0; j < K; j++)
+		for (int j = 0; j < K; ++j)
 		{
 			parallel_sum_guided(a[j], N);
 		}
 		end_time = omp_get_wtime();
-		ta += end_time - st_time;
-
-		st_time = omp_get_wtime();
-		for (int j = 0; j < K; j++)
-		{
-			parallel_sum_static(a[j], N);
-		}
-		end_time = omp_get_wtime();
-		tr += end_time - st_time;
+		tg += end_time - st_time;
 	}
-	tc /= 20;
-	ta /= 20;
-	tr /= 20;
+	tst /= 20;
+	td /= 20;
+	tg /= 20;
 
 	// Вычисление ускорения
-	double acp = ts / (tp + tc);
-	double aap = ts / (tp + ta);
-	double arp = ts / (tp + tr);
-	double ac = ts / tc;
-	double aa = ts / ta;
-	double ar = ts / tr;
+	double atsp = ts / (tp + tst);
+	double adp = ts / (tp + td);
+	double agp = ts / (tp + tg);
+	double ast = ts / tst;
+	double ad = ts / td;
+	double ag = ts / tg;
 
 	// Вывод полученных значений времени и ускорения
 	printf("Sequential time: %f\n", ts);
 	printf("Parallel initialization time: %f\n", tp);
-	printf("Parallel time (critical): %f\n", tc);
-	printf("Parallel time (atomic): %f\n", ta);
-	printf("Parallel time (reduction): %f\n", tr);
-	printf("Speedup (critical with init): %f\n", acp);
-	printf("Speedup (atomic with init): %f\n", aap);
-	printf("Speedup (reduction with init): %f\n", arp);
-	printf("Speedup (critical without init): %f\n", ac);
-	printf("Speedup (atomic without init): %f\n", aa);
-	printf("Speedup (reduction without init): %f\n", ar);
+	printf("Parallel time (static): %f\n", tst);
+	printf("Parallel time (dynamic): %f\n", td);
+	printf("Parallel time (guided): %f\n", tg);
+	printf("Speedup (static with init): %f\n", atsp);
+	printf("Speedup (dynamic with init): %f\n", adp);
+	printf("Speedup (guided with init): %f\n", agp);
+	printf("Speedup (static without init): %f\n", ast);
+	printf("Speedup (dynamic without init): %f\n", ad);
+	printf("Speedup (guided without init): %f\n", ag);
 
 	// Освобождение памяти
 	for (int i = 0; i < K; i++)
