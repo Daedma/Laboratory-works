@@ -86,6 +86,7 @@ int main(int argc, char* argv[])
 	if (argc < 2)
 	{
 		printf("Usage: %s <number_of_threads>", argv[0]);
+		return -1;
 	}
 
 	int nthreads = atoi(argv[1]);
