@@ -68,9 +68,6 @@
 #define APPLY_FUNCTION_10(var, func) APPLY_FUNCTION_9(var, func) (func(var##10));
 #define APPLY_FUNCTION(var, func) CAT(APPLY_FUNCTION_, K)(var, func)
 
-#define MALLOC(var) var = (TYPE*)malloc(N * sizeof(TYPE))
-#define FILL(var) fill_array(var, N)
-
 #define STR(x) STR_HELPER(x)
 #define STR_HELPER(x) #x
 
@@ -78,9 +75,9 @@
 
 void fill_array(TYPE* a, int size)
 {
-	for (int i = 0; i != size; ++i)
+	for (int i = 0; i < size; ++i)
 	{
-		a[i] = (TYPE)rand() / RAND_MAX;
+		a[i] = (TYPE)1;
 	}
 }
 
@@ -103,7 +100,9 @@ int main(int argc, char* argv[])
 
 	// Создание массивов
 	DECLARE_VECTORS(a);
+#define MALLOC(var) var = (TYPE*)malloc(N * sizeof(TYPE))
 	APPLY_FUNCTION(a, MALLOC);
+#define FILL(var) fill_array(var, N)
 	APPLY_FUNCTION(a, FILL);
 
 	// Время
@@ -114,7 +113,7 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < 20; ++i) // внешний цикл для 20-ти повторений
 	{
 		TYPE sum;
-		ptrdiff_t i;
+		int i;
 		double st_time, end_time;
 
 		// Последовательный алгоритм
