@@ -29,6 +29,10 @@
 #define N 6300000
 #endif
 
+#ifndef EXTRA
+#define EXTRA 0
+#endif
+
 #ifndef Q
 #define Q 26
 #endif
@@ -121,19 +125,21 @@ int main(int argc, char* argv[])
 		printf("N: %d\n", N);
 		printf("Threads count: %s\n", STR((THREADS_COUNT)));
 		printf("Q: %d\n", Q);
+		printf("Extra: %d\n", EXTRA);
 	}
 
 	// Создание массивов
 	DECLARE_VECTORS(a); // Исходные вектора
 	if (proc_rank == 0)
 	{
-#define MALLOC(x) x = (TYPE*)malloc(N* sizeof(TYPE))
+#define MALLOC(x) x = (TYPE*)malloc((N + EXTRA) * sizeof(TYPE))
 		APPLY_FUNCTION(a, MALLOC);
-#define FILL(x) fill_array(x, N)
+#define FILL(x) fill_array(x, N + EXTRA)
 		APPLY_FUNCTION(a, FILL);
 	}
 
-	int k = N / proc_num; // Количество обрабатываемых каждым процессом элементов
+	int extra_elements = (N + EXTRA) % proc_num; // Дополнительные элементы
+	int k = (N + EXTRA) / proc_num + (proc_rank < extra_elements); // Количество обрабатываемых этим процессом элементов
 	DECLARE_VECTORS(a_local); // Обрабатываемые части
 #define MALLOC(x) x = (TYPE*)malloc(k * sizeof(TYPE))
 	APPLY_FUNCTION(a_local, MALLOC);
@@ -142,14 +148,32 @@ int main(int argc, char* argv[])
 	TYPE* a_result;
 	if (proc_rank == 0)
 	{
-		a_result = (TYPE*)malloc(N * sizeof(TYPE));
+		a_result = (TYPE*)malloc((N + EXTRA) * sizeof(TYPE));
 	}
 	TYPE* a_local_result = (TYPE*)malloc(k * sizeof(TYPE));
+
+	// Вспомогательные массивы
+	int* sendcounts = (int*)malloc(proc_num * sizeof(int));
+	int* displs = (int*)malloc(proc_num * sizeof(int));
+
+	// Инициализация sendcounts
+	for (int i = 0; i < proc_num; ++i)
+	{
+		sendcounts[i] = k + (i < extra_elements);
+	}
+
+	// Инициализация displs
+	displs[0] = 0;
+	for (int i = 1; i < proc_num; ++i)
+	{
+		displs[i] = displs[i - 1] + sendcounts[i - 1];
+	}
+
 
 	// Время
 	double ts = 0; // последовательный алгоритм
 	double tSc = 0; // широковещательная рассылка
-	double tmul = 0; // параллельные алгоритмы
+	double tnon = 0; // параллельные алгоритмы
 	for (int i = 0; i < 20; ++i) // внешний цикл для 20-ти повторений
 	{
 		double st_time, end_time;
@@ -158,7 +182,7 @@ int main(int argc, char* argv[])
 		if (proc_rank == 0)
 		{
 			st_time = MPI_Wtime();
-			for (int i = 0; i < N; ++i)
+			for (int i = 0; i < N + EXTRA; ++i)
 			{
 				REPEAT_Q_TIMES
 					a_result[i] = APPLY_BIN_OP(a, i, +);
@@ -170,7 +194,7 @@ int main(int argc, char* argv[])
 
 		// Широковещательная рассылка и замер времени ее выполнения
 		st_time = MPI_Wtime();
-#define SCATTER(x, y) MPI_Scatter(x, k, MPI_TYPE, y, k, MPI_TYPE, 0, MPI_COMM_WORLD)
+#define SCATTER(x, y) MPI_Scatterv(x, sendcounts, displs, MPI_TYPE, y, k, MPI_TYPE, 0, MPI_COMM_WORLD)
 		APPLY_FUNCTION2(a, a_local, SCATTER);
 		end_time = MPI_Wtime();
 		tSc += end_time - st_time;
@@ -183,25 +207,25 @@ int main(int argc, char* argv[])
 			REPEAT_Q_TIMES
 				a_local_result[l] = APPLY_BIN_OP(a_local, l, +);
 		}
-		MPI_Gather(a_local_result, k, MPI_TYPE, a_result, k, MPI_TYPE, 0, MPI_COMM_WORLD);
+		MPI_Gatherv(a_local_result, k, MPI_TYPE, a_result, sendcounts, displs, MPI_TYPE, 0, MPI_COMM_WORLD);
 		end_time = MPI_Wtime();
-		tmul += end_time - st_time;
+		tnon += end_time - st_time;
 		MPI_Barrier(MPI_COMM_WORLD);
 	}
 	ts /= 20;
 	tSc /= 20;
-	tmul /= 20;
+	tnon /= 20;
 
 	// Вычисление ускорения
-	double amulSc = ts / (tSc + tmul);
-	double amul = ts / tmul;
+	double amulSc = ts / (tSc + tnon);
+	double amul = ts / tnon;
 
 	// Вывод полученных значений времени и ускорения
 	if (proc_rank == 0)
 	{
 		printf("Sequential time: %.17f\n", ts);
 		printf("Scatter time: %.17f\n", tSc);
-		printf("Parallel time (reduce): %.17f\n", tmul);
+		printf("Parallel time (reduce): %.17f\n", tnon);
 		printf("Speedup (reduce with scatter): %.17f\n", amulSc);
 		printf("Speedup (reduce without scatter): %.17f\n", amul);
 	}
@@ -214,6 +238,8 @@ int main(int argc, char* argv[])
 	}
 	APPLY_FUNCTION(a_local, free);
 	free(a_local_result);
+	free(sendcounts);
+	free(displs);
 
 	// Завершение MPI
 	MPI_Finalize();
