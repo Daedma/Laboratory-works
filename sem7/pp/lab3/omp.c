@@ -106,6 +106,8 @@ int main(int argc, char* argv[])
 #define FILL(var) fill_array(var, N)
 	APPLY_FUNCTION(a, FILL);
 
+	TYPE* a_result = (TYPE*)malloc(N * sizeof(TYPE));
+
 	// Время
 	double ts = 0; // последовательный алгоритм
 	double tp = 0; // инициализация параллельной области
@@ -113,17 +115,15 @@ int main(int argc, char* argv[])
 
 	for (int i = 0; i < 20; ++i) // внешний цикл для 20-ти повторений
 	{
-		TYPE sum;
 		int i;
 		double st_time, end_time;
 
 		// Последовательный алгоритм
-		sum = 0;
 		st_time = omp_get_wtime();
 		for (i = 0; i < N; ++i)
 		{
 			REPEAT_Q_TIMES
-				sum = sum + APPLY_BIN_OP(a, i, +);
+				a_result[i] = APPLY_BIN_OP(a, i, +);
 		}
 		end_time = omp_get_wtime();
 		ts += end_time - st_time;
@@ -137,35 +137,32 @@ int main(int argc, char* argv[])
 		end_time = omp_get_wtime();
 		tp += end_time - st_time;
 
-		sum = 0;
 		st_time = omp_get_wtime();
-#pragma omp parallel for reduction(+:sum) schedule(static, CHUNK)
+#pragma omp parallel for schedule(static, CHUNK)
 		for (i = 0; i < N; ++i)
 		{
 			REPEAT_Q_TIMES
-				sum = sum + APPLY_BIN_OP(a, i, +);
+				a_result[i] = APPLY_BIN_OP(a, i, +);
 		}
 		end_time = omp_get_wtime();
 		tst += end_time - st_time;
 
-		sum = 0;
 		st_time = omp_get_wtime();
-#pragma omp parallel for reduction(+:sum) schedule(dynamic, CHUNK)
+#pragma omp parallel for schedule(dynamic, CHUNK)
 		for (i = 0; i < N; ++i)
 		{
 			REPEAT_Q_TIMES
-				sum = sum + APPLY_BIN_OP(a, i, +);
+				a_result[i] = APPLY_BIN_OP(a, i, +);
 		}
 		end_time = omp_get_wtime();
 		td += end_time - st_time;
 
-		sum = 0;
 		st_time = omp_get_wtime();
-#pragma omp parallel for reduction(+:sum) schedule(guided, CHUNK)
+#pragma omp parallel for schedule(guided, CHUNK)
 		for (i = 0; i < N; ++i)
 		{
 			REPEAT_Q_TIMES
-				sum = sum + APPLY_BIN_OP(a, i, +);
+				a_result[i] = APPLY_BIN_OP(a, i, +);
 		}
 		end_time = omp_get_wtime();
 		tg += end_time - st_time;
@@ -201,6 +198,6 @@ int main(int argc, char* argv[])
 
 	// Освобождение памяти
 	APPLY_FUNCTION(a, free);
-
+	free(a_result);
 	return 0;
 }
