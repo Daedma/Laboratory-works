@@ -19,6 +19,7 @@
 *.ini
 !CMakeLists.txt
 !MakeFile
+!makefile
 build/
 .vscode/settings.json
 !**/vcpkg.json

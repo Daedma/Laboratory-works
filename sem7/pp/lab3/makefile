@@ -4,7 +4,7 @@ N=6300000
 Q=26
 K=3
 EXTRA=33391
-THREADS_COUNT="[3,9,12]"
+THREADS_COUNT="\"[3,9,12]\""
 ###
 DEFINES= -D$(TYPE) -DN=$(N) -DQ=$(Q) -DK=$(K) -DTHREADS_COUNT=$(THREADS_COUNT) -DEXTRA=$(EXTRA)
 CFLAGS= -std=c99 -O0 $(DEFINES)
@@ -26,7 +26,7 @@ lab3nonmpiq:
 	$(MPICC) -o $@ nonmpi.c $(CFLAGS) -DSLOWER
 
 lab3omp:
-	$(CC) -o $@ omp.c $(CFLAGS)
+	$(CC) -o $@ omp.c $(CFLAGS) -fopenmp
 
 lab3ompq:
-	$(CC) -o $@ omp.c $(CFLAGS) -DSLOWER
+	$(CC) -o $@ omp.c $(CFLAGS) -DSLOWER -fopenmp

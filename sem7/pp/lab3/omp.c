@@ -88,14 +88,6 @@ void fill_array(TYPE *a, int size) {
 }
 
 int main(int argc, char *argv[]) {
-  if (argc < 2) {
-    printf("Usage: %s <number_of_threads>", argv[0]);
-    return -1;
-  }
-
-  int nthreads = atoi(argv[1]);
-  omp_set_num_threads(nthreads);
-
   // Вывод параметров индивидуального варианта
   printf("Type: %s\n", STR(TYPE));
   printf("K: %d\n", K);
