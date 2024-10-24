@@ -3,7 +3,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifndef TYPE
+#if defined(TYPE_DOUBLE)
+#define TYPE double
+#elif defined(TYPE_FLOAT)
+#define TYPE float
+#elif defined(TYPE_INT)
+#define TYPE int
+#else
 #define TYPE double
 #endif
 
