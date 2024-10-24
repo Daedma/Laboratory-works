@@ -18,6 +18,7 @@
 *.pdb
 *.ini
 !CMakeLists.txt
+!MakeFile
 build/
 .vscode/settings.json
 !**/vcpkg.json

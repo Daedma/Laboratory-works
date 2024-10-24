@@ -3,10 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifndef TYPE
-#define TYPE double
-#define MPI_TYPE MPI_DOUBLE
-#elif defined(TYPE_DOUBLE)
+#if defined(TYPE_DOUBLE)
 #define TYPE double
 #define MPI_TYPE MPI_DOUBLE
 #elif defined(TYPE_FLOAT)
@@ -16,7 +13,8 @@
 #define TYPE int
 #define MPI_TYPE MPI_INT
 #else
-#error "Unsupported TYPE"
+#define TYPE double
+#define MPI_TYPE MPI_DOUBLE
 #endif
 
 #ifndef K
@@ -32,7 +30,7 @@
 #endif
 
 #ifndef THREADS_COUNT
-#define THREADS_COUNT [ 3, 9, 12 ]
+#define THREADS_COUNT "[ 3, 9, 12 ]"
 #endif
 
 #ifdef SLOWER
@@ -110,7 +108,7 @@ int main(int argc, char *argv[]) {
     printf("Type: %s\n", STR(TYPE));
     printf("K: %d\n", K);
     printf("N: %d\n", N);
-    printf("Threads count: %s\n", STR((THREADS_COUNT)));
+    printf("Threads count: %s\n", THREADS_COUNT);
     printf("Q: %d\n", Q);
   }
 
