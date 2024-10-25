@@ -23,3 +23,9 @@ lab2omp:
 
 lab2ompq:
 	$(CC) -o $@ omp.c $(CFLAGS) -DSLOWER -fopenmp
+
+clean:
+	rm lab2mpi
+	rm lab2mpiq
+	rm lab2omp
+	rm lab2ompq

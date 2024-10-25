@@ -140,6 +140,9 @@ int main(int argc, char *argv[]) {
       }
       end_time = MPI_Wtime();
       ts += end_time - st_time;
+      if (i == 19) {
+        printf("Sequantional sum : %f\n", sum);
+      }
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -178,6 +181,9 @@ int main(int argc, char *argv[]) {
     MPI_Barrier(MPI_COMM_WORLD);
     end_time = MPI_Wtime();
     tpp += end_time - st_time;
+    if (proc_rank == 0 && i == 19) {
+      printf("Point-to-point sum : %f\n", sum);
+    }
 
     // Параллельный алгоритм с использованием коллективной операции
     st_time = MPI_Wtime();
@@ -190,6 +196,9 @@ int main(int argc, char *argv[]) {
     end_time = MPI_Wtime();
     tR += end_time - st_time;
     MPI_Barrier(MPI_COMM_WORLD);
+    if (proc_rank == 0 && i == 19) {
+      printf("Reduce sum : %f\n", sum);
+    }
   }
   ts /= 20;
   tB /= 20;

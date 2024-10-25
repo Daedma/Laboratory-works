@@ -93,14 +93,6 @@ void fill_array(TYPE *a, int size) {
 }
 
 int main(int argc, char *argv[]) {
-  // if (argc < 2) {
-  //   printf("Usage: %s <number_of_threads>", argv[0]);
-  //   return -1;
-  // }
-
-  // int nthreads = atoi(argv[1]);
-  // omp_set_num_threads(nthreads);
-
   // Вывод параметров индивидуального варианта
   printf("Type: %s\n", STR(TYPE));
   printf("K: %d\n", K);
@@ -135,6 +127,9 @@ int main(int argc, char *argv[]) {
     }
     end_time = omp_get_wtime();
     ts += end_time - st_time;
+    if (i == 19) {
+      printf("Sequantional sum : %f\n", sum);
+    }
 
     // Инициализация параллельной области
     st_time = omp_get_wtime();
@@ -158,6 +153,9 @@ int main(int argc, char *argv[]) {
     }
     end_time = omp_get_wtime();
     tc += end_time - st_time;
+    if (i == 19) {
+      printf("Critical sum : %f\n", sum);
+    }
 
     // atomic
     sum = 0;
@@ -170,6 +168,9 @@ int main(int argc, char *argv[]) {
     }
     end_time = omp_get_wtime();
     ta += end_time - st_time;
+    if (i == 19) {
+      printf("Atomic sum : %f\n", sum);
+    }
 
     // reduction
     sum = 0;
@@ -181,6 +182,9 @@ int main(int argc, char *argv[]) {
     }
     end_time = omp_get_wtime();
     tr += end_time - st_time;
+    if (i == 19) {
+      printf("Reduction sum : %f\n", sum);
+    }
   }
   // Расчет ускорения
   ts /= 20;
