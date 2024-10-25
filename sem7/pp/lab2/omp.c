@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
   double tp = 0; // инициализация параллельной области
   double tc = 0, ta = 0, tr = 0; // параллельные алгоритмы
 
-  for (int i = 0; i < 20; ++i) // внешний цикл для 20-ти повторений
+  for (int j = 0; j < 20; ++j) // внешний цикл для 20-ти повторений
   {
     TYPE sum;
     int i;
@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
     }
     end_time = omp_get_wtime();
     ts += end_time - st_time;
-    if (i == 19) {
+    if (j == 19) {
       printf("Sequantional sum : %f\n", sum);
     }
 
@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
     }
     end_time = omp_get_wtime();
     tc += end_time - st_time;
-    if (i == 19) {
+    if (j == 19) {
       printf("Critical sum : %f\n", sum);
     }
 
@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
     }
     end_time = omp_get_wtime();
     ta += end_time - st_time;
-    if (i == 19) {
+    if (j == 19) {
       printf("Atomic sum : %f\n", sum);
     }
 
@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
     }
     end_time = omp_get_wtime();
     tr += end_time - st_time;
-    if (i == 19) {
+    if (j == 19) {
       printf("Reduction sum : %f\n", sum);
     }
   }
