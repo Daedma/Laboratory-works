@@ -1,0 +1,16 @@
+Type: double
+K: 3
+N: 6300000
+Threads count: [3,9,12]
+Q: 26
+Sequential time: 0.995514
+Parallel initialization time: 0.000123
+Parallel time (static): 0.137882
+Parallel time (dynamic): 0.136298
+Parallel time (guided): 0.136371
+Speedup (static with init): 7.213631
+Speedup (dynamic with init): 7.297388
+Speedup (guided with init): 7.293478
+Speedup (static without init): 7.220067
+Speedup (dynamic without init): 7.303974
+Speedup (guided without init): 7.300058

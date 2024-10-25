@@ -1,0 +1,10 @@
+Type: double
+K: 3
+N: 6300000
+Threads count: [3,9,12]
+Q: 26
+Sequential time: 0.03078286647796631
+Scatter time: 0.04801450967788697
+Parallel time (reduce): 0.02309486865997314
+Speedup (reduce with scatter): 0.43289460824293091
+Speedup (reduce without scatter): 1.33288770467517814

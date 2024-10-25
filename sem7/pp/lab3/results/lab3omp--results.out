@@ -1,0 +1,18 @@
+
+libgomp: Invalid value for environment variable OMP_NUM_THREADS
+Type: double
+K: 3
+N: 6300000
+Threads count: [3,9,12]
+Q: 26
+Sequential time: 0.035676
+Parallel initialization time: 0.000126
+Parallel time (static): 0.013894
+Parallel time (dynamic): 0.012725
+Parallel time (guided): 0.012970
+Speedup (static with init): 2.544548
+Speedup (dynamic with init): 2.775978
+Speedup (guided with init): 2.724053
+Speedup (static without init): 2.567650
+Speedup (dynamic without init): 2.803496
+Speedup (guided without init): 2.750546

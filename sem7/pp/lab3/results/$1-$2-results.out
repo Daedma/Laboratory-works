@@ -1,0 +1,70 @@
+Type: double
+K: 3
+N: 6300000
+Threads count: [3,9,12]
+Q: 26
+Sequential time: 0.035650
+Parallel initialization time: 0.000124
+Parallel time (static): 0.014538
+Parallel time (dynamic): 0.012494
+Parallel time (guided): 0.012513
+Speedup (static with init): 2.431433
+Speedup (dynamic with init): 2.825344
+Speedup (guided with init): 2.821084
+Speedup (static without init): 2.452142
+Speedup (dynamic without init): 2.853345
+Speedup (guided without init): 2.849000
+Type: double
+K: 3
+N: 6300000
+Threads count: [3,9,12]
+Q: 26
+Sequential time: 0.038294
+Parallel initialization time: 0.000125
+Parallel time (static): 0.011014
+Parallel time (dynamic): 0.009247
+Parallel time (guided): 0.009011
+Speedup (static with init): 3.437710
+Speedup (dynamic with init): 4.086188
+Speedup (guided with init): 4.191721
+Speedup (static without init): 3.476741
+Speedup (dynamic without init): 4.141451
+Speedup (guided without init): 4.249896
+Type: double
+K: 3
+N: 6300000
+Threads count: [3,9,12]
+Q: 26
+Sequential time: 0.035773
+Parallel initialization time: 0.000084
+Parallel time (static): 0.019145
+Parallel time (dynamic): 0.017879
+Parallel time (guided): 0.018682
+Speedup (static with init): 1.860309
+Speedup (dynamic with init): 1.991491
+Speedup (guided with init): 1.906287
+Speedup (static without init): 1.868471
+Speedup (dynamic without init): 2.000848
+Speedup (guided without init): 1.914859
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** STEP 106016.0 ON n241 CANCELLED AT 2024-10-25T13:22:42 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 106017.0 ON n240 CANCELLED AT 2024-10-25T13:22:42 DUE TO TIME LIMIT ***
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** JOB 106016 ON n241 CANCELLED AT 2024-10-25T13:22:42 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 106017 ON n240 CANCELLED AT 2024-10-25T13:22:42 DUE TO TIME LIMIT ***
+Type: double
+K: 3
+N: 6300000
+Threads count: [3,9,12]
+Q: 26
+Sequential time: 0.689419
+Parallel initialization time: 0.000089
+Parallel time (static): 0.362736
+Parallel time (dynamic): 0.309300
+Parallel time (guided): 0.274338
+Speedup (static with init): 1.900139
+Speedup (dynamic with init): 2.228324
+Speedup (guided with init): 2.512211
+Speedup (static without init): 1.900606
+Speedup (dynamic without init): 2.228967
+Speedup (guided without init): 2.513028

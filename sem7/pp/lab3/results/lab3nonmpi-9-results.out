@@ -1,0 +1,16 @@
+Type: double
+K: 3
+N: 6300000
+Threads count: ("[3,9,12]")
+Q: 26
+Extra: 33391
+Fatal error in PMPI_Scatterv: Message truncated, error stack:
+PMPI_Scatterv(658)........: MPI_Scatterv(sbuf=0x2b0b0c553010, scnts=0x23300d0, displs=0x2330100, MPI_DOUBLE, rbuf=0x2b0b15649010, rcount=703711, MPI_DOUBLE, root=0, MPI_COMM_WORLD) failed
+MPIR_Scatterv_impl(212)...: 
+I_MPIR_Scatterv_intra(273): 
+MPIR_Scatterv(112)........: 
+MPIR_Localcopy(355).......: Message truncated; 5629696 bytes received but buffer size is 5629688
+srun: error: n250: task 0: Exited with exit code 1
+slurmstepd: error: *** STEP 106077.0 ON n250 CANCELLED AT 2024-10-25T14:12:12 DUE TO TIME LIMIT ***
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** JOB 106077 ON n250 CANCELLED AT 2024-10-25T14:12:12 DUE TO TIME LIMIT ***
