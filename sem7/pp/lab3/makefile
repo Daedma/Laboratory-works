@@ -32,4 +32,9 @@ lab3ompq:
 	$(CC) -o $@ omp.c $(CFLAGS) -DSLOWER -fopenmp
 
 clean:
-	rm lab3mulmpi lab3nonmpi lab3mulmpiq lab3nonmpiq lab3omp lab3ompq
+	rm lab3mulmpi
+	rm lab3nonmpi
+	rm lab3mulmpiq
+	rm lab3nonmpiq
+	rm lab3omp
+	rm lab3ompq
