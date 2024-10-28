@@ -1,7 +1,51 @@
-#ifndef MACRO_UTILS_H
-#define MACRO_UTILS_H
+#ifndef COMMON_H
+#define COMMON_H
 
-#include "config.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+#if defined(TYPE_DOUBLE)
+#define TYPE double
+#define TYPE_FORMAT "%f"
+#elif defined(TYPE_FLOAT)
+#define TYPE float
+#define TYPE_FORMAT "%f"
+#elif defined(TYPE_INT)
+#define TYPE int
+#define TYPE_FORMAT "%d"
+#else
+#define TYPE double
+#define TYPE_FORMAT "%f"
+#endif
+
+#ifndef K
+#define K 3
+#endif
+
+#ifndef DIMDIV
+#define DIMDIV 1
+#endif
+
+#ifndef N
+#define N 6300000/DIMDIV
+#endif
+
+#ifndef DIMDIV1
+#define DIMDIV1 3
+#endif
+
+#ifndef DIMDIV2
+#define DIMDIV2 9
+#endif
+
+#ifndef GRID_SIZE
+#define GRID_SIZE 1
+#endif
+
+#ifndef BLOCK_SIZE
+#define BLOCK_SIZE 256
+#endif
 
 #define STR(x) STR_HELPER(x)
 #define STR_HELPER(x) #x
@@ -90,5 +134,20 @@
 #define EMPTY()
 
 #define DECLARE_LIST_OF_ARGS(name) CAT(LIST_OF_ARGS_, K)(TYPE* name)
+
+static void fill_array(TYPE* a, int size)
+{
+	for (int i = 0; i < size; ++i)
+	{
+		a[i] = (TYPE)1;
+	}
+}
+
+static void print_vector(const char* label, TYPE* vec, int size)
+{
+	assert(size >= 4);
+	printf("%s : [" TYPE_FORMAT ", " TYPE_FORMAT "... " TYPE_FORMAT ", " TYPE_FORMAT "]\n",
+		label, vec[0], vec[1], vec[size - 2], vec[size - 1]);
+}
 
 #endif

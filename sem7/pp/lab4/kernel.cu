@@ -1,4 +1,4 @@
-#include "macro_utils.h"
+#include "common.h"
 
 __global__ void addKernel(TYPE* c, DECLARE_LIST_OF_ARGS(a), unsigned int size)
 {

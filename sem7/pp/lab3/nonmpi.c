@@ -30,8 +30,10 @@ int main(int argc, char* argv[])
 	{
 #define MALLOC(x) x = (TYPE *)malloc((N + EXTRA) * sizeof(TYPE))
 		APPLY_FUNCTION(a, MALLOC);
+#undef MALLOC
 #define FILL(x) fill_array(x, N + EXTRA)
 		APPLY_FUNCTION(a, FILL);
+#undef FILL
 	}
 
 	int base_elements = (N + EXTRA) / proc_num;
@@ -59,6 +61,7 @@ int main(int argc, char* argv[])
 	DECLARE_VECTORS(a_local); // Обрабатываемые части
 #define MALLOC(x) x = (TYPE *)malloc(k * sizeof(TYPE))
 	APPLY_FUNCTION(a_local, MALLOC);
+#undef MALLOC
 
 	// Результирующие векторы
 	TYPE* a_result;
@@ -72,7 +75,7 @@ int main(int argc, char* argv[])
 	double ts = 0;   // последовательный алгоритм
 	double tSc = 0;  // широковещательная рассылка
 	double tnon = 0; // параллельные алгоритмы
-	for (int k = 0; k < 20; ++k) // внешний цикл для 20-ти повторений
+	for (int j = 0; j < 20; ++j) // внешний цикл для 20-ти повторений
 	{
 		double st_time, end_time;
 
@@ -87,7 +90,7 @@ int main(int argc, char* argv[])
 			}
 			end_time = MPI_Wtime();
 			ts += end_time - st_time;
-			if (k == 19)
+			if (j == 19)
 			{
 				print_vector("Sequational sum", a_result, N + EXTRA);
 			}
@@ -96,10 +99,9 @@ int main(int argc, char* argv[])
 
 		// Широковещательная рассылка и замер времени ее выполнения
 		st_time = MPI_Wtime();
-#define SCATTER(x, y)                                                          \
-  MPI_Scatterv(x, sendcounts, displs, MPI_TYPE, y, k, MPI_TYPE, 0,             \
-               MPI_COMM_WORLD)
-		APPLY_FUNCTION2(a, a_local, SCATTER);
+#define SCATTERV(x, y)  MPI_Scatterv(x, sendcounts, displs, MPI_TYPE, y, k, MPI_TYPE, 0, MPI_COMM_WORLD)
+		APPLY_FUNCTION2(a, a_local, SCATTERV);
+#undef SCATTERV
 		end_time = MPI_Wtime();
 		tSc += end_time - st_time;
 		MPI_Barrier(MPI_COMM_WORLD);
@@ -116,7 +118,7 @@ int main(int argc, char* argv[])
 		end_time = MPI_Wtime();
 		tnon += end_time - st_time;
 		MPI_Barrier(MPI_COMM_WORLD);
-		if (proc_rank == 0 && k == 19)
+		if (proc_rank == 0 && j == 19)
 		{
 			print_vector("Parallel sum", a_result, N + EXTRA);
 		}

@@ -4,22 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "macro_utils.h"
-
-void fill_array(TYPE* a, int size)
-{
-	for (int i = 0; i < size; ++i)
-	{
-		a[i] = (TYPE)1;
-	}
-}
-
-void print_vector(const char* label, TYPE* vec, int size)
-{
-	assert(size >= 4);
-	printf("%s : [" TYPE_FORMAT ", " TYPE_FORMAT "... " TYPE_FORMAT ", " TYPE_FORMAT "]\n",
-		label, vec[0], vec[1], vec[size - 2], vec[size - 1]);
-}
+#include "common.h"
 
 int main(int argc, char* argv[])
 {
@@ -82,7 +67,7 @@ int main(int argc, char* argv[])
 	double ts = 0.0, ttr = 0.0, tcu = 0.0;
 	clock_t start_time, end_time;
 
-	for (int i = 0; i < 20; ++i)
+	for (int j = 0; j < 20; ++j)
 	{
 		// Последовательный алгоритм и замер его времени выполнения ts
 		start_time = clock();
@@ -92,7 +77,7 @@ int main(int argc, char* argv[])
 		}
 		end_time = clock();
 		ts += (double)(end_time - start_time) / CLOCKS_PER_SEC;
-		if (i == 19)
+		if (j == 19)
 		{
 			print_vector("Sequentional sum", res, N);
 		}
@@ -155,7 +140,7 @@ int main(int argc, char* argv[])
 				cudaGetErrorString(cuerr));
 			return EXIT_FAILURE;
 		}
-		if (i == 19)
+		if (j == 19)
 		{
 			print_vector("Parallel sum", res, N);
 		}

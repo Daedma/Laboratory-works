@@ -29,14 +29,17 @@ int main(int argc, char* argv[])
 	{
 #define MALLOC(x) x = (TYPE *)malloc(N * sizeof(TYPE))
 		APPLY_FUNCTION(a, MALLOC);
+#undef MALLOC
 #define FILL(x) fill_array(x, N)
 		APPLY_FUNCTION(a, FILL);
+#undef FILL
 	}
 
 	int k = N / proc_num; // Количество обрабатываемых каждым процессом элементов
 	DECLARE_VECTORS(a_local); // Обрабатываемые части
 #define MALLOC(x) x = (TYPE *)malloc(k * sizeof(TYPE))
 	APPLY_FUNCTION(a_local, MALLOC);
+#undef MALLOC
 
 	// Результирующие векторы
 	TYPE* a_result;
@@ -50,7 +53,7 @@ int main(int argc, char* argv[])
 	double ts = 0;   // последовательный алгоритм
 	double tSc = 0;  // широковещательная рассылка
 	double tmul = 0; // параллельные алгоритмы
-	for (int k = 0; k < 20; ++k) // внешний цикл для 20-ти повторений
+	for (int j = 0; j < 20; ++j) // внешний цикл для 20-ти повторений
 	{
 		double st_time, end_time;
 
@@ -65,7 +68,7 @@ int main(int argc, char* argv[])
 			}
 			end_time = MPI_Wtime();
 			ts += end_time - st_time;
-			if (k == 19)
+			if (j == 19)
 			{
 				print_vector("Sequentional sum", a_result, N);
 			}
@@ -76,6 +79,7 @@ int main(int argc, char* argv[])
 		st_time = MPI_Wtime();
 #define SCATTER(x, y) MPI_Scatter(x, k, MPI_TYPE, y, k, MPI_TYPE, 0, MPI_COMM_WORLD)
 		APPLY_FUNCTION2(a, a_local, SCATTER);
+#undef SCATTER
 		end_time = MPI_Wtime();
 		tSc += end_time - st_time;
 		MPI_Barrier(MPI_COMM_WORLD);
@@ -92,7 +96,7 @@ int main(int argc, char* argv[])
 		end_time = MPI_Wtime();
 		tmul += end_time - st_time;
 		MPI_Barrier(MPI_COMM_WORLD);
-		if (proc_rank == 0 && k == 19)
+		if (proc_rank == 0 && j == 19)
 		{
 			print_vector("Parallel sum", a_result, N);
 		}

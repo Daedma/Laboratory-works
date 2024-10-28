@@ -17,8 +17,10 @@ int main(int argc, char* argv[])
 	DECLARE_VECTORS(a);
 #define MALLOC(var) var = (TYPE *)malloc(N * sizeof(TYPE))
 	APPLY_FUNCTION(a, MALLOC);
+#undef MALLOC
 #define FILL(var) fill_array(var, N)
 	APPLY_FUNCTION(a, FILL);
+#undef FILL
 
 	TYPE* a_result = (TYPE*)malloc(N * sizeof(TYPE));
 
@@ -27,7 +29,7 @@ int main(int argc, char* argv[])
 	double tp = 0; // инициализация параллельной области
 	double tst = 0, td = 0, tg = 0; // параллельные алгоритмы
 
-	for (int k = 0; k < 20; ++k) // внешний цикл для 20-ти повторений
+	for (int j = 0; j < 20; ++j) // внешний цикл для 20-ти повторений
 	{
 		int i;
 		double st_time, end_time;
@@ -41,7 +43,7 @@ int main(int argc, char* argv[])
 		}
 		end_time = omp_get_wtime();
 		ts += end_time - st_time;
-		if (k == 19)
+		if (j == 19)
 		{
 			print_vector("Sequational sum", a_result, N);
 		}
@@ -64,7 +66,7 @@ int main(int argc, char* argv[])
 		}
 		end_time = omp_get_wtime();
 		tst += end_time - st_time;
-		if (k == 19)
+		if (j == 19)
 		{
 			print_vector("Static sum", a_result, N);
 		}
@@ -78,7 +80,7 @@ int main(int argc, char* argv[])
 		}
 		end_time = omp_get_wtime();
 		td += end_time - st_time;
-		if (k == 19)
+		if (j == 19)
 		{
 			print_vector("Dynamic sum", a_result, N);
 		}
@@ -92,7 +94,7 @@ int main(int argc, char* argv[])
 		}
 		end_time = omp_get_wtime();
 		tg += end_time - st_time;
-		if (k == 19)
+		if (j == 19)
 		{
 			print_vector("Guided sum", a_result, N);
 		}
