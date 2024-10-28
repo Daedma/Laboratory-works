@@ -1,10 +1,14 @@
-__global__ void addKernel(int *c, int *a, int *b, unsigned int size) {
-  int gridSize = blockDim.x * gridDim.x;
-  int start = blockIdx.x * blockDim.x + threadIdx.x;
+#include "macro_utils.h"
 
-  for (int i = start; i < size; i += gridSize) {
-    c[i] = a[i] + b[i];
-  }
+__global__ void addKernel(TYPE* c, DECLARE_LIST_OF_ARGS(a), unsigned int size)
+{
+	int gridSize = blockDim.x * gridDim.x;
+	int start = blockIdx.x * blockDim.x + threadIdx.x;
+
+	for (int i = start; i < size; i += gridSize)
+	{
+		c[i] = APPLY_BIN_OP(a, i, +);
+	}
 }
 
 #define kernel addKernel
