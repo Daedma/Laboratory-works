@@ -164,9 +164,9 @@ int main(int argc, char* argv[])
 	// Очищение памяти
 	cudaEventDestroy(start);
 	cudaEventDestroy(stop);
-	APPLY_FUNCTION2(adev, cudaFree);
+	APPLY_FUNCTION(adev, cudaFree);
 	cudaFree(resdev);
-	APPLY_FUNCTION2(a, free);
+	APPLY_FUNCTION(a, free);
 	free(res);
 
 	return 0;
