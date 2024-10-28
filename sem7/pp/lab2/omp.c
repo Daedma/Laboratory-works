@@ -5,13 +5,18 @@
 
 #if defined(TYPE_DOUBLE)
 #define TYPE double
+#define TYPE_FORMAT "%f"
 #elif defined(TYPE_FLOAT)
 #define TYPE float
+#define TYPE_FORMAT "%f"
 #elif defined(TYPE_INT)
 #define TYPE int
+#define TYPE_FORMAT "%d"
 #else
 #define TYPE double
+#define TYPE_FORMAT "%f"
 #endif
+
 
 #ifndef K
 #define K 3
@@ -133,7 +138,7 @@ int main(int argc, char* argv[])
 		ts += end_time - st_time;
 		if (j == 19)
 		{
-			printf("Sequantional sum : %f\n", sum);
+			printf("Sequantional sum : " TYPE_FORMAT "\n", sum);
 		}
 
 		// Инициализация параллельной области
@@ -161,7 +166,7 @@ int main(int argc, char* argv[])
 		tc += end_time - st_time;
 		if (j == 19)
 		{
-			printf("Critical sum : %f\n", sum);
+			printf("Critical sum : " TYPE_FORMAT "\n", sum);
 		}
 
 		// atomic
@@ -178,7 +183,7 @@ int main(int argc, char* argv[])
 		ta += end_time - st_time;
 		if (j == 19)
 		{
-			printf("Atomic sum : %f\n", sum);
+			printf("Atomic sum : " TYPE_FORMAT "\n", sum);
 		}
 
 		// reduction
@@ -194,7 +199,7 @@ int main(int argc, char* argv[])
 		tr += end_time - st_time;
 		if (j == 19)
 		{
-			printf("Reduction sum : %f\n", sum);
+			printf("Reduction sum : " TYPE_FORMAT "\n", sum);
 		}
 	}
 	// Расчет ускорения

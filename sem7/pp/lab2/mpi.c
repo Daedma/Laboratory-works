@@ -5,16 +5,20 @@
 
 #if defined(TYPE_DOUBLE)
 #define TYPE double
+#define TYPE_FORMAT "%f"
 #define MPI_TYPE MPI_DOUBLE
 #elif defined(TYPE_FLOAT)
 #define TYPE float
+#define TYPE_FORMAT "%f"
 #define MPI_TYPE MPI_FLOAT
 #elif defined(TYPE_INT)
 #define TYPE int
+#define TYPE_FORMAT "%d"
 #define MPI_TYPE MPI_INT
 #else
 #define TYPE double
 #define MPI_TYPE MPI_DOUBLE
+#define TYPE_FORMAT "%f"
 #endif
 
 #ifndef K
@@ -149,7 +153,7 @@ int main(int argc, char* argv[])
 			ts += end_time - st_time;
 			if (i == 19)
 			{
-				printf("Sequantional sum : %f\n", sum);
+				printf("Sequantional sum : " TYPE_FORMAT "\n", sum);
 			}
 		}
 		MPI_Barrier(MPI_COMM_WORLD);
@@ -196,7 +200,7 @@ int main(int argc, char* argv[])
 		tpp += end_time - st_time;
 		if (proc_rank == 0 && i == 19)
 		{
-			printf("Point-to-point sum : %f\n", sum);
+			printf("Point-to-point sum : " TYPE_FORMAT "\n", sum);
 		}
 
 		// Параллельный алгоритм с использованием коллективной операции
@@ -213,7 +217,7 @@ int main(int argc, char* argv[])
 		MPI_Barrier(MPI_COMM_WORLD);
 		if (proc_rank == 0 && i == 19)
 		{
-			printf("Reduce sum : %f\n", sum);
+			printf("Reduce sum : " TYPE_FORMAT "\n", sum);
 		}
 	}
 	ts /= 20;
