@@ -14,9 +14,6 @@ NVCC = nvcc
 # Флаги компилятора
 CFLAGS = -g -G -O0 -lcublas -DN=$(N) -DK=$(K) -D$(TYPE)
 
-# Исходные файлы
-SRCS = main.c kernel.cu
-
 # Имя исполняемого файла
 EXEC = lab4
 
@@ -24,8 +21,8 @@ EXEC = lab4
 all: $(foreach grid,$(GRID_SIZES),$(foreach block,$(BLOCK_SIZES),$(foreach dimdiv,$(DIMDIVS),$(EXEC)_$(grid)_$(block)_$(dimdiv))))
 
 # Правило для компиляции с различными параметрами
-$(EXEC)_%_%_%:
-	$(NVCC) $(CFLAGS) -DGRID_SIZE=$(word 1,$(subst _,_ ,$@)) -DBLOCK_SIZE=$(word 2,$(subst _,_ ,$@)) -DDIMDIV=$(word 3,$(subst _,_ ,$@)) -o $@ $(SRCS)
+$(EXEC)_%_%_%: kernel.cu main.c
+	$(NVCC) $(CFLAGS) -DGRID_SIZE=$(word 1,$(subst _,_ ,$@)) -DBLOCK_SIZE=$(word 2,$(subst _,_ ,$@)) -DDIMDIV=$(word 3,$(subst _,_ ,$@)) -o $@ $<
 
 # Правило для очистки
 clean:
