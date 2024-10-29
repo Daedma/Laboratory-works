@@ -1,4 +1,4 @@
 #!/bin/bash
 
-module load intel/icc
-module load cuda/6.5
+module load intel/icc18
+module load cuda/8.0
