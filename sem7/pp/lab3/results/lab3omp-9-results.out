@@ -3,14 +3,18 @@ K: 3
 N: 6300000
 Threads count: [3,9,12]
 Q: 26
-Sequential time: 0.031492
-Parallel initialization time: 0.000125
-Parallel time (static): 0.011243
-Parallel time (dynamic): 0.008158
-Parallel time (guided): 0.007589
-Speedup (static with init): 2.770195
-Speedup (dynamic with init): 3.802051
-Speedup (guided with init): 4.082539
-Speedup (static without init): 2.801006
-Speedup (dynamic without init): 3.860333
-Speedup (guided without init): 4.149813
+Sequational sum : [3.000000, 3.000000... 3.000000, 3.000000]
+Static sum : [3.000000, 3.000000... 3.000000, 3.000000]
+Dynamic sum : [3.000000, 3.000000... 3.000000, 3.000000]
+Guided sum : [3.000000, 3.000000... 3.000000, 3.000000]
+Sequential time: 0.035655
+Parallel initialization time: 0.000108
+Parallel time (static): 0.013659
+Parallel time (dynamic): 0.012469
+Parallel time (guided): 0.012498
+Speedup (static with init): 2.589878
+Speedup (dynamic with init): 2.834802
+Speedup (guided with init): 2.828338
+Speedup (static without init): 2.610414
+Speedup (dynamic without init): 2.859424
+Speedup (guided without init): 2.852847

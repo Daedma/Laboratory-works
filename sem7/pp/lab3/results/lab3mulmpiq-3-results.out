@@ -3,8 +3,10 @@ K: 3
 N: 6300000
 Threads count: [3,9,12]
 Q: 26
-Sequential time: 0.91803497076034546
-Scatter time: 0.03988809585571289
-Parallel time (reduce): 0.32239102125167846
-Speedup (reduce with scatter): 2.53405434486639169
-Speedup (reduce without scatter): 2.84758231540099338
+Sequentional sum : [3.000000, 3.000000... 3.000000, 3.000000]
+Parallel sum : [3.000000, 3.000000... 3.000000, 3.000000]
+Sequential time: 0.92061979770660396
+Scatter time: 0.04268472194671631
+Parallel time (reduce): 0.32307274341583253
+Speedup (reduce with scatter): 2.51702257613268499
+Speedup (reduce without scatter): 2.84957433416677386
