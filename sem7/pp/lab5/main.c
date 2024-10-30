@@ -38,11 +38,15 @@
 #define BETA (TYPE)0
 #endif
 
-#define TRANSPOSE_A
+#ifndef TRANSPOSE_A
+#define TRANSPOSE_A 0
+#endif
 
-#define TRANSPOSE_B
+#ifndef TRANSPOSE_B
+#define TRANSPOSE_B 0
+#endif
 
-#ifdef TRANSPOSE_A
+#if (TRANSPOSE_A == 1)
 #define A_OP CUBLAS_OP_T
 #define TRANSPOSE_A_INFO "T"
 #else
@@ -50,7 +54,7 @@
 #define TRANSPOSE_A_INFO "non-T"
 #endif
 
-#ifdef TRANSPOSE_B
+#if (TRANSPOSE_B == 1)
 #define B_OP CUBLAS_OP_T
 #define TRANSPOSE_B_INFO "T"
 #else
