@@ -12,19 +12,18 @@ TEMP_FILE=$(mktemp)
 
 cat <<EOF > $TEMP_FILE
 #!/bin/bash
-#PBS -N ${JOB_NAME}
-#PBS -l walltime=00:20:00
-#PBS -l nodes=1:ppn=1:gpu
-#PBS -j oe
-#PBS -A tk
+#SBATCH --job-name=${JOB_NAME}
+#SBATCH --time=00:20:00
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --mem=1gb
+#SBATCH --output=${OUTPUT_FILE}
 
-cd \$PBS_O_WORKDIR
 export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/home/COMMON/cuda-6.5/lib64
 ./${PROGRAM}_${GRID_SIZE}_${BLOCK_SIZE}_${DIMDIV}
 EOF
 
-# Отправляем задачу PBS
-qsub $TEMP_FILE
+# Отправляем задачу SLURM
+sbatch $TEMP_FILE
 
 # Удаляем временный файл
 rm $TEMP_FILE

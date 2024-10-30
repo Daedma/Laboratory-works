@@ -5,6 +5,8 @@ GRID_SIZES=(1024 512)
 BLOCK_SIZES=(1024 512 256)
 DIMDIVS=(1 3 9)
 
+mkdir -p -v results
+
 for GRID_SIZE in "${GRID_SIZES[@]}"; do
     for BLOCK_SIZE in "${BLOCK_SIZES[@]}"; do
         for DIMDIV in "${DIMDIVS[@]}"; do
