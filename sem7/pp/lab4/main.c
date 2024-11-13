@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
 		ttr += (double)(end_time - start_time) / CLOCKS_PER_SEC;
 
 		// Установка точки старта
-		cuerr = cudaEventRecord(start, 0);
+		cuerr = cudaEventRecord(start);
 		if (cuerr != cudaSuccess)
 		{
 			fprintf(stderr, "Cannot record CUDA event: %s\n",
@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
 		}
 
 		// Запуск ядра
-		kernel << <GRID_SIZE, BLOCK_SIZE >> > (res, LIST_OF_ARGS(adev), N);
+		kernel << <GRID_SIZE, BLOCK_SIZE >> > (resdev, LIST_OF_ARGS(adev), N);
 
 		cuerr = cudaGetLastError();
 		if (cuerr != cudaSuccess)
@@ -110,20 +110,28 @@ int main(int argc, char* argv[])
 			return EXIT_FAILURE;
 		}
 
+		// Установка точки конца
+		cuerr = cudaEventRecord(stop);
+		if (cuerr != cudaSuccess)
+		{
+			fprintf(stderr, "Cannot record CUDA event: %s\n",
+				cudaGetErrorString(cuerr));
+			return EXIT_FAILURE;
+		}
+
+		cuerr = cudaEventSynchronize(stop);
+		if (cuerr != cudaSuccess)
+		{
+			fprintf(stderr, "Cannot synchronize CUDA event: %s\n",
+				cudaGetErrorString(cuerr));
+			return EXIT_FAILURE;
+		}
+
 		// Синхронизация устройств
 		cuerr = cudaDeviceSynchronize();
 		if (cuerr != cudaSuccess)
 		{
 			fprintf(stderr, "Cannot synchronize CUDA kernel: %s\n",
-				cudaGetErrorString(cuerr));
-			return EXIT_FAILURE;
-		}
-
-		// Установка точки окончания
-		cuerr = cudaEventRecord(stop, 0);
-		if (cuerr != cudaSuccess)
-		{
-			fprintf(stderr, "Cannot record CUDA event: %s\n",
 				cudaGetErrorString(cuerr));
 			return EXIT_FAILURE;
 		}
@@ -145,8 +153,6 @@ int main(int argc, char* argv[])
 			print_vector("Parallel sum", res, N);
 		}
 	}
-
-	print_vector("Parallel sum", res, N);
 
 	ts /= 20.0;
 	ttr /= 20.0;
