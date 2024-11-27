@@ -3,11 +3,11 @@
 % преобразование. Использовать свойства
 % преобразования Фурье.
 % Параметры
-N = 100; % Размерность вектора f
-M = 512; % Размерность после дополнения нулями
-a = 5;
+N = 500; % Размерность вектора f
+M = 4096; % Размерность после дополнения нулями
+a = 3;
 hx = 2 * a / N; % Шаг по x
-input_field = @(x) exp(-x.^2);
+input_field = @(x) sin(4*pi*x);
 
 % Шаг 1: Дискретизация входной функции f(x)
 x = linspace(-a, a, N);
@@ -32,20 +32,28 @@ F = F((M/2-N/2+1):(M/2+N/2));
 b = N^2 / (4 * a * M);
 u = linspace(-b, b, N);
 
-% Построение графика амплитуды
+% Вывод результатов
 figure;
-subplot(2, 1, 1);
-plot(u, abs(F), 'LineWidth', 2);
+subplot(2,2,1);
+plot(x, abs(f));
+title('Амплитуда f(x)');
+xlabel('x');
+ylabel('|f(x)|');
+
+subplot(2,2,3);
+plot(x, angle(f));
+title('Фаза f(x)');
+xlabel('x');
+ylabel('∠f(x)');
+
+subplot(2,2,2);
+plot(u, abs(F));
 title('Амплитуда F(u)');
 xlabel('u');
-ylabel('Амплитуда');
-grid on;
+ylabel('|F(u)|');
 
-% Построение графика фазы
-subplot(2, 1, 2);
-plot(u, angle(F), 'LineWidth', 2);
+subplot(2,2,4);
+plot(u, angle(F));
 title('Фаза F(u)');
 xlabel('u');
-ylabel('Фаза');
-grid on;
-
+ylabel('∠F(u)');

@@ -4,7 +4,7 @@
 % преобразования Фурье.
 % Параметры
 N = 100; % Размерность вектора f
-M = 256; % Размерность после дополнения нулями
+M = 512; % Размерность после дополнения нулями
 a = 5;
 hx = 2 * a / N; % Шаг по x
 input_field = @(x) exp(-x.^2);
@@ -47,7 +47,7 @@ plot(u, abs(F1));
 hold on;
 plot(u, abs(F2));
 hold off;
-title('Амплитуда гауссова пучка');
+title('Амплитуда F(u)');
 xlabel('x');
 ylabel('Амплитуда');
 legend('fft', 'rect');
@@ -59,7 +59,7 @@ plot(u, angle(F1));
 hold on;
 plot(u, angle(F2));
 hold off;
-title('Фаза гауссова пучка');
+title('Фаза F(u)');
 xlabel('x');
 ylabel('Фаза');
 legend('fft', 'rect');

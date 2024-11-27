@@ -2,11 +2,11 @@
 % преобразование. Использовать свойства
 % преобразования Фурье.
 % Параметры
-N = 100; % Размерность вектора f
-M = 256; % Размерность после дополнения нулями
+N = 500; % Размерность вектора f
+M = 2048; % Размерность после дополнения нулями
 a = 5;
 hx = 2 * a / N; % Шаг по x
-input_field = @(x, y) x.^3 .* exp(-x.^2) .* y.^3 .* exp(-y.^2);
+input_field = @(x, y) sin(4*pi*x) .* sin(4*pi*y);
 % input_field = @(x, y) exp(-x.^2 - y.^2);
 
 % Шаг 1: Дискретизация входной функции f(x)
@@ -65,15 +65,15 @@ u = linspace(-b, b, N);
 figure;
 subplot(2,1,1);
 imagesc(u, u, abs(F));
-title('Амплитуда F(u)');
+title('Амплитуда F(u, v)');
 xlabel('u');
-ylabel('|F(u)|');
+ylabel('v');
 colorbar;
 
 subplot(2,1,2);
 imagesc(u, u, angle(F));
-title('Фаза F(u)');
+title('Фаза F(u, v)');
 xlabel('u');
-ylabel('arg(F(u))');
+ylabel('v');
 colorbar;
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PROGRAMS=("lab3mulmpi" "lab3nonmpi" "lab3mulmpiq" "lab3nonmpiq" "lab3omp" "lab3ompq")
-THREADS=(3 9 12)
+THREADS=(12)
 
 mkdir -p -v results
 

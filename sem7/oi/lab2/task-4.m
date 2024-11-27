@@ -1,8 +1,8 @@
 % Параметры гауссова пучка
 sigma = 1; % Ширина гауссова пучка
-N = 1024; % Количество точек
-x = linspace(-10, 10, N); % Диапазон x
-u = linspace(-10, 10, N); % Диапазон u
+N = 100; % Количество точек
+x = linspace(-5, 5, N); % Диапазон x
+u = linspace(-1, 1, N); % Диапазон u
 
 % Гауссов пучок
 f = exp(-x.^2 / (2 * sigma^2));
@@ -12,7 +12,7 @@ F = zeros(size(u));
 dx = x(2) - x(1);
 
 for k = 1:length(u)
-    integrand = f .* exp(-1i * u(k) * x);
+    integrand = f .* exp(-1i * 2 * pi * u(k) * x);
     F(k) = sum(integrand) * dx;
 end
 

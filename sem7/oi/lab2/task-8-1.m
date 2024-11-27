@@ -5,7 +5,7 @@ a = 5;
 for N = N_values
     M = N; % M = N
     hx = 2 * a / N; % Шаг по x
-    input_field = @(x) x.^3 .* exp(-x.^2);
+    input_field = @(x) sin(4*pi*x);
 
     % Шаг 1: Дискретизация входной функции f(x)
     x = linspace(-a, a, N);
