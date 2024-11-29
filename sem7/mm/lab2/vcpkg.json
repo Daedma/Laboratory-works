@@ -1,0 +1,20 @@
+{
+  "dependencies": [
+    {
+      "name": "imgui",
+      "default-features": false,
+      "features": [
+        "sdl2-binding",
+        "vulkan-binding"
+      ]
+    },
+    {
+      "name": "sdl2",
+      "features": [
+        "vulkan"
+      ]
+    },
+    "vulkan",
+    "boost-qvm"
+  ]
+}
