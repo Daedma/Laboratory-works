@@ -3,6 +3,8 @@
 #include <set>
 #include <vector>
 #include <cstdint>
+#include <stdexcept>
+#include <utility>
 
 
 class QueueingModel
@@ -35,75 +37,166 @@ public:
 		}
 	};
 
-	void setSimulationTime(double simulationTime);
+	void setSimulationTime(float aSimulationTime)
+	{
+		checkIsRunning();
+		if (aSimulationTime < 0)
+		{
+			throw std::invalid_argument{ "Simulation time must be non-negative" };
+		}
+		simulationTime = aSimulationTime;
+	}
 
-	void setLambda(double lambda);
+	void setArrivalRate(float aArrivalRate)
+	{
+		checkIsRunning();
+		if (aArrivalRate < 0)
+		{
+			throw std::invalid_argument{ "Lambda must be non-negative" };
+		}
+		arrivalRate = aArrivalRate;
+	}
 
-	void setBeta(double beta);
+	void setReverseServiceTimeMean(float aReverseServiceTimeMean)
+	{
+		checkIsRunning();
+		if (aReverseServiceTimeMean < 0)
+		{
+			throw std::invalid_argument{ "Beta must be non-negative" };
+		}
+		reverseServiceTimeMean = aReverseServiceTimeMean;
+	}
 
-	void setNumLines(size_t numLines);
+	void setNumLines(uint16_t aNumLines)
+	{
+		checkIsRunning();
+		numLines = aNumLines;
+	}
 
-	void setBufferCapacity(size_t bufferCapacity);
+	void setBufferCapacity(size_t aBufferCapacity)
+	{
+		checkIsRunning();
+		bufferCapacity = aBufferCapacity;
+	}
 
-	double getSimulationTime() const;
+	float getSimulationTime() const noexcept
+	{
+		return simulationTime;
+	}
 
-	double getLambda() const;
+	float getArrivalRate() const noexcept
+	{
+		return arrivalRate;
+	}
 
-	double getBeta() const;
+	float getReverseServiceTimeMean() const noexcept
+	{
+		return reverseServiceTimeMean;
+	}
 
-	size_t getNumLines() const;
+	uint16_t getNumLines() const noexcept
+	{
+		return numLines;
+	}
 
-	size_t getBufferCapacity() const;
+	size_t getBufferCapacity() const noexcept
+	{
+		return bufferCapacity;
+	}
 
-	size_t getTotalCalls() const;
+	size_t getTotalArrivals() const noexcept
+	{
+		return totalArrivals;
+	}
 
-	size_t getMaxBusyLines() const;
+	size_t getNumBusyLines() const noexcept
+	{
+		return numBusyLines;
+	}
 
-	size_t getCurrentBufferUsage() const;
+	size_t getCurrentBufferUsage() const noexcept
+	{
+		return currentBufferUsage;
+	}
 
-	size_t getRejectedCalls() const;
+	size_t getRejectedCalls() const noexcept
+	{
+		return rejectedCalls;
+	}
 
-	double getEfficiency() const;
+	double getEfficiency() const noexcept
+	{
+		return 1 - (rejectedCalls ? static_cast<float>(totalArrivals) / rejectedCalls : 0.);
+	}
+
+	std::pair<std::multiset<Event>::const_iterator, std::multiset<Event>::const_iterator>
+		getProcesedEvents() const noexcept
+	{
+		return { events.cbegin(), currentEvent };
+	}
+
+	void startSimulation();
 
 	void nextStep();
 
-	void runSimulation();
-
 private:
-	double simulationTime;
-	double lambda;
-	std::gamma_distribution<float> arrivals;
-	double beta;
-	std::gamma_distribution<float> serviceTime;
-	size_t numLines;
-	size_t bufferCapacity;
+	float simulationTime = NAN;
 
-	size_t totalCalls;
-	size_t maxBusyLines;
-	size_t currentBufferUsage;
-	size_t rejectedCalls;
-	double efficiency;
+	float arrivalRate = NAN;
+
+	std::gamma_distribution<float> arrivalTimeGenerator;
+
+	float reverseServiceTimeMean = NAN;
+
+	std::gamma_distribution<float> serviceTimeGenerator;
+
+	uint16_t numLines = 0;
+
+	size_t bufferCapacity = 0;
+
+	size_t totalArrivals = 0;
+
+	size_t numBusyLines = 0;
+
+	size_t currentBufferUsage = 0;
+
+	size_t rejectedCalls = 0;
 
 	std::multiset<Event> events;
 
-	std::multiset<Event>::iterator currentEvent;
+	std::multiset<Event>::const_iterator currentEvent;
 
 	std::vector<LineState> lines;
 
-	std::mt19937 generator;
+	std::mt19937 randomGenerator;
 
-	void processArrival();
+	bool is_running = false;
 
-	void processStart();
+	void checkIsRunning()
+	{
+		if (is_running)
+		{
+			throw std::runtime_error{ "Simulation is running, parameters cannot be changed until end of simulation." };
+		}
+	}
 
-	void processEnd();
+	void checkParams();
+
+	void processArrivalEvent();
+
+	void processStartEvent();
+
+	void processEndEvent();
 
 	float getServiceTime() noexcept
 	{
-
+		return serviceTimeGenerator(randomGenerator);
 	}
 
-	float generateArrivals();
+	float getNextArrivalTime() noexcept
+	{
+		return arrivalTimeGenerator(randomGenerator);
+	}
 
-	void simulate();
+	void generateArrivals();
 };
