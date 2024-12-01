@@ -32,7 +32,7 @@ void QueueingModel::startSimulation()
 
 	currentEvent = events.cbegin();
 
-	is_running = true;
+	isRunning = true;
 }
 
 void QueueingModel::generateArrivals()
@@ -48,7 +48,7 @@ void QueueingModel::generateArrivals()
 
 void QueueingModel::nextStep()
 {
-	if (is_running)
+	if (isRunning)
 	{
 		++currentEvent;
 		if (currentEvent != events.end())
@@ -70,7 +70,7 @@ void QueueingModel::nextStep()
 		}
 		else
 		{
-			is_running = false;
+			isRunning = false;
 		}
 	}
 }

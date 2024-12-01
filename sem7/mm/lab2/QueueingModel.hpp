@@ -135,6 +135,16 @@ public:
 		return { events.cbegin(), currentEvent };
 	}
 
+	bool getIsRunning() const noexcept
+	{
+		return isRunning;
+	}
+
+	void stopSimulation() noexcept
+	{
+		isRunning = false;
+	}
+
 	void startSimulation();
 
 	void nextStep();
@@ -170,11 +180,11 @@ private:
 
 	std::mt19937 randomGenerator;
 
-	bool is_running = false;
+	bool isRunning = false;
 
 	void checkIsRunning()
 	{
-		if (is_running)
+		if (isRunning)
 		{
 			throw std::runtime_error{ "Simulation is running, parameters cannot be changed until end of simulation." };
 		}

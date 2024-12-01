@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <thread>
 #include "ImVec2QvmTraits.hpp"
 
 
@@ -555,79 +556,21 @@ void View::drawWidgets()
 
 	drawSystemVisualisation();
 
-	drawSystemSetup();
-
-	drawSystemState();
-
-	drawFileActions();
+	drawInput();
 }
 
-void View::drawSystemSetup()
+void View::drawInput()
 {
 	ImGui::Begin("Right Window", &show_right_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_UnsavedDocument);
 	ImGui::SetWindowPos(ImVec2(w - ImGui::GetWindowWidth(), 0));
 	ImGui::SetWindowSize(ImVec2(400, h));
 
-	ImGui::InputFloat("Time Step", &time_step, .0f, .0f, "%.10g");
 	ImGui::InputFloat("Simulation Time", &simulation_time, .0f, .0f, "%.10g");
-
-	ImGui::Text("Difference Schemes");
-	ImGui::RadioButton("Euler", &selected_scheme, PlanetSystem::DiffSchemes::EULER);
-	ImGui::SameLine();
-	ImGui::RadioButton("Verlet", &selected_scheme, PlanetSystem::DiffSchemes::VERLET);
-	ImGui::SameLine();
-	ImGui::RadioButton("Euler-Cromer", &selected_scheme, PlanetSystem::DiffSchemes::EULER_CROMER);
-	ImGui::SameLine();
-	ImGui::RadioButton("Beeman", &selected_scheme, PlanetSystem::DiffSchemes::BEEMAN);
-
-	ImGui::InputFloat("Viscosity", &viscosity_coefficient, 0.f, 0.f, "%.10g");
-
-	int new_num_planets = num_planets;
-	ImGui::InputInt("Number of Planets", &new_num_planets);
-
-	if (new_num_planets > num_planets)
-	{
-		// Добавляем новые планеты
-		for (int i = num_planets; i < new_num_planets; ++i)
-		{
-			PlanetSystem::PlanetParams curPlanet = PlanetSystem::createDefaultPlanet(i);
-			positions.push_back(curPlanet.pos);
-			velocities.push_back(curPlanet.velocity);
-			masses.push_back(curPlanet.mass);
-		}
-	}
-	else if (new_num_planets < num_planets)
-	{
-		// Удаляем лишние планеты
-		positions.resize(new_num_planets);
-		velocities.resize(new_num_planets);
-		masses.resize(new_num_planets);
-	}
-
-	num_planets = new_num_planets;
-
-	for (int i = 0; i < num_planets; ++i)
-	{
-		ImGui::PushID(i);
-		ImGui::Text("Planet %d", i + 1);
-		ImGui::InputFloat2("Position", &positions[i].x, "%.10g");
-		ImGui::InputFloat2("Velocity", &velocities[i].x, "%.10g");
-		ImGui::InputFloat("Mass", &masses[i], 0.f, 0.f, "%.10g");
-		ImGui::PopID();
-	}
-	ImGui::End();
-}
-
-void View::drawSystemState()
-{
-	ImGui::Begin("Left Window", &show_left_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_UnsavedDocument | ImGuiWindowFlags_AlwaysAutoResize);
-	ImGui::SetWindowPos(ImVec2(0, 0));
-
-	ImGui::Text("Total Energy: %.10g", total_energy);
-	ImGui::Text("Current Time: %.10g", current_time);
-	ImGui::Text("Center of Mass Velocity: (%.10g, %.10g)", center_of_mass_velocity.x, center_of_mass_velocity.y);
+	ImGui::InputInt("Number of lines", &num_lines);
+	ImGui::InputInt("Capacity of buffer", &buffer_capacity);
+	ImGui::InputFloat("Arrival rate (lambda)", &arrival_rate, .0f, .0f, "%.10g");
+	ImGui::InputFloat("Reverse service time mean (beta)", &reverse_service_time_mean, .0f, .0f, "%.10g");
 
 	if (is_model_running)
 	{
@@ -679,69 +622,17 @@ void View::drawSystemState()
 			ImGui::EndPopup();
 		}
 	}
-	ImGui::End();
-}
 
-void View::drawFileActions()
-{
-	ImGui::Begin("Left Bottom Window", &show_left_bottom_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_UnsavedDocument | ImGuiWindowFlags_AlwaysAutoResize);
-	ImGui::SetWindowPos(ImVec2(0, h - ImGui::GetWindowHeight()));
-
-	ImGui::InputText("File Path", file_path, IM_ARRAYSIZE(file_path));
-
-	if (ImGui::Button("Save Model Parameters"))
-	{
-		std::ofstream file(file_path);
-		if (file.is_open())
-		{
-			file << time_step << "\n";
-			file << simulation_time << "\n";
-			file << selected_scheme << "\n";
-			file << viscosity_coefficient << "\n";
-			file << num_planets << "\n";
-
-			for (int i = 0; i < num_planets; ++i)
-			{
-				file << positions[i].x << " " << positions[i].y << "\n";
-				file << velocities[i].x << " " << velocities[i].y << "\n";
-				file << masses[i] << "\n";
-			}
-
-			file.close();
-		}
-	}
-
-	ImGui::SameLine();
-
-	if (ImGui::Button("Load Model Parameters"))
-	{
-		std::ifstream file(file_path);
-		if (file.is_open())
-		{
-			file >> time_step;
-			file >> simulation_time;
-			file >> selected_scheme;
-			file >> viscosity_coefficient;
-			file >> num_planets;
-
-			positions.resize(num_planets);
-			velocities.resize(num_planets);
-			masses.resize(num_planets);
-
-			for (int i = 0; i < num_planets; ++i)
-			{
-				file >> positions[i].x >> positions[i].y;
-				file >> velocities[i].x >> velocities[i].y;
-				file >> masses[i];
-			}
-
-			file.close();
-		}
-	}
+	// Output
+	ImGui::Text("Effectivity: %.10g", effectivity);
+	ImGui::Text("Total arrivals: %d", arrivals_count);
+	ImGui::Text("Busy lines: %d", num_busy_lines);
+	ImGui::Text("Buffer usage: %d", buffer_usage);
+	ImGui::Text("Rejected: %d", rejected_count);
 
 	ImGui::End();
 }
+
 
 void View::drawSystemVisualisation()
 {
@@ -750,93 +641,36 @@ void View::drawSystemVisualisation()
 	ImGui::Begin("Moving Point", &show_animation_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_UnsavedDocument);
 
-	// Обработка ввода
-	if (ImGui::IsWindowHovered() && ImGui::IsMouseDragging(0))
-	{
-		if (!dragging)
-		{
-			dragging = true;
-			lastMouseX = ImGui::GetMousePos().x;
-			lastMouseY = ImGui::GetMousePos().y;
-		}
-		if (dragging)
-		{
-			float deltaX = ImGui::GetMousePos().x - lastMouseX;
-			float deltaY = ImGui::GetMousePos().y - lastMouseY;
-			offsetX += deltaX;
-			offsetY += deltaY;
-			lastMouseX = ImGui::GetMousePos().x;
-			lastMouseY = ImGui::GetMousePos().y;
-		}
-	}
-	else
-	{
-		dragging = false;
-	}
-
-	if (ImGui::IsWindowHovered() && ImGui::GetIO().MouseWheel != 0.0f)
-	{
-		float zoom = ImGui::GetIO().MouseWheel * 1.e-11f;
-		scale += zoom;
-		if (scale < 1.e-10f) scale = 1.e-10f;
-	}
-	// size_t step = std::max(lastStep / 100, 1ULL);
-	// size_t step = 1000;
-	size_t step = 1;
-	// size_t step = std::max(static_cast<size_t>(lastStep / (current_time * scale * 1.e+3)), 1ULL);
 	ImDrawList* draw_list = ImGui::GetWindowDrawList();
-	auto paths = system.getPaths();
-	auto systemParams = system.getSystemParams();
-	// Найти максимальную массу в системе
-	double maxMass = 0.0;
-	for (const auto& params : systemParams)
+
+	for (size_t i = 0; i != lines.size(); ++i)
 	{
-		if (params.mass > maxMass)
-		{
-			maxMass = params.mass;
-		}
+		draw_list->AddLine(lines[i].first, lines[i].second, IM_COL32_BLACK, 1.0f);
+		std::string label = std::to_string(i);
+		draw_list->AddText(lines[i].first, IM_COL32_BLACK, label.c_str());
 	}
 
-	for (size_t planetIndex = 0; planetIndex != paths.size(); ++planetIndex)
+	for (const auto& i : intervals)
 	{
-		auto& planet = paths[planetIndex];
-		for (size_t i = step; i < lastStep; i += step)
-		{
-			ImVec2 p1 = planet[i - step];
-			ImVec2 p2 = planet[i];
-			// Масштабирование и смещение координат
-			p1.x = (p1.x * scale) + window_center.x + offsetX;
-			p1.y = (p1.y * scale) + window_center.y + offsetY;
-			p2.x = (p2.x * scale) + window_center.x + offsetX;
-			p2.y = (p2.y * scale) + window_center.y + offsetY;
-			draw_list->AddLine(p1, p2, IM_COL32(255, 255, 255, 255), 2.0f);
-		}
-		ImVec2 lastPos = planet[lastStep > 0 ? lastStep - 1 : 0];
-		lastPos.x = (lastPos.x * scale) + window_center.x + offsetX;
-		lastPos.y = (lastPos.y * scale) + window_center.y + offsetY;
-		double planetMass = systemParams[planetIndex].mass;
-		float radius = std::max(20.0f * (planetMass / maxMass), 6.); // Нормализованный радиус
-		draw_list->AddCircleFilled(lastPos, radius, IM_COL32(255, 0, 0, 255));
+		draw_list->AddLine(i.first, i.second, IM_COL32(255, 0, 0, 255), 2.0f);
 	}
 	ImGui::End();
 }
 
 void View::startSimulation()
 {
-	system.setDiffScheme(static_cast<PlanetSystem::DiffSchemes>(selected_scheme));
-	system.setTimeStep(time_step);
-	system.setSimulationTime(simulation_time);
-	system.setViscosity(viscosity_coefficient);
-	std::vector<PlanetSystem::PlanetParams> planets(num_planets);
-	for (size_t i = 0; i != num_planets;++i)
-	{
-		using namespace boost::qvm;
-		planets[i].pos = convert_to<PlanetSystem::Point>(positions[i]);
-		planets[i].velocity = convert_to<PlanetSystem::Point>(velocities[i]);
-		planets[i].mass = masses[i];
-	}
-	system.setSystemParams(planets);
-	system.run(isConcurency);
+	model.setArrivalRate(arrival_rate);
+	model.setBufferCapacity(buffer_capacity);
+	model.setNumLines(num_lines);
+	model.setReverseServiceTimeMean(reverse_service_time_mean);
+	model.setSimulationTime(simulation_time);
+	model.startSimulation();
+	std::thread{ [this]() {
+		while (model.getIsRunning())
+		{
+
+		}
+		} }
 }
 
 void View::updateUIData()
