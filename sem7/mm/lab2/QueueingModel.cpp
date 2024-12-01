@@ -50,7 +50,6 @@ void QueueingModel::nextStep()
 {
 	if (isRunning)
 	{
-		++currentEvent;
 		if (currentEvent != events.end())
 		{
 			switch (currentEvent->type)
@@ -72,6 +71,7 @@ void QueueingModel::nextStep()
 		{
 			isRunning = false;
 		}
+		++currentEvent;
 	}
 }
 

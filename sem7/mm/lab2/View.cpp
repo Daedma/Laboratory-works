@@ -8,7 +8,6 @@
 #include <fstream>
 #include <string>
 #include <thread>
-#include "ImVec2QvmTraits.hpp"
 
 
 // Volk headers
@@ -551,7 +550,7 @@ void View::drawWidgets()
 
 	if (is_model_running && !isConcurency)
 	{
-		system.makeStep();
+		model.nextStep();
 	}
 
 	drawSystemVisualisation();
@@ -579,7 +578,8 @@ void View::drawInput()
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.7f, 0.4f, 0.4f, 1.0f));
 		if (ImGui::Button("Stop Model", ImVec2(100, 30)))
 		{
-			system.stop();
+			std::lock_guard<std::mutex> lock(model_mutex);
+			model.stopSimulation();
 			is_model_running = false;
 		}
 	}
@@ -641,6 +641,8 @@ void View::drawSystemVisualisation()
 	ImGui::Begin("Moving Point", &show_animation_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_UnsavedDocument);
 
+	updateIntervals();
+
 	ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
 	for (size_t i = 0; i != lines.size(); ++i)
@@ -665,19 +667,69 @@ void View::startSimulation()
 	model.setReverseServiceTimeMean(reverse_service_time_mean);
 	model.setSimulationTime(simulation_time);
 	model.startSimulation();
-	std::thread{ [this]() {
-		while (model.getIsRunning())
-		{
-
-		}
-		} }
+	if (isConcurency)
+	{
+		std::thread{ [this]() {
+			while (model.getIsRunning())
+			{
+				std::lock_guard<std::mutex> lock(model_mutex);
+				model.nextStep();
+			}
+			} }.detach();
+	}
+	initLines();
 }
 
 void View::updateUIData()
 {
-	is_model_running = system.isInProgress();
-	lastStep = system.getLastStep();
-	total_energy = system.getEnergyValue(lastStep);
-	current_time = system.getCurrentTime(lastStep);
-	center_of_mass_velocity = system.getVelocityValue(lastStep);
+	std::lock_guard<std::mutex> lock(model_mutex);
+	effectivity = model.getEfficiency();
+	arrivals_count = model.getTotalArrivals();
+	num_busy_lines = model.getNumBusyLines();
+	buffer_usage = model.getCurrentBufferUsage();
+	rejected_count = model.getRejectedCalls();
+	is_model_running = model.getIsRunning();
+	processed = model.getProcesedEvents();
+}
+
+void View::updateIntervals()
+{
+	while (last_processed != processed.second)
+	{
+		if (last_processed->type == QueueingModel::Event::Types::START)
+		{
+			line_start_times[last_processed->line] = last_processed->timeStamp;
+		}
+		else if (last_processed->type == QueueingModel::Event::Types::END)
+		{
+			float start_time = line_start_times[last_processed->line];
+			float end_time = last_processed->timeStamp;
+			int line = last_processed->line;
+			float scale = (lines[line].second.x - lines[line].first.x) / simulation_time;
+			ImVec2 start;
+			start.y = lines[line].first.y;
+			start.x = lines[line].first.x + start_time * scale;
+			ImVec2 end;
+			end.y = lines[line].first.y;
+			end.x = lines[line].first.x + end_time * scale;
+			intervals.emplace_back(start, end);
+		}
+		++last_processed;
+	}
+}
+
+void View::initLines()
+{
+	line_start_times.resize(num_lines);
+	lines.resize(num_lines);
+	for (size_t i = 0; i != lines.size(); ++i)
+	{
+		ImVec2 start;
+		ImVec2 end;
+		start.x = window_pos.x;
+		end.x = window_pos.x + window_size.x;
+		start.y = window_pos.y + (i + 1) * window_size.y / (num_lines + 1);
+		end.y = start.y;
+		lines[i] = { start, end };
+	}
 }

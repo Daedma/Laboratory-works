@@ -4,6 +4,7 @@
 #include "imgui_impl_vulkan.h"
 #include "QueueingModel.hpp"
 #include <vector>
+#include <mutex>
 
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
@@ -29,8 +30,6 @@ private:
 
 	void drawInput();
 
-	void drawOutput();
-
 	void drawSystemVisualisation();
 
 	void render();
@@ -38,6 +37,10 @@ private:
 	void startSimulation();
 
 	void updateUIData();
+
+	void updateIntervals();
+
+	void initLines();
 
 private:
 	// UI Utilities
@@ -75,6 +78,7 @@ private:
 	int num_busy_lines = 0;
 	int buffer_usage = 0;
 	int rejected_count = 0;
+	std::mutex model_mutex;
 
 	// Animation
 	bool show_animation_window = false;
@@ -83,6 +87,7 @@ private:
 	ImVec2 window_center = ImVec2(window_size.x / 2, window_size.y / 2);
 	std::vector<std::pair<ImVec2, ImVec2>> lines;
 	std::vector<std::pair<ImVec2, ImVec2>> intervals;
+	std::vector<float> line_start_times;
 	std::multiset<QueueingModel::Event>::const_iterator last_processed;
 	std::pair<std::multiset<QueueingModel::Event>::const_iterator, std::multiset<QueueingModel::Event>::const_iterator>
 		processed;
