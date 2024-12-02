@@ -126,7 +126,7 @@ public:
 
 	double getEfficiency() const noexcept
 	{
-		return 1 - (rejectedCalls ? static_cast<float>(totalArrivals) / rejectedCalls : 0.);
+		return 1 - (totalArrivals ? static_cast<float>(rejectedCalls) / totalArrivals : 0.);
 	}
 
 	std::pair<std::multiset<Event>::const_iterator, std::multiset<Event>::const_iterator>
@@ -154,11 +154,11 @@ private:
 
 	float arrivalRate = NAN;
 
-	std::gamma_distribution<float> arrivalTimeGenerator;
+	std::exponential_distribution<float> arrivalTimeGenerator;
 
 	float reverseServiceTimeMean = NAN;
 
-	std::gamma_distribution<float> serviceTimeGenerator;
+	std::exponential_distribution<float> serviceTimeGenerator;
 
 	uint16_t numLines = 0;
 

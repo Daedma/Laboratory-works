@@ -10,10 +10,10 @@ void QueueingModel::startSimulation()
 	lines.clear();
 	lines.resize(numLines, LineState::AVAILABLE);
 
-	std::gamma_distribution<float>::param_type arrivalParams(arrivalRate, 0);
+	std::exponential_distribution<float>::param_type arrivalParams(arrivalRate);
 	arrivalTimeGenerator.param(arrivalParams);
 
-	std::gamma_distribution<float>::param_type serviceTimeParams(reverseServiceTimeMean, 0);
+	std::exponential_distribution<float>::param_type serviceTimeParams(reverseServiceTimeMean);
 	serviceTimeGenerator.param(serviceTimeParams);
 
 	totalArrivals = 0;
@@ -66,12 +66,12 @@ void QueueingModel::nextStep()
 			default:
 				break;
 			}
+			++currentEvent;
 		}
 		else
 		{
 			isRunning = false;
 		}
-		++currentEvent;
 	}
 }
 
@@ -139,9 +139,5 @@ void QueueingModel::checkParams()
 	if (numLines == 0)
 	{
 		throw std::invalid_argument("Number of lines must be greater than zero");
-	}
-	if (bufferCapacity == 0)
-	{
-		throw std::invalid_argument("Buffer capacity must be greater than zero");
 	}
 }

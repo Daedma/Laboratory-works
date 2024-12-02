@@ -555,20 +555,28 @@ void View::drawWidgets()
 
 	drawSystemVisualisation();
 
-	drawInput();
+	drawRightPanel();
 }
 
-void View::drawInput()
+void View::drawRightPanel()
 {
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.65f, 0.58f, 0.50f, 1.00f));
 	ImGui::Begin("Right Window", &show_right_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_UnsavedDocument);
 	ImGui::SetWindowPos(ImVec2(w - ImGui::GetWindowWidth(), 0));
 	ImGui::SetWindowSize(ImVec2(400, h));
 
+	float input_width = 100.0f;
+
+	ImGui::SetNextItemWidth(input_width);
 	ImGui::InputFloat("Simulation Time", &simulation_time, .0f, .0f, "%.10g");
+	ImGui::SetNextItemWidth(input_width);
 	ImGui::InputInt("Number of lines", &num_lines);
+	ImGui::SetNextItemWidth(input_width);
 	ImGui::InputInt("Capacity of buffer", &buffer_capacity);
+	ImGui::SetNextItemWidth(input_width);
 	ImGui::InputFloat("Arrival rate (lambda)", &arrival_rate, .0f, .0f, "%.10g");
+	ImGui::SetNextItemWidth(input_width);
 	ImGui::InputFloat("Reverse service time mean (beta)", &reverse_service_time_mean, .0f, .0f, "%.10g");
 
 	if (is_model_running)
@@ -631,6 +639,7 @@ void View::drawInput()
 	ImGui::Text("Rejected: %d", rejected_count);
 
 	ImGui::End();
+	ImGui::PopStyleColor();
 }
 
 
@@ -638,6 +647,7 @@ void View::drawSystemVisualisation()
 {
 	ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always);
 	ImGui::SetNextWindowSize(window_size, ImGuiCond_Always);
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.96f, 0.90f, 0.80f, 1.00f));
 	ImGui::Begin("Moving Point", &show_animation_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_UnsavedDocument);
 
@@ -657,6 +667,7 @@ void View::drawSystemVisualisation()
 		draw_list->AddLine(i.first, i.second, IM_COL32(255, 0, 0, 255), 2.0f);
 	}
 	ImGui::End();
+	ImGui::PopStyleColor();
 }
 
 void View::startSimulation()
@@ -677,7 +688,7 @@ void View::startSimulation()
 			}
 			} }.detach();
 	}
-	initLines();
+	initSimulationCanvas();
 }
 
 void View::updateUIData()
@@ -732,4 +743,11 @@ void View::initLines()
 		end.y = start.y;
 		lines[i] = { start, end };
 	}
+}
+
+void View::initSimulationCanvas()
+{
+	initLines();
+	intervals.clear();
+	last_processed = model.getProcesedEvents().first;
 }

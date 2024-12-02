@@ -28,7 +28,7 @@ private:
 
 	void drawWidgets();
 
-	void drawInput();
+	void drawRightPanel();
 
 	void drawSystemVisualisation();
 
@@ -41,6 +41,8 @@ private:
 	void updateIntervals();
 
 	void initLines();
+
+	void initSimulationCanvas();
 
 private:
 	// UI Utilities
@@ -56,6 +58,7 @@ private:
 	ImGui_ImplVulkan_InitInfo init_info;
 	bool show_demo_window = false;
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	// ImVec4 clear_color = ImVec4(0.96f, 0.90f, 0.80f, 1.00f);
 	bool done;
 
 	// Setup window
@@ -65,7 +68,7 @@ private:
 	bool show_error_popup = false;
 
 	// Input
-	float simulation_time = 360000000.0f;
+	float simulation_time = 100.0f;
 	int num_lines = 1;
 	int buffer_capacity = 0;
 	float arrival_rate = 0.1f;
