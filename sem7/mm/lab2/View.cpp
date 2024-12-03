@@ -381,7 +381,7 @@ View::View()
 #endif
 
 	// Create window with Vulkan graphics context
-	window_flags = (SDL_WindowFlags)(SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+	window_flags = (SDL_WindowFlags)(SDL_WINDOW_VULKAN | SDL_WINDOW_ALLOW_HIGHDPI);
 	window = SDL_CreateWindow("Queueing Model", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
 	if (window == nullptr)
 	{
@@ -568,45 +568,66 @@ void View::drawRightPanel()
 
 	float input_width = 100.0f;
 
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.Colors[ImGuiCol_PopupBg] = ImVec4(0.7f, 0.6f, 0.5f, 1.0f);
+	style.Colors[ImGuiCol_FrameBg] = ImVec4(0.31f, 0.26f, 0.19f, 1.0f);
+
 	ImGui::SetNextItemWidth(input_width);
 	ImGui::InputFloat("Simulation Time", &simulation_time, .0f, .0f, "%.3g");
 	ImGui::SetItemTooltip("Duration of the simulation in minutes.");
 
 	ImGui::SetNextItemWidth(input_width);
 	ImGui::InputInt("Number of lines", &num_lines);
-	ImGui::SetItemTooltip("Number of lines in the system. Increasing "
-		"this parameter helps to reduce the number of rejected applications.");
+	ImGui::SetItemTooltip(
+		"Number of lines in the system. Increasing\n"
+		"this parameter helps to reduce the number\n"
+		"of rejected applications."
+	);
 
 	ImGui::SetNextItemWidth(input_width);
 	ImGui::InputInt("Buffer capacity", &buffer_capacity);
-	ImGui::SetItemTooltip("Capacity of the buffer where unaccepted "
-		"requests are sent. Increasing "
-		"this parameter helps to reduce the number of rejected applications.");
+	ImGui::SetItemTooltip(
+		"Capacity of the buffer where unaccepted\n"
+		"requests are sent. Increasing this\n"
+		"parameter helps to reduce the number of\n"
+		"rejected applications."
+	);
 
 	ImGui::SetNextItemWidth(input_width);
 	ImGui::InputFloat("Arrival rate", &arrival_rate, .0f, .0f, "%.3g");
-	ImGui::SetItemTooltip("Affects the average time between requests (lambda). Increasing "
-		"this parameter contributes to an increase in line congestion and the "
-		"number of rejected applications.");
+	ImGui::SetItemTooltip(
+		"Affects the average time between\n"
+		"requests (lambda). Increasing this\n"
+		"parameter contributes to an increase\n"
+		"in line congestion and the number\n"
+		"of rejected applications."
+	);
 
 	ImGui::SetNextItemWidth(input_width);
 	ImGui::InputFloat("Service rate", &reverse_service_time_mean, .0f, .0f, "%.3g");
-	ImGui::SetItemTooltip("Affects the average application processing time (beta). "
-		"Increasing this parameter "
-		"helps to reduce line congestion and the number of rejected applications.");
+	ImGui::SetItemTooltip(
+		"Affects the average application processing\n"
+		"time (beta). Increasing this parameter\n"
+		"helps to reduce line congestion and the\n"
+		"number of rejected applications."
+	);
 
 	ImGui::SetNextItemWidth(input_width);
 	ImGui::InputFloat("Failure chance", &failure_chance, .0f, .0f, "%.3g");
-	ImGui::SetItemTooltip("Chance of line failure after processing the "
-		"application. Increasing "
-		"this parameter contributes to an increase in line congestion and the "
-		"number of rejected applications.");
+	ImGui::SetItemTooltip(
+		"Chance of line failure after processing\n"
+		"the application. Increasing this parameter\n"
+		"contributes to an increase in line\n"
+		"congestion and the number of rejected applications."
+	);
 
 	ImGui::SetNextItemWidth(input_width);
 	ImGui::InputFloat("Recovery rate", &recovery_rate, .0f, .0f, "%.3g");
-	ImGui::SetItemTooltip("Affects the average line recovery time. Increasing "
-		"this parameter contributes to an increase in line congestion and the "
-		"number of rejected applications.");
+	ImGui::SetItemTooltip(
+		"Affects the average line recovery time. Increasing\n"
+		"this parameter contributes to an increase in line\n"
+		"congestion and the number of rejected applications."
+	);
 
 	if (is_model_running)
 	{
