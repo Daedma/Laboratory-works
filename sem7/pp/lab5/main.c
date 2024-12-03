@@ -152,7 +152,6 @@ int main()
 	CHECK_CUDA(cudaMalloc((void**)&d_C, nr_rows_C * nr_cols_C * sizeof(TYPE)));
 
 	double tMh = 0, tMd = 0, ts = 0, ttr = 0, tcu = 0;
-	clock_t start_time, end_time;
 	cudaEvent_t start, stop;
 	float gpuTime = 0.0f;
 	CHECK_CUDA(cudaEventCreate(&start));
@@ -161,23 +160,27 @@ int main()
 	for (int i = 0; i < 20; ++i)
 	{
 		// Создание матриц на хосте
-		start_time = clock();
+		CHECK_CUDA(cudaEventRecord(start));
 		CPU_fill_rand(h_A, nr_rows_A, nr_cols_A);
 		CPU_fill_rand(h_B, nr_rows_B, nr_cols_B);
-		end_time = clock();
-		tMh += (double)(end_time - start_time) / CLOCKS_PER_SEC;
+		CHECK_CUDA(cudaEventRecord(stop));
+		CHECK_CUDA(cudaEventSynchronize(stop));
+		CHECK_CUDA(cudaDeviceSynchronize());
+		CHECK_CUDA(cudaEventElapsedTime(&gpuTime, start, stop));
+		tMh += gpuTime / 1000.0;
 
 		// Создание матриц на девайсе
 		CHECK_CUDA(cudaEventRecord(start, 0));
 		GPU_fill_rand(d_A, nr_rows_A, nr_cols_A);
 		GPU_fill_rand(d_B, nr_rows_B, nr_cols_B);
+		CHECK_CUDA(cudaEventRecord(stop));
+		CHECK_CUDA(cudaEventSynchronize(stop));
 		CHECK_CUDA(cudaDeviceSynchronize());
-		CHECK_CUDA(cudaEventRecord(stop, 0));
 		CHECK_CUDA(cudaEventElapsedTime(&gpuTime, start, stop));
 		tMd += gpuTime / 1000.;
 
 		// Последовательный алгоритм
-		start_time = clock();
+		CHECK_CUDA(cudaEventRecord(start));
 		for (int i = 0; i < nr_rows_A; ++i)
 		{
 			for (int j = 0; j < nr_cols_B; ++j)
@@ -199,11 +202,17 @@ int main()
 				}
 			}
 		}
-		end_time = clock();
-		ts += (double)(end_time - start_time) / CLOCKS_PER_SEC;
+		CHECK_CUDA(cudaEventRecord(stop));
+		CHECK_CUDA(cudaEventSynchronize(stop));
+		CHECK_CUDA(cudaDeviceSynchronize());
+		CHECK_CUDA(cudaEventElapsedTime(&gpuTime, start, stop));
+		ts += gpuTime / 1000.;
 
-		printf("Sequantional multiplication:\n");
-		print_matrix(h_C, N, N);
+		if(i == 19)
+		{
+			printf("Sequantional multiplication:\n");
+			print_matrix(h_C, N, N);
+		}
 
 		// Передача данных на видеокарту
 		CHECK_CUDA(cudaEventRecord(start, 0));
@@ -211,24 +220,29 @@ int main()
 			cudaMemcpyHostToDevice));
 		CHECK_CUDA(cudaMemcpy(d_B, h_B, nr_rows_B * nr_cols_B * sizeof(TYPE),
 			cudaMemcpyHostToDevice));
+		CHECK_CUDA(cudaEventRecord(stop));
+		CHECK_CUDA(cudaEventSynchronize(stop));
 		CHECK_CUDA(cudaDeviceSynchronize());
-		CHECK_CUDA(cudaEventRecord(stop, 0));
 		CHECK_CUDA(cudaEventElapsedTime(&gpuTime, start, stop));
 		ttr += gpuTime / 1000.;
 
 		// Умножение матриц на GPU
 		CHECK_CUDA(cudaEventRecord(start, 0));
 		gpu_blas_mmul(d_A, d_B, d_C, nr_rows_A, nr_cols_A, nr_cols_B);
+		CHECK_CUDA(cudaEventRecord(stop));
+		CHECK_CUDA(cudaEventSynchronize(stop));
 		CHECK_CUDA(cudaDeviceSynchronize());
-		CHECK_CUDA(cudaEventRecord(stop, 0));
 		CHECK_CUDA(cudaEventElapsedTime(&gpuTime, start, stop));
 		tcu += gpuTime / 1000.;
 
 		CHECK_CUDA(cudaMemcpy(h_C, d_C, nr_rows_C * nr_cols_C * sizeof(TYPE),
 			cudaMemcpyDeviceToHost));
 
-		printf("CuBLAS multiplication:\n");
-		print_matrix(h_C, N, N);
+		if(i == 19)
+		{
+			printf("CuBLAS multiplication:\n");
+			print_matrix(h_C, N, N);
+		}
 	}
 
 	tMh /= 20;
