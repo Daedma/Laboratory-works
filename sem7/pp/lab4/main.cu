@@ -12,20 +12,20 @@ int main(int argc, char* argv[])
 	// Вывод параметров индивидуального варианта
 	printf("Type : %s\n", STR(TYPE));
 	printf("K : %d\n", K);
-	printf("N : %d\n", N);
+	printf("(N/DIMDIV) : %d\n", (N/DIMDIV));
 	printf("(GridDim, BlockDim) : (%d, %d)\n", GRID_SIZE, BLOCK_SIZE);
 
 	DECLARE_VECTORS(a);
 	TYPE* res;
 
 	// Выделение памяти на хосте
-#define MALLOC(x) x = (TYPE *)malloc(N * sizeof(TYPE))
+#define MALLOC(x) x = (TYPE *)malloc((N/DIMDIV) * sizeof(TYPE))
 	APPLY_FUNCTION(a, MALLOC);
 	MALLOC(res);
 #undef MALLOC
 
 	// Инициализация массивов
-#define FILL(x) fill_array(x, N)
+#define FILL(x) fill_array(x, (N/DIMDIV))
 	APPLY_FUNCTION(a, FILL);
 #undef FILL
 
@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 	TYPE* resdev;
 
 	// Выделение памяти на устройстве
-#define CUDA_MALLOC(x) CHECK_CUDA(cudaMalloc((void**)&x, N * sizeof(TYPE)))
+#define CUDA_MALLOC(x) CHECK_CUDA(cudaMalloc((void**)&x, (N/DIMDIV) * sizeof(TYPE)))
 	APPLY_FUNCTION(adev, CUDA_MALLOC);
 	CUDA_MALLOC(resdev);
 #undef CUDA_MALLOC
@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
 	{
 		// Последовательный алгоритм и замер его времени выполнения ts
 		CHECK_CUDA(cudaEventRecord(start));
-		for (int i = 0; i < N; ++i)
+		for (int i = 0; i < (N/DIMDIV); ++i)
 		{
 			res[i] = APPLY_BIN_OP(a, i, +);
 		}
@@ -63,12 +63,12 @@ int main(int argc, char* argv[])
 
 		if (j == 19)
 		{
-			print_vector("Sequentional sum", res, N);
+			print_vector("Sequentional sum", res, (N/DIMDIV));
 		}
 
 		// Замер времени передачи данных на видеокарту ttr
 		CHECK_CUDA(cudaEventRecord(start));
-#define CUDA_MEMCPY(dest, src) CHECK_CUDA(cudaMemcpy(dest, src, N * sizeof(TYPE), cudaMemcpyHostToDevice))
+#define CUDA_MEMCPY(dest, src) CHECK_CUDA(cudaMemcpy(dest, src, (N/DIMDIV) * sizeof(TYPE), cudaMemcpyHostToDevice))
 		APPLY_FUNCTION2(adev, a, CUDA_MEMCPY);
 #undef CUDA_MEMCPY
 		CHECK_CUDA(cudaEventRecord(stop));
@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
 		CHECK_CUDA(cudaEventRecord(start));
 
 		// Запуск ядра
-		kernel << <GRID_SIZE, BLOCK_SIZE >> > (resdev, LIST_OF_ARGS(adev), N);
+		kernel << <GRID_SIZE, BLOCK_SIZE >> > (resdev, LIST_OF_ARGS(adev), (N/DIMDIV));
 
 		CHECK_CUDA(cudaGetLastError());
 
@@ -98,10 +98,10 @@ int main(int argc, char* argv[])
 		tcu += gpuTime / 1000.0;
 
 		// Копирование результата на хост
-		CHECK_CUDA(cudaMemcpy(res, resdev, N * sizeof(TYPE), cudaMemcpyDeviceToHost));
+		CHECK_CUDA(cudaMemcpy(res, resdev, (N/DIMDIV) * sizeof(TYPE), cudaMemcpyDeviceToHost));
 		if (j == 19)
 		{
-			print_vector("Parallel sum", res, N);
+			print_vector("Parallel sum", res, (N/DIMDIV));
 		}
 	}
 
