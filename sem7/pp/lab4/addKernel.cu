@@ -1,4 +1,4 @@
-#include "common.h"
+#include "addKernel.h"
 
 __global__
 void addKernel(TYPE* c, DECLARE_LIST_OF_ARGS(a), unsigned int size)
@@ -12,5 +12,3 @@ void addKernel(TYPE* c, DECLARE_LIST_OF_ARGS(a), unsigned int size)
 	}
 }
 
-#define kernel addKernel
-#include "main.c"

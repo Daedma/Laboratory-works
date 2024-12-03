@@ -98,25 +98,25 @@
 #define APPLY_FUNCTION_10(x, func) APPLY_FUNCTION_9(x, func) func(x##10);
 #define APPLY_FUNCTION(x, func) CAT(APPLY_FUNCTION_, K)(x, func)
 
-#define APPLY_FUNCTION2_1(x, y, func) (func(x##1, y##1));
+#define APPLY_FUNCTION2_1(x, y, func) func(x##1, y##1);
 #define APPLY_FUNCTION2_2(x, y, func)                                          \
-  APPLY_FUNCTION2_1(x, y, func)(func(x##2, y##2));
+  APPLY_FUNCTION2_1(x, y, func) func(x##2, y##2);
 #define APPLY_FUNCTION2_3(x, y, func)                                          \
-  APPLY_FUNCTION2_2(x, y, func)(func(x##3, y##3));
+  APPLY_FUNCTION2_2(x, y, func) func(x##3, y##3);
 #define APPLY_FUNCTION2_4(x, y, func)                                          \
-  APPLY_FUNCTION2_3(x, y, func)(func(x##4, y##4));
+  APPLY_FUNCTION2_3(x, y, func) func(x##4, y##4);
 #define APPLY_FUNCTION2_5(x, y, func)                                          \
-  APPLY_FUNCTION2_4(x, y, func)(func(x##5, y##5));
+  APPLY_FUNCTION2_4(x, y, func) func(x##5, y##5);
 #define APPLY_FUNCTION2_6(x, y, func)                                          \
-  APPLY_FUNCTION2_5(x, y, func)(func(x##6, y##6));
+  APPLY_FUNCTION2_5(x, y, func) func(x##6, y##6);
 #define APPLY_FUNCTION2_7(x, y, func)                                          \
-  APPLY_FUNCTION2_6(x, y, func)(func(x##7, y##7));
+  APPLY_FUNCTION2_6(x, y, func) func(x##7, y##7);
 #define APPLY_FUNCTION2_8(x, y, func)                                          \
-  APPLY_FUNCTION2_7(x, y, func)(func(x##8, y##8));
+  APPLY_FUNCTION2_7(x, y, func) func(x##8, y##8);
 #define APPLY_FUNCTION2_9(x, y, func)                                          \
-  APPLY_FUNCTION2_8(x, y, func)(func(x##9, y##9));
+  APPLY_FUNCTION2_8(x, y, func) func(x##9, y##9);
 #define APPLY_FUNCTION2_10(x, y, func)                                         \
-  APPLY_FUNCTION2_9(x, y, func)(func(x##10, y##10));
+  APPLY_FUNCTION2_9(x, y, func) func(x##10, y##10);
 #define APPLY_FUNCTION2(x, y, func) CAT(APPLY_FUNCTION2_, K)(x, y, func)
 
 #define LIST_OF_ARGS_1(name) name##1
@@ -134,6 +134,15 @@
 #define EMPTY()
 
 #define DECLARE_LIST_OF_ARGS(name) CAT(LIST_OF_ARGS_, K)(TYPE* name)
+
+// Функция проверки ошибок CUDA
+#define CHECK_CUDA(call) do { \
+    cudaError_t err = call; \
+    if (err != cudaSuccess) { \
+        fprintf(stderr, "CUDA error %s:%d: %s\n", __FILE__, __LINE__, cudaGetErrorString(err)); \
+        exit(1); \
+    } \
+} while (0)
 
 static void fill_array(TYPE* a, int size)
 {

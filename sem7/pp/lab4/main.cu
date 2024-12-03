@@ -5,6 +5,7 @@
 #include <time.h>
 
 #include "common.h"
+#include "addKernel.h"
 
 int main(int argc, char* argv[])
 {
@@ -31,16 +32,8 @@ int main(int argc, char* argv[])
 	DECLARE_VECTORS(adev);
 	TYPE* resdev;
 
-	cudaError_t cuerr;
-
 	// Выделение памяти на устройстве
-#define CUDA_MALLOC(x) cuerr = cudaMalloc((void**)&x, N * sizeof(TYPE));\
-			if (cuerr != cudaSuccess)\
-			{\
-				fprintf(stderr, "Cannot allocate device array for %s: %s\n",\
-					STR(x), cudaGetErrorString(cuerr));\
-				return EXIT_FAILURE;\
-			}
+#define CUDA_MALLOC(x) CHECK_CUDA(cudaMalloc((void**)&x, N * sizeof(TYPE)))
 	APPLY_FUNCTION(adev, CUDA_MALLOC);
 	CUDA_MALLOC(resdev);
 #undef CUDA_MALLOC
@@ -48,106 +41,64 @@ int main(int argc, char* argv[])
 	// Создание обработчиков событий
 	cudaEvent_t start, stop;
 	float gpuTime = 0.0f;
-	cuerr = cudaEventCreate(&start);
-	if (cuerr != cudaSuccess)
-	{
-		fprintf(stderr, "Cannot create CUDA start event: %s\n",
-			cudaGetErrorString(cuerr));
-		return 0;
-	}
+	CHECK_CUDA(cudaEventCreate(&start));
 
-	cuerr = cudaEventCreate(&stop);
-	if (cuerr != cudaSuccess)
-	{
-		fprintf(stderr, "Cannot create CUDA end event: %s\n",
-			cudaGetErrorString(cuerr));
-		return 0;
-	}
+	CHECK_CUDA(cudaEventCreate(&stop));
 
 	double ts = 0.0, ttr = 0.0, tcu = 0.0;
-	clock_t start_time, end_time;
 
 	for (int j = 0; j < 20; ++j)
 	{
 		// Последовательный алгоритм и замер его времени выполнения ts
-		start_time = clock();
+		CHECK_CUDA(cudaEventRecord(start));
 		for (int i = 0; i < N; ++i)
 		{
 			res[i] = APPLY_BIN_OP(a, i, +);
 		}
-		end_time = clock();
-		ts += (double)(end_time - start_time) / CLOCKS_PER_SEC;
+		CHECK_CUDA(cudaEventRecord(stop));
+		CHECK_CUDA(cudaEventSynchronize(stop));
+		CHECK_CUDA(cudaDeviceSynchronize());
+		CHECK_CUDA(cudaEventElapsedTime(&gpuTime, start, stop));
+		ts += gpuTime / 1000.0;
+
 		if (j == 19)
 		{
 			print_vector("Sequentional sum", res, N);
 		}
 
 		// Замер времени передачи данных на видеокарту ttr
-		start_time = clock();
-#define CUDA_MEMCPY(dest, src) cuerr = cudaMemcpy(dest, src, N * sizeof(TYPE), cudaMemcpyHostToDevice)
+		CHECK_CUDA(cudaEventRecord(start));
+#define CUDA_MEMCPY(dest, src) CHECK_CUDA(cudaMemcpy(dest, src, N * sizeof(TYPE), cudaMemcpyHostToDevice))
 		APPLY_FUNCTION2(adev, a, CUDA_MEMCPY);
 #undef CUDA_MEMCPY
-		end_time = clock();
-		ttr += (double)(end_time - start_time) / CLOCKS_PER_SEC;
+		CHECK_CUDA(cudaEventRecord(stop));
+		CHECK_CUDA(cudaEventSynchronize(stop));
+		CHECK_CUDA(cudaDeviceSynchronize());
+		CHECK_CUDA(cudaEventElapsedTime(&gpuTime, start, stop));
+		ttr += gpuTime / 1000.0;
 
 		// Установка точки старта
-		cuerr = cudaEventRecord(start);
-		if (cuerr != cudaSuccess)
-		{
-			fprintf(stderr, "Cannot record CUDA event: %s\n",
-				cudaGetErrorString(cuerr));
-			return EXIT_FAILURE;
-		}
+		CHECK_CUDA(cudaEventRecord(start));
 
 		// Запуск ядра
 		kernel << <GRID_SIZE, BLOCK_SIZE >> > (resdev, LIST_OF_ARGS(adev), N);
 
-		cuerr = cudaGetLastError();
-		if (cuerr != cudaSuccess)
-		{
-			fprintf(stderr, "Cannot launch CUDA kernel: %s\n",
-				cudaGetErrorString(cuerr));
-			return EXIT_FAILURE;
-		}
+		CHECK_CUDA(cudaGetLastError());
 
 		// Установка точки конца
-		cuerr = cudaEventRecord(stop);
-		if (cuerr != cudaSuccess)
-		{
-			fprintf(stderr, "Cannot record CUDA event: %s\n",
-				cudaGetErrorString(cuerr));
-			return EXIT_FAILURE;
-		}
+		CHECK_CUDA(cudaEventRecord(stop));
 
-		cuerr = cudaEventSynchronize(stop);
-		if (cuerr != cudaSuccess)
-		{
-			fprintf(stderr, "Cannot synchronize CUDA event: %s\n",
-				cudaGetErrorString(cuerr));
-			return EXIT_FAILURE;
-		}
+		CHECK_CUDA(cudaEventSynchronize(stop));
 
 		// Синхронизация устройств
-		cuerr = cudaDeviceSynchronize();
-		if (cuerr != cudaSuccess)
-		{
-			fprintf(stderr, "Cannot synchronize CUDA kernel: %s\n",
-				cudaGetErrorString(cuerr));
-			return EXIT_FAILURE;
-		}
+		CHECK_CUDA(cudaDeviceSynchronize());
 
 		// Расчет времени
-		cuerr = cudaEventElapsedTime(&gpuTime, start, stop);
+		CHECK_CUDA(cudaEventElapsedTime(&gpuTime, start, stop));
 		tcu += gpuTime / 1000.0;
 
 		// Копирование результата на хост
-		cuerr = cudaMemcpy(res, resdev, N * sizeof(TYPE), cudaMemcpyDeviceToHost);
-		if (cuerr != cudaSuccess)
-		{
-			fprintf(stderr, "Cannot copy res array from device to host: %s\n",
-				cudaGetErrorString(cuerr));
-			return EXIT_FAILURE;
-		}
+		CHECK_CUDA(cudaMemcpy(res, resdev, N * sizeof(TYPE), cudaMemcpyDeviceToHost));
 		if (j == 19)
 		{
 			print_vector("Parallel sum", res, N);
@@ -168,10 +119,12 @@ int main(int argc, char* argv[])
 	printf("Speedup with transfer (acutr): %.9f\n", acutr);
 
 	// Очищение памяти
-	cudaEventDestroy(start);
-	cudaEventDestroy(stop);
+	CHECK_CUDA(cudaEventDestroy(start));
+	CHECK_CUDA(cudaEventDestroy(stop));
 	APPLY_FUNCTION(adev, cudaFree);
-	cudaFree(resdev);
+#define CUDA_FREE(x) CHECK_CUDA(cudaFree(x))
+	CUDA_FREE(resdev);
+#undef CUDA_FREE
 	APPLY_FUNCTION(a, free);
 	free(res);
 

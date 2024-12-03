@@ -21,8 +21,8 @@ EXEC ?= lab4
 all: $(foreach grid,$(GRID_SIZES),$(foreach block,$(BLOCK_SIZES),$(foreach dimdiv,$(DIMDIVS),$(EXEC)_$(grid)_$(block)_$(dimdiv))))
 
 # Правило для компиляции с различными параметрами
-$(EXEC)%: kernel.cu main.c
-	$(NVCC) $(CFLAGS) -DGRID_SIZE=$(strip $(word 2,$(subst _, ,$@))) -DBLOCK_SIZE=$(strip $(word 3,$(subst _, ,$@))) -DDIMDIV=$(strip $(word 4,$(subst _, ,$@))) -o $@ $<
+$(EXEC)%: main.cu addKernel.cu
+	$(NVCC) $(CFLAGS) -DGRID_SIZE=$(strip $(word 2,$(subst _, ,$@))) -DBLOCK_SIZE=$(strip $(word 3,$(subst _, ,$@))) -DDIMDIV=$(strip $(word 4,$(subst _, ,$@))) -o $@ $^
 
 # Правило для очистки
 clean:
