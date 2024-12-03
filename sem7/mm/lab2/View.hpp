@@ -57,8 +57,8 @@ private:
 	ImGuiIO* io;
 	ImGui_ImplVulkan_InitInfo init_info;
 	bool show_demo_window = false;
-	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-	// ImVec4 clear_color = ImVec4(0.96f, 0.90f, 0.80f, 1.00f);
+	// ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	ImVec4 clear_color = ImVec4(0.96f, 0.90f, 0.80f, 1.00f);
 	bool done;
 
 	// Setup window
@@ -73,6 +73,8 @@ private:
 	int buffer_capacity = 0;
 	float arrival_rate = 0.1f;
 	float reverse_service_time_mean = 0.1f;
+	float failure_chance = 0.f;
+	float recovery_rate = 0.1f;
 	bool isConcurency = false;
 
 	// Output
@@ -81,15 +83,18 @@ private:
 	int num_busy_lines = 0;
 	int buffer_usage = 0;
 	int rejected_count = 0;
+	int failures_count = 0;
+	int num_disabled_lines = 0;
 	std::mutex model_mutex;
 
 	// Animation
 	bool show_animation_window = false;
 	ImVec2 window_pos = ImVec2(0, 0);
-	ImVec2 window_size = ImVec2(880, 720);
+	ImVec2 window_size = ImVec2(1050, 720);
 	ImVec2 window_center = ImVec2(window_size.x / 2, window_size.y / 2);
 	std::vector<std::pair<ImVec2, ImVec2>> lines;
-	std::vector<std::pair<ImVec2, ImVec2>> intervals;
+	std::vector<std::pair<ImVec2, ImVec2>> busy_intervals;
+	std::vector<std::pair<ImVec2, ImVec2>> disabled_intervals;
 	std::vector<float> line_start_times;
 	std::multiset<QueueingModel::Event>::const_iterator last_processed;
 	std::pair<std::multiset<QueueingModel::Event>::const_iterator, std::multiset<QueueingModel::Event>::const_iterator>

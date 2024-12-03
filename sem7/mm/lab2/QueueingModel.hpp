@@ -13,14 +13,14 @@ public:
 
 	enum class LineState : uint8_t
 	{
-		BUSY, AVAILABLE, SCHEDULED
+		BUSY, AVAILABLE, SCHEDULED, DISABLED
 	};
 
 	struct Event
 	{
 		enum class Types : uint16_t
 		{
-			ARRIVAL, START, END
+			ARRIVAL, FAILURE, SERVICE_START, SERVICE_END, RECOVERY_START, RECOVERY_END
 		};
 
 		float timeStamp;
@@ -67,6 +67,26 @@ public:
 		reverseServiceTimeMean = aReverseServiceTimeMean;
 	}
 
+	void setFailureChance(float aFailureChance)
+	{
+		checkIsRunning();
+		if (aFailureChance < 0 || aFailureChance > 1)
+		{
+			throw std::invalid_argument{ "Chance of failure must be in range [0, 1]" };
+		}
+		failureChance = aFailureChance;
+	}
+
+	void setRecoveryRate(float aRecoveryRate)
+	{
+		checkIsRunning();
+		if (aRecoveryRate < 0)
+		{
+			throw std::invalid_argument{ "Recovery rate must be non-negative" };
+		}
+		recoveryRate = aRecoveryRate;
+	}
+
 	void setNumLines(uint16_t aNumLines)
 	{
 		checkIsRunning();
@@ -94,6 +114,16 @@ public:
 		return reverseServiceTimeMean;
 	}
 
+	float getFailureChance() const noexcept
+	{
+		return failureChance;
+	}
+
+	float getRecoveryRate() const noexcept
+	{
+		return recoveryRate;
+	}
+
 	uint16_t getNumLines() const noexcept
 	{
 		return numLines;
@@ -109,9 +139,19 @@ public:
 		return totalArrivals;
 	}
 
+	size_t getTotalFailures() const noexcept
+	{
+		return totalFailures;
+	}
+
 	size_t getNumBusyLines() const noexcept
 	{
 		return numBusyLines;
+	}
+
+	size_t getNumDisableLines() const noexcept
+	{
+		return numDisableLines;
 	}
 
 	size_t getCurrentBufferUsage() const noexcept
@@ -160,6 +200,14 @@ private:
 
 	std::exponential_distribution<float> serviceTimeGenerator;
 
+	float failureChance = 0;
+
+	std::bernoulli_distribution failureGenerator;
+
+	float recoveryRate = NAN;
+
+	std::exponential_distribution<float> recoveryTimeGenerator;
+
 	uint16_t numLines = 0;
 
 	size_t bufferCapacity = 0;
@@ -171,6 +219,10 @@ private:
 	size_t currentBufferUsage = 0;
 
 	size_t rejectedCalls = 0;
+
+	size_t totalFailures = 0;
+
+	size_t numDisableLines = 0;
 
 	std::multiset<Event> events;
 
@@ -194,9 +246,15 @@ private:
 
 	void processArrivalEvent();
 
-	void processStartEvent();
+	void processFailureEvent();
 
-	void processEndEvent();
+	void processServiceStartEvent();
+
+	void processServiceEndEvent();
+
+	void processRecoveryStartEvent();
+
+	void processRecoveryEndEvent();
 
 	float getServiceTime() noexcept
 	{
@@ -206,6 +264,16 @@ private:
 	float getNextArrivalTime() noexcept
 	{
 		return arrivalTimeGenerator(randomGenerator);
+	}
+
+	bool isFailure() noexcept
+	{
+		return failureGenerator(randomGenerator);
+	}
+
+	float getRecoveryTime() noexcept
+	{
+		return recoveryTimeGenerator(randomGenerator);
 	}
 
 	void generateArrivals();

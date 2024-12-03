@@ -382,7 +382,7 @@ View::View()
 
 	// Create window with Vulkan graphics context
 	window_flags = (SDL_WindowFlags)(SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-	window = SDL_CreateWindow("Planet system", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+	window = SDL_CreateWindow("Queueing Model", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
 	if (window == nullptr)
 	{
 		printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
@@ -564,20 +564,24 @@ void View::drawRightPanel()
 	ImGui::Begin("Right Window", &show_right_window, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoResize | ImGuiWindowFlags_UnsavedDocument);
 	ImGui::SetWindowPos(ImVec2(w - ImGui::GetWindowWidth(), 0));
-	ImGui::SetWindowSize(ImVec2(400, h));
+	ImGui::SetWindowSize(ImVec2(250, h));
 
 	float input_width = 100.0f;
 
 	ImGui::SetNextItemWidth(input_width);
-	ImGui::InputFloat("Simulation Time", &simulation_time, .0f, .0f, "%.10g");
+	ImGui::InputFloat("Simulation Time", &simulation_time, .0f, .0f, "%.3g");
 	ImGui::SetNextItemWidth(input_width);
 	ImGui::InputInt("Number of lines", &num_lines);
 	ImGui::SetNextItemWidth(input_width);
-	ImGui::InputInt("Capacity of buffer", &buffer_capacity);
+	ImGui::InputInt("Buffer capacity", &buffer_capacity);
 	ImGui::SetNextItemWidth(input_width);
-	ImGui::InputFloat("Arrival rate (lambda)", &arrival_rate, .0f, .0f, "%.10g");
+	ImGui::InputFloat("Arrival rate", &arrival_rate, .0f, .0f, "%.3g");
 	ImGui::SetNextItemWidth(input_width);
-	ImGui::InputFloat("Reverse service time mean (beta)", &reverse_service_time_mean, .0f, .0f, "%.10g");
+	ImGui::InputFloat("Service rate", &reverse_service_time_mean, .0f, .0f, "%.3g");
+	ImGui::SetNextItemWidth(input_width);
+	ImGui::InputFloat("Failure chance", &failure_chance, .0f, .0f, "%.3g");
+	ImGui::SetNextItemWidth(input_width);
+	ImGui::InputFloat("Recovery rate", &recovery_rate, .0f, .0f, "%.3g");
 
 	if (is_model_running)
 	{
@@ -632,11 +636,40 @@ void View::drawRightPanel()
 	}
 
 	// Output
-	ImGui::Text("Effectivity: %.10g", effectivity);
-	ImGui::Text("Total arrivals: %d", arrivals_count);
-	ImGui::Text("Busy lines: %d", num_busy_lines);
-	ImGui::Text("Buffer usage: %d", buffer_usage);
-	ImGui::Text("Rejected: %d", rejected_count);
+	char effectivity_str[50];
+	ImGui::SetNextItemWidth(input_width);
+	snprintf(effectivity_str, sizeof(effectivity_str), "%.10g", effectivity);
+	ImGui::InputText("Effectivity", effectivity_str, IM_ARRAYSIZE(effectivity_str), ImGuiInputTextFlags_ReadOnly);
+
+	char arrivals_str[50];
+	ImGui::SetNextItemWidth(input_width);
+	snprintf(arrivals_str, sizeof(arrivals_str), "%d", arrivals_count);
+	ImGui::InputText("Total arrivals", arrivals_str, IM_ARRAYSIZE(arrivals_str), ImGuiInputTextFlags_ReadOnly);
+
+	char failures_str[50];
+	ImGui::SetNextItemWidth(input_width);
+	snprintf(failures_str, sizeof(failures_str), "%d", failures_count);
+	ImGui::InputText("Total failures", failures_str, IM_ARRAYSIZE(failures_str), ImGuiInputTextFlags_ReadOnly);
+
+	char rejected_str[50];
+	ImGui::SetNextItemWidth(input_width);
+	snprintf(rejected_str, sizeof(rejected_str), "%d", rejected_count);
+	ImGui::InputText("Rejected", rejected_str, IM_ARRAYSIZE(rejected_str), ImGuiInputTextFlags_ReadOnly);
+
+	char busy_lines_str[50];
+	ImGui::SetNextItemWidth(input_width);
+	snprintf(busy_lines_str, sizeof(busy_lines_str), "%d", num_busy_lines);
+	ImGui::InputText("Busy lines", busy_lines_str, IM_ARRAYSIZE(busy_lines_str), ImGuiInputTextFlags_ReadOnly);
+
+	char disabled_lines_str[50];
+	ImGui::SetNextItemWidth(input_width);
+	snprintf(disabled_lines_str, sizeof(disabled_lines_str), "%d", num_disabled_lines);
+	ImGui::InputText("Disabled lines", disabled_lines_str, IM_ARRAYSIZE(disabled_lines_str), ImGuiInputTextFlags_ReadOnly);
+
+	char buffer_usage_str[50];
+	ImGui::SetNextItemWidth(input_width);
+	snprintf(buffer_usage_str, sizeof(buffer_usage_str), "%d", buffer_usage);
+	ImGui::InputText("Buffer usage", buffer_usage_str, IM_ARRAYSIZE(buffer_usage_str), ImGuiInputTextFlags_ReadOnly);
 
 	ImGui::End();
 	ImGui::PopStyleColor();
@@ -662,9 +695,14 @@ void View::drawSystemVisualisation()
 		draw_list->AddText(lines[i].first, IM_COL32_BLACK, label.c_str());
 	}
 
-	for (const auto& i : intervals)
+	for (const auto& i : busy_intervals)
 	{
-		draw_list->AddLine(i.first, i.second, IM_COL32(255, 0, 0, 255), 2.0f);
+		draw_list->AddLine(i.first, i.second, IM_COL32(0, 0, 139, 255), 4.0f);
+	}
+
+	for (const auto& i : disabled_intervals)
+	{
+		draw_list->AddLine(i.first, i.second, IM_COL32(139, 0, 0, 255), 4.0f);
 	}
 	ImGui::End();
 	ImGui::PopStyleColor();
@@ -677,6 +715,8 @@ void View::startSimulation()
 	model.setNumLines(num_lines);
 	model.setReverseServiceTimeMean(reverse_service_time_mean);
 	model.setSimulationTime(simulation_time);
+	model.setFailureChance(failure_chance);
+	model.setRecoveryRate(recovery_rate);
 	model.startSimulation();
 	if (isConcurency)
 	{
@@ -701,29 +741,34 @@ void View::updateUIData()
 	rejected_count = model.getRejectedCalls();
 	is_model_running = model.getIsRunning();
 	processed = model.getProcesedEvents();
+	num_disabled_lines = model.getNumDisableLines();
+	failures_count = model.getTotalFailures();
 }
 
 void View::updateIntervals()
 {
+	ImVec2 start, end;
 	while (last_processed != processed.second)
 	{
-		if (last_processed->type == QueueingModel::Event::Types::START)
+		QueueingModel::Event event = *last_processed;
+		if (event.type == QueueingModel::Event::Types::SERVICE_START ||
+			event.type == QueueingModel::Event::Types::RECOVERY_START)
 		{
-			line_start_times[last_processed->line] = last_processed->timeStamp;
+			line_start_times[event.line] = event.timeStamp;
 		}
-		else if (last_processed->type == QueueingModel::Event::Types::END)
+		else if (event.type == QueueingModel::Event::Types::SERVICE_END ||
+			event.type == QueueingModel::Event::Types::RECOVERY_END)
 		{
-			float start_time = line_start_times[last_processed->line];
-			float end_time = last_processed->timeStamp;
-			int line = last_processed->line;
+			float start_time = line_start_times[event.line];
+			float end_time = event.timeStamp;
+			int line = event.line;
 			float scale = (lines[line].second.x - lines[line].first.x) / simulation_time;
-			ImVec2 start;
 			start.y = lines[line].first.y;
 			start.x = lines[line].first.x + start_time * scale;
-			ImVec2 end;
 			end.y = lines[line].first.y;
 			end.x = lines[line].first.x + end_time * scale;
-			intervals.emplace_back(start, end);
+			(event.type == QueueingModel::Event::Types::SERVICE_END ?
+				busy_intervals : disabled_intervals).emplace_back(start, end);
 		}
 		++last_processed;
 	}
@@ -748,6 +793,7 @@ void View::initLines()
 void View::initSimulationCanvas()
 {
 	initLines();
-	intervals.clear();
+	busy_intervals.clear();
+	disabled_intervals.clear();
 	last_processed = model.getProcesedEvents().first;
 }
