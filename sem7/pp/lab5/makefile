@@ -1,16 +1,16 @@
 # Makefile для компиляции программы с различными параметрами
 
 # Параметры для компиляции
-N = 300 600 900
-TYPE = TYPE_DOUBLE
-TRANSPOSE_A = 1
-TRANSPOSE_B = 1
+N ?= 300 600 900
+TYPE ?= TYPE_DOUBLE
+TRANSPOSE_A ?= 1
+TRANSPOSE_B ?= 1
 
 # Компилятор CUDA
 NVCC = nvcc
 
 # Флаги компилятора
-CFLAGS = -g -G -O0 -lcublas -D$(TYPE) -DTRANSPOSE_A=$(TRANSPOSE_A) -DTRANSPOSE_B=$(TRANSPOSE_B)
+CFLAGS = -g -G -O0 -lcublas -lcurand -D$(TYPE) -DTRANSPOSE_A=$(TRANSPOSE_A) -DTRANSPOSE_B=$(TRANSPOSE_B)
 
 # Имя исполняемого файла
 EXEC = lab5

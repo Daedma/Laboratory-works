@@ -147,9 +147,9 @@ int main()
 	TYPE* h_C = (TYPE*)malloc(nr_rows_C * nr_cols_C * sizeof(TYPE));
 
 	TYPE* d_A, * d_B, * d_C;
-	CHECK_CUDA(cudaMalloc(&d_A, nr_rows_A * nr_cols_A * sizeof(TYPE)));
-	CHECK_CUDA(cudaMalloc(&d_B, nr_rows_B * nr_cols_B * sizeof(TYPE)));
-	CHECK_CUDA(cudaMalloc(&d_C, nr_rows_C * nr_cols_C * sizeof(TYPE)));
+	CHECK_CUDA(cudaMalloc((void**)&d_A, nr_rows_A * nr_cols_A * sizeof(TYPE)));
+	CHECK_CUDA(cudaMalloc((void**)&d_B, nr_rows_B * nr_cols_B * sizeof(TYPE)));
+	CHECK_CUDA(cudaMalloc((void**)&d_C, nr_rows_C * nr_cols_C * sizeof(TYPE)));
 
 	double tMh = 0, tMd = 0, ts = 0, ttr = 0, tcu = 0;
 	clock_t start_time, end_time;
