@@ -1,0 +1,14 @@
+rm -f lab4_*
+nvcc -g -G -O0 -lcublas -DN=6300000 -DK=3 -DTYPE_DOUBLE -DGRID_SIZE=512 -DBLOCK_SIZE=1024 -DDIMDIV=3 -o lab4_512_1024_3 main.cu addKernel.cu
+nvcc warning : The 'compute_20', 'sm_20', and 'sm_21' architectures are deprecated, and may be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+Type : double
+K : 3
+(N/DIMDIV) : 2100000
+(GridDim, BlockDim) : (512, 1024)
+Sequentional sum : [3.000000, 3.000000... 3.000000, 3.000000]
+Parallel sum : [3.000000, 3.000000... 3.000000, 3.000000]
+Average sequential time (ts): 0.012110779 seconds
+Average transfer time (ttr): 0.012297026 seconds
+Average kernel execution time (tcu): 0.000726021 seconds
+Speedup without transfer (acu): 16.681036232
+Speedup with transfer (acutr): 0.929949789

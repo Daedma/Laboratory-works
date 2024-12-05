@@ -1,0 +1,54 @@
+rm -f lab5_*
+nvcc -g -G -O0 -lcublas -lcurand -DTYPE_COMPLEX -DTRANSPOSE_A=1 -DTRANSPOSE_B=1 -DN=120 -o lab5_120 main.cu
+nvcc warning : The 'compute_20', 'sm_20', and 'sm_21' architectures are deprecated, and may be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+main.cu(211): warning: reference is to variable "i"
+(160): here -- under old for-init scoping rules it would have been variable "i"
+(184): here
+
+main.cu(241): warning: reference is to variable "i"
+(160): here -- under old for-init scoping rules it would have been variable "i"
+(184): here
+
+main.cu(211): warning: reference is to variable "i"
+(160): here -- under old for-init scoping rules it would have been variable "i"
+(184): here
+
+main.cu(241): warning: reference is to variable "i"
+(160): here -- under old for-init scoping rules it would have been variable "i"
+(184): here
+
+main.cu: In function ‘int main()’:
+main.cu:211:5: warning: name lookup of ‘i’ changed [enabled by default]
+   if(i == 19)
+     ^
+main.cu:160:10: warning:   matches this ‘i’ under ISO standard rules [enabled by default]
+  for (int i = 0; i < 20; ++i)
+          ^
+main.cu:184:10: warning:   matches this ‘i’ under old rules [enabled by default]
+   for (int i = 0; i < nr_rows_A; ++i)
+          ^
+Type : cuComplex
+N : 120
+(T, T)
+Sequantional multiplication:
+(0.91; 54.71) (2.37; 51.26) (3.86; 54.58) (9.26; 55.75) (7.92; 59.61) (3.13; 57.51) 
+(-3.16; 58.39) (-2.51; 55.83) (0.29; 58.02) (4.78; 59.08) (1.23; 60.72) (-3.27; 59.55) 
+(-1.82; 59.78) (-4.54; 58.99) (-0.40; 58.85) (4.87; 62.12) (3.73; 63.70) (-1.47; 60.15) 
+(-5.44; 58.55) (-2.59; 54.83) (-1.09; 58.46) (0.52; 62.57) (1.81; 67.13) (-7.17; 60.45) 
+(-2.34; 60.12) (-1.45; 55.49) (2.45; 55.11) (9.53; 58.88) (3.69; 63.26) (-0.65; 58.89) 
+(-6.51; 62.07) (-3.26; 60.11) (0.31; 60.98) (4.62; 63.54) (2.16; 64.94) (-3.50; 61.85) 
+CuBLAS multiplication:
+(0.91; 54.71) (-3.16; 58.39) (-1.82; 59.78) (-5.44; 58.55) (-2.34; 60.12) (-6.51; 62.07) 
+(2.37; 51.26) (-2.51; 55.83) (-4.54; 58.99) (-2.59; 54.83) (-1.45; 55.49) (-3.26; 60.11) 
+(3.86; 54.58) (0.29; 58.02) (-0.40; 58.85) (-1.09; 58.46) (2.45; 55.11) (0.31; 60.98) 
+(9.26; 55.75) (4.78; 59.08) (4.87; 62.12) (0.52; 62.57) (9.53; 58.88) (4.62; 63.54) 
+(7.92; 59.61) (1.23; 60.72) (3.73; 63.70) (1.81; 67.13) (3.69; 63.26) (2.16; 64.94) 
+(3.13; 57.51) (-3.27; 59.55) (-1.47; 60.15) (-7.17; 60.45) (-0.65; 58.89) (-3.50; 61.85) 
+Matrix creation on host time : 0.001228
+Matrix creation on device time: 0.022832
+Sequantional time: 0.110651
+Transfer time: 0.000119
+CuBLAS time: 0.006452
+Speedup (without transfer): 17.151213
+Speedup (with creation on host and transfer): 0.070479
+Speedup (with creation on device): 0.264642

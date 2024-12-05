@@ -160,10 +160,10 @@ int main()
 	for (int i = 0; i < 20; ++i)
 	{
 		// Создание матриц на хосте
-		CHECK_CUDA(cudaEventRecord(start));
+		CHECK_CUDA(cudaEventRecord(start, 0));
 		CPU_fill_rand(h_A, nr_rows_A, nr_cols_A);
 		CPU_fill_rand(h_B, nr_rows_B, nr_cols_B);
-		CHECK_CUDA(cudaEventRecord(stop));
+		CHECK_CUDA(cudaEventRecord(stop, 0));
 		CHECK_CUDA(cudaEventSynchronize(stop));
 		CHECK_CUDA(cudaDeviceSynchronize());
 		CHECK_CUDA(cudaEventElapsedTime(&gpuTime, start, stop));
@@ -173,14 +173,14 @@ int main()
 		CHECK_CUDA(cudaEventRecord(start, 0));
 		GPU_fill_rand(d_A, nr_rows_A, nr_cols_A);
 		GPU_fill_rand(d_B, nr_rows_B, nr_cols_B);
-		CHECK_CUDA(cudaEventRecord(stop));
+		CHECK_CUDA(cudaEventRecord(stop, 0));
 		CHECK_CUDA(cudaEventSynchronize(stop));
 		CHECK_CUDA(cudaDeviceSynchronize());
 		CHECK_CUDA(cudaEventElapsedTime(&gpuTime, start, stop));
 		tMd += gpuTime / 1000.;
 
 		// Последовательный алгоритм
-		CHECK_CUDA(cudaEventRecord(start));
+		CHECK_CUDA(cudaEventRecord(start, 0));
 		for (int i = 0; i < nr_rows_A; ++i)
 		{
 			for (int j = 0; j < nr_cols_B; ++j)
@@ -202,7 +202,7 @@ int main()
 				}
 			}
 		}
-		CHECK_CUDA(cudaEventRecord(stop));
+		CHECK_CUDA(cudaEventRecord(stop, 0));
 		CHECK_CUDA(cudaEventSynchronize(stop));
 		CHECK_CUDA(cudaDeviceSynchronize());
 		CHECK_CUDA(cudaEventElapsedTime(&gpuTime, start, stop));
@@ -220,7 +220,7 @@ int main()
 			cudaMemcpyHostToDevice));
 		CHECK_CUDA(cudaMemcpy(d_B, h_B, nr_rows_B * nr_cols_B * sizeof(TYPE),
 			cudaMemcpyHostToDevice));
-		CHECK_CUDA(cudaEventRecord(stop));
+		CHECK_CUDA(cudaEventRecord(stop, 0));
 		CHECK_CUDA(cudaEventSynchronize(stop));
 		CHECK_CUDA(cudaDeviceSynchronize());
 		CHECK_CUDA(cudaEventElapsedTime(&gpuTime, start, stop));
@@ -229,7 +229,7 @@ int main()
 		// Умножение матриц на GPU
 		CHECK_CUDA(cudaEventRecord(start, 0));
 		gpu_blas_mmul(d_A, d_B, d_C, nr_rows_A, nr_cols_A, nr_cols_B);
-		CHECK_CUDA(cudaEventRecord(stop));
+		CHECK_CUDA(cudaEventRecord(stop, 0));
 		CHECK_CUDA(cudaEventSynchronize(stop));
 		CHECK_CUDA(cudaDeviceSynchronize());
 		CHECK_CUDA(cudaEventElapsedTime(&gpuTime, start, stop));

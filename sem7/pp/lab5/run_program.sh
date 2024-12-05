@@ -15,8 +15,8 @@ cat <<EOF > $TEMP_FILE
 #!/bin/bash
 #SBATCH --job-name=${JOB_NAME}
 #SBATCH --time=00:03:00
-#SBATCH --nodes=1 --ntasks-per-node=1
-#SBATCH --mem=1gb
+#SBATCH --nodes=1
+#SBATCH --gres=gpu
 #SBATCH --output=${OUTPUT_FILE}
 
 module load cuda/8.0

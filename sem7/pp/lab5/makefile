@@ -19,7 +19,7 @@ EXEC = lab5
 all: $(foreach dim,$(N),$(EXEC)_$(dim))
 
 # Правило для компиляции с различными параметрами
-$(EXEC)_%: main.c
+$(EXEC)_%: main.cu
 	$(NVCC) $(CFLAGS) -DN=$(strip $*) -o $@ $<
 
 # Правило для очистки
