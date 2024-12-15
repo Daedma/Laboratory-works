@@ -4,7 +4,6 @@ n = 100
 
 function result = f(r)
 	R_1_5 = 10*r.^5 - 12*r.^3 + 3*r;
-	% Z_1_5 = R_1_5 .* exp(-1i * phi);
 	result = R_1_5;
   end
 
