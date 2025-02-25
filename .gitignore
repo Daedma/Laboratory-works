@@ -25,3 +25,4 @@ build/
 !**/vcpkg.json
 !**/vcpkg-configuration.json
 !**/CMakePresets.json
+!/sem8/bd/**
