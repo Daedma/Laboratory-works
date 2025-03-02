@@ -26,3 +26,4 @@ build/
 !**/vcpkg-configuration.json
 !**/CMakePresets.json
 !/sem8/bd/**
+!/sem8/nn/lab2/*.png
