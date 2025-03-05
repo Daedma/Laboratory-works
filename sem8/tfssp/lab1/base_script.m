@@ -7,7 +7,7 @@ threshold = 1.0; % Порог зашкаливания
 
 % Размер изображения
 size_img = 300;
-[x, y] = meshgrid(linspace(-omega, omega, size_img), linspace(-omega, omega, size_img));
+[x, y] = meshgrid(linspace(-omega*3, omega*3, size_img), linspace(-omega*3, omega*3, size_img));
 
 % Радиус
 r = sqrt(x.^2 + y.^2);
@@ -53,7 +53,7 @@ final_image(2:2:end, 1:2:end) = images(:, :, 3);
 final_image(1:2:end, 2:2:end) = images(:, :, 4);
 
 % Отображение суммарного изображения
-imagesc(linspace(-omega, omega, size_img * 2), linspace(-omega, omega, size_img * 2), final_image);
+imagesc(linspace(-omega*3, omega*3, size_img * 2), linspace(-omega*3, omega*3, size_img * 2), final_image);
 colormap(jet);
 colorbar;
 title('Суммарное поляризационное изображение');
