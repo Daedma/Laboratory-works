@@ -1,34 +1,21 @@
-cmake_minimum_required(VERSION 3.14)
-project(FFTExample CXX)
+cmake_minimum_required(VERSION 3.26)
+project(LR3 CXX)
 
-# Указываем стандарт C++ (например, C++17)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Добавляем текущую директорию в путь для поиска заголовочных файлов
+option(BUILD_SHARED_LIBS OFF)
+
 include_directories(${CMAKE_SOURCE_DIR})
 
-# Находим FFTW
-find_package(FFTW REQUIRED)
-include_directories(${FFTW_INCLUDE_DIRS})
+add_subdirectory(fftw)
 
-# Находим matplot++
-# Предполагаем, что matplot++ находится в текущей директории
-set(MATPLOTPP_DIR ${CMAKE_SOURCE_DIR}/matplotplusplus)
-include_directories(${MATPLOTPP_DIR}/include)
+set(FFTW_ROOT ${CMAKE_SOURCE_DIR}/fftw)
 
-# Если matplot++ требует дополнительные зависимости, добавьте их здесь
-# Например, для OpenCV или других библиотек
+add_subdirectory(matplotplusplus)
 
-# Добавляем исполняемый файл
-add_executable(FFTExample main.cpp)
+add_executable(dark_field dark_field.cpp)
 
-# Подключаем FFTW
-target_link_libraries(FFTExample ${FFTW_LIBRARIES})
+target_link_libraries(dark_field PUBLIC fftw3 matplot)
 
-# Подключаем matplot++
-target_link_libraries(FFTExample ${MATPLOTPP_DIR}/lib/libmatplot.a)
-
-# Если matplot++ требует дополнительные библиотеки, добавьте их здесь
-# Например:
-# target_link_libraries(FFTExample opencv_core opencv_imgproc)
+target_include_directories(dark_field PRIVATE fftw/api ${SOURCE_DIR})
