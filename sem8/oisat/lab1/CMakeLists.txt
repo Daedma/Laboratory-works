@@ -14,7 +14,7 @@ set(FFTW_ROOT ${CMAKE_SOURCE_DIR}/fftw)
 
 add_subdirectory(matplotplusplus)
 
-add_executable(dark_field dark_field.cpp)
+add_executable(dark_field dark_field.cpp LightField.cpp)
 
 target_link_libraries(dark_field PUBLIC fftw3 matplot)
 
