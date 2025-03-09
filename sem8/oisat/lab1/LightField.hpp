@@ -5,6 +5,8 @@
 #include <functional>
 #include <utility>
 
+#include "FFTWAllocator.hpp"
+
 class LightField
 {
 private:
@@ -16,7 +18,7 @@ private:
 
 	size_t resY;
 
-	std::vector<std::complex<double>> field;
+	std::vector<std::complex<double>, FFTWAllocator<std::complex<double>>> field;
 public:
 	LightField(double sizeX_, double sizeY_, size_t resX_, size_t resY_) :
 		sizeX(sizeX_),
