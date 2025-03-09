@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "FFTWAllocator.hpp"
+#include "MatrixProxy.hpp"
 
 class LightField
 {
@@ -37,7 +38,9 @@ public:
 		{
 			for (size_t j = 0; j != resY; ++j)
 			{
-				field[j * resX + i] = generator(i * hx, j * hy);
+				double x = (i - resX * 0.5) * hx;
+				double y = (j - resY * 0.5) * hy;
+				field[j * resX + i] = generator(x, y);
 			}
 		}
 
@@ -53,7 +56,9 @@ public:
 		{
 			for (size_t j = 0; j != resY; ++j)
 			{
-				field[j * resX + i] *= filter(i * hx, j * hy);
+				double x = (i - resX * 0.5) * hx;
+				double y = (j - resY * 0.5) * hy;
+				field[j * resX + i] *= filter(x, y);
 			}
 		}
 
@@ -78,8 +83,61 @@ public:
 
 	size_t getResolutionY() const noexcept { return resY; }
 
-	LightField fft(size_t newResX, size_t newResY) const;
+	LightField fft(size_t newResX, size_t newResY) const { return fft_Impl(newResX, newResY, FFTW_FORWARD); }
 
-	LightField ifft() const;
+	LightField fft() const { return fft(resX, resY); }
+
+	LightField ifft(size_t newResX, size_t newResY) const { return fft_Impl(newResX, newResY, FFTW_BACKWARD); }
+
+	LightField ifft() const { return ifft(resX, resY); }
+
+	std::vector<std::vector<double>> abs() const
+	{
+		std::vector<std::vector<double>> result(resY, std::vector<double>(resX));
+		for (size_t i = 0; i != resX; ++i)
+		{
+			for (size_t j = 0; j != resY; ++j)
+			{
+				result[j][i] = std::abs(field[j * resX + i]);
+			}
+		}
+		return result;
+	}
+
+	std::vector<std::vector<double>> angle() const
+	{
+		std::vector<std::vector<double>> result(resY, std::vector<double>(resX));
+		for (size_t i = 0; i != resX; ++i)
+		{
+			for (size_t j = 0; j != resY; ++j)
+			{
+				result[j][i] = std::arg(field[j * resX + i]);
+			}
+		}
+		return result;
+	}
+
+private:
+	LightField fft_Impl(size_t newResX, size_t newResY, int dftDirection) const;
+
+	fftw_complex* get() noexcept
+	{
+		return reinterpret_cast<fftw_complex*>(field.data());
+	}
+
+	const fftw_complex* get() const noexcept
+	{
+		return reinterpret_cast<const fftw_complex*>(field.data());
+	}
+
+	fftw_complex* get(size_t x, size_t y) noexcept
+	{
+		return reinterpret_cast<fftw_complex*>(&field[y * resX + x]);
+	}
+
+	const fftw_complex* get(size_t x, size_t y) const noexcept
+	{
+		return reinterpret_cast<const fftw_complex*>(&field[y * resX + x]);
+	}
 
 };

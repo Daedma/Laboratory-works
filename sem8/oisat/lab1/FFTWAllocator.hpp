@@ -1,38 +1,37 @@
 #pragma once
 
-#include <type_traits>
 #include <fftw3.h>
-#include <complex>
 
 template <typename T>
-struct FFTWAllocator
+class FFTWAllocator
 {
-	typedef T value_type;
+public:
+	using value_type = T;
 
 	FFTWAllocator() = default;
 
-	template<class T>
-	constexpr FFTWAllocator(const FFTWAllocator<T>&) noexcept {}
+	template <typename U>
+	FFTWAllocator(const FFTWAllocator<U>&) {}
 
-	T* allocate(size_t n) = delete;
+	T* allocate(std::size_t n)
+	{
+		return static_cast<T*>(fftw_malloc(sizeof(T) * n));
+	}
 
-	void deallocate(T* p, size_t n) noexcept
+	void deallocate(T* p, std::size_t)
 	{
 		fftw_free(p);
 	}
 };
 
-template<class T, class U>
-bool operator==(const FFTWAllocator<T>&, const FFTWAllocator<U>&) { return true; }
-
-template<class T, class U>
-bool operator!=(const FFTWAllocator<T>&, const FFTWAllocator<U>&) { return false; }
-
-template <>
-struct FFTWAllocator<std::complex<double>>
+template <typename T, typename U>
+bool operator==(const FFTWAllocator<T>&, const FFTWAllocator<U>&)
 {
-	std::complex<double>* allocate(size_t n)
-	{
-		return reinterpret_cast<std::complex<double>*>(fftw_alloc_complex(n));
-	}
-};
+	return true;
+}
+
+template <typename T, typename U>
+bool operator!=(const FFTWAllocator<T>&, const FFTWAllocator<U>&)
+{
+	return false;
+}

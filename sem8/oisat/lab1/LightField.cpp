@@ -1,56 +1,79 @@
 #include <algorithm>
 #include <cstring>
 #include <array>
+#include <algorithm>
 
 #include <fftw3.h>
 
 #include "LightField.hpp"
 
-LightField LightField::fft(size_t newResX, size_t newResY) const
+template<typename T>
+static int m1pn(T n)
 {
-	size_t bufferSize = std::max(resX * newResY, newResX * resY);
+	return 1 - 2 * (n & 1);
+}
 
-	// Выделение памяти для FFT
+static size_t nextPowerOf2(size_t n)
+{
+	--n;
+	n |= n >> 1;
+	n |= n >> 2;
+	n |= n >> 4;
+	n |= n >> 8;
+	n |= n >> 16;
+	n |= n >> 32;
+	++n;
+	return n;
+}
+
+LightField LightField::fft_Impl(size_t newResX, size_t newResY, int dftDirection) const
+{
+	if (newResX == 0 || newResY == 0)
+	{
+		throw std::invalid_argument("Resolution must be greater than zero.");
+	}
+
+	newResX = nextPowerOf2(newResX);
+	newResY = nextPowerOf2(newResY);
+
+	const size_t bufferSize = newResX * newResY;
 	fftw_complex* buffer = fftw_alloc_complex(bufferSize);
+	std::memset(buffer, 0, bufferSize * sizeof(fftw_complex));
 
-	// Rows
-	// Filling
-	size_t nNulls = newResX - resX;
-	for (size_t i = 0; i != newResY; ++i)
-	{
-		fftw_complex* dst = buffer + i * newResX;
-		const fftw_complex* src = reinterpret_cast<const fftw_complex*>(field.data() + i * resX);
-		// Zero padding + shift
-		std::memcpy(dst, src + resX / 2, resX / 2 * sizeof(fftw_complex));
-		std::memset(dst + resX / 2, 0, nNulls * sizeof(fftw_complex));
-		std::memcpy(dst + resX / 2 + nNulls, src, resX / 2 * sizeof(fftw_complex));
-	}
-
-	// FFT
-	fftw_plan p = fftw_plan_dft_1d(newResX, buffer, buffer, FFTW_FORWARD, FFTW_MEASURE);
-	for (size_t i = 0; i != newResY; ++i)
-	{
-		fftw_execute_dft(p, buffer + i * newResX, buffer + i * newResX);
-	}
-
-	// Fit
-	for (size_t i = 0; i != newResY; ++i)
-	{
-		fftw_complex* src = buffer + i * newResX;
-		fftw_complex* dst = buffer + i * resX;
-		std::memcpy(dst + resX / 2, src, resX / 2 * sizeof(fftw_complex));
-		std::memcpy(dst, src + newResX - resX / 2, resX / 2 * sizeof(fftw_complex));
-	}
-
-	// Transpose
 	for (size_t i = 0; i != resY; ++i)
 	{
-		for (size_t j = i; j != resX; ++j)
+		for (size_t j = 0; j != resX; ++j)
 		{
-			std::swap(buffer[i + j * resX], buffer[j + i * resX]);
+			const fftw_complex* cur = get(j, i);
+			int sign = m1pn(i + j);
+			buffer[i * newResX + j][0] = (*cur)[0] * sign;
+			buffer[i * newResX + j][1] = (*cur)[1] * sign;
 		}
 	}
 
+	fftw_plan plan = fftw_plan_dft_2d(newResY, newResX, buffer, buffer, dftDirection, FFTW_ESTIMATE);
+	fftw_execute(plan);
 
+	const double newSizeX = 2 * resX * resX / (4 * sizeX * newResX);
+	const double newSizeY = 2 * resY * resY / (4 * sizeY * newResY);
 
+	LightField result{ newSizeX, newSizeY, resX, resY };
+	for (size_t i = 0; i != resY; ++i)
+	{
+		fftw_complex* dst = result.get(0, i);
+		const fftw_complex* src = buffer + i * newResX;
+		std::memcpy(dst, src, resX * sizeof(fftw_complex));
+	}
+
+	double hx = sizeX / resX;
+	double hy = sizeY / resY;
+	for(auto& i : result.field)
+	{
+		i *= hx * hy;
+	}
+
+	fftw_free(buffer);
+	fftw_destroy_plan(plan);
+
+	return result;
 }
