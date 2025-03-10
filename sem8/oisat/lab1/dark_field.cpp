@@ -15,45 +15,32 @@ inline constexpr auto filter = [](double x, double y)->std::complex<double> {
 	return { 1., 0. };
 	};
 
+inline constexpr auto image = bacteries;
 
 int main()
 {
-	try
-	{
-		LightField field{ sizeX, sizeY, resX, resY };
-		field.populate(image);
+	LightField field{ size, res };
+	field.populate(image);
 
-		LightField spectrum = field.fft();
+	LightField spectrum = field.fft();
 
-		spectrum.applyFilter(filter);
+	spectrum.applyFilter(filter);
 
-		LightField output = spectrum.ifft();
+	LightField output = spectrum.ifft();
 
-		matplot::subplot(3, 1, 0);
-		matplot::imagesc(field.abs());
-		matplot::colorbar();
+	matplot::subplot(1, 3, 0);
+	matplot::imagesc(field.angle());
+	matplot::colorbar();
 
-		matplot::subplot(3, 1, 1);
-		matplot::imagesc(spectrum.abs());
-		matplot::colorbar();
+	matplot::subplot(1, 3, 1);
+	matplot::imagesc(spectrum.abs());
+	matplot::colorbar();
 
-		matplot::subplot(3, 1, 2);
-		matplot::imagesc(output.abs());
-		matplot::colorbar();
+	matplot::subplot(1, 3, 2);
+	matplot::imagesc(output.angle());
+	matplot::colorbar();
 
-		matplot::show();
-
-		// plotLightField(field);
-		// plotLightField(spectrum);
-		// plotLightField(spectrum);
-		// printLightField(field);
-		// printLightField(spectrum);
-		// printLightField(output);
-	}
-	catch (const std::exception& e)
-	{
-		std::cerr << e.what() << std::endl;
-	}
+	matplot::show();
 
 	return 0;
 }
