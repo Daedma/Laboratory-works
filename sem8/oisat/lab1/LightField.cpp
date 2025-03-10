@@ -69,7 +69,7 @@ LightField LightField::fft_Impl(int dftDirection) const
 	for (size_t i = 0; i != N; ++i)
 	{
 		fftw_complex* dst = result.get(0, i);
-		const fftw_complex* src = buffer + i * M;
+		const fftw_complex* src = buffer + i * M + (M - N) / 2;
 		std::memcpy(dst, src, N * sizeof(fftw_complex));
 	}
 

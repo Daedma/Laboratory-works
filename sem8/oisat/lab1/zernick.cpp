@@ -11,15 +11,8 @@
 #include "common.hpp"
 
 inline constexpr auto filter = [](double x, double y)->std::complex<double> {
-	constexpr double minFreq = 0.1;
-	if (std::abs(x) > minFreq && std::abs(y) > minFreq)
-	{
-		return 1.;
-	}
-	else
-	{
-		return 0.;
-	}
+	constexpr std::complex<double> phase{0., 1.};
+    return phase;
 };
 
 inline constexpr auto image = bacteries;
@@ -41,7 +34,7 @@ int main()
     matplot::title("Original Field Angle");
 
     matplot::figure();
-    matplot::imagesc(spectrum.abs());
+    matplot::imagesc(spectrum.angle());
     matplot::colorbar();
     matplot::title("Spectrum Magnitude");
 

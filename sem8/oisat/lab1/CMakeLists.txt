@@ -19,3 +19,9 @@ add_executable(dark_field dark_field.cpp LightField.cpp)
 target_link_libraries(dark_field PUBLIC fftw3 matplot)
 
 target_include_directories(dark_field PRIVATE fftw/api ${SOURCE_DIR})
+
+add_executable(zernick zernick.cpp LightField.cpp)
+
+target_link_libraries(zernick PUBLIC fftw3 matplot)
+
+target_include_directories(zernick PRIVATE fftw/api ${SOURCE_DIR})
