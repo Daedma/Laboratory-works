@@ -124,4 +124,11 @@ private:
         return reinterpret_cast<const fftw_complex*>(&field[y * res + x]);
     }
 
+    void shift(const fftw_complex* src, size_t srcSize, 
+        size_t srcStep,  fftw_complex* dst, size_t dstSize, size_t dstStep) const;
+
+    void fit(const fftw_complex* src, size_t srcSize, 
+        size_t srcStep,  fftw_complex* dst, size_t dstSize, size_t dstStep) const;
+
+    void transpose(fftw_complex* src, size_t srcSize, size_t srcStep) const;
 };

@@ -9,7 +9,7 @@
 
 namespace
 {
-	constexpr size_t res = 10;
+	constexpr size_t res = 100;
 	constexpr double size = 5. * 2.;
 
 	constexpr auto bacteries = [](double x, double y) -> std::complex<double> {
