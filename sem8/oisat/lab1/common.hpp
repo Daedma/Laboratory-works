@@ -39,7 +39,7 @@ namespace
 		constexpr auto sinamp = [](double freqX, double freqY, double ampFactor) {
 			return [freqX, freqY, ampFactor](double x, double y) -> std::complex<double> {
 				using constants::pi;
-				const double amp = std::abs(ampFactor * pi * std::sin(freqX * x) * std::sin(freqY * y));
+				const double amp = ampFactor * pi * std::sin(freqX * x) * std::sin(freqY * y);
 				const double phase = 1.;
 				return std::polar(amp, phase);
 				};
@@ -120,15 +120,16 @@ namespace
 	{
 		void plotField(LightField field, const std::string& label)
 		{
+			static constexpr size_t resolution = 100;
 			matplot::figure();
 
 			matplot::subplot(1, 2, 0);
-			matplot::imagesc(field.angle());
+			matplot::imagesc(field.angle(resolution));
 			matplot::colorbar();
 			matplot::title("Phase of " + label);
 
 			matplot::subplot(1, 2, 1);
-			matplot::imagesc(field.abs());
+			matplot::imagesc(field.abs(resolution));
 			matplot::colorbar();
 			matplot::title("Amplitude of " + label);
 		}
@@ -137,6 +138,8 @@ namespace
 			std::function<std::complex<double>(double, double)> filter,
 			double fieldSize = imageParams::size, size_t fieldRes = imageParams::res)
 		{
+			fftw_init_threads();
+
 			LightField inputField{ fieldSize, fieldRes };
 			inputField.populate(field);
 

@@ -30,12 +30,13 @@ static size_t nextPowerOf2(size_t n)
 LightField LightField::fft_Impl(int dftDirection) const
 {
 	size_t N = res;
-	size_t M = nextPowerOf2(res) << 2;
+	size_t M = nextPowerOf2(res) << 6;
 
 	size_t bufferSize = M * N;
 
 	// Выделение памяти для FFT
 	fftw_complex* buffer = fftw_alloc_complex(bufferSize);
+	fftw_plan_with_nthreads(fftw_planner_nthreads());
 	fftw_plan p = fftw_plan_dft_1d(M, buffer, buffer, dftDirection, FFTW_MEASURE);
 
 	// Rows
