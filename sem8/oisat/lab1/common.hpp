@@ -2,6 +2,9 @@
 
 #include <complex>
 #include <cmath>
+#include <vector>
+#include <random>
+#include <algorithm>
 
 #include <matplot/matplot.h>
 
@@ -9,23 +12,135 @@
 
 namespace
 {
-	constexpr size_t res = 100;
-	constexpr double size = 5. * 2.;
+	namespace imageParams
+	{
+		constexpr size_t res = 100;
+		constexpr double size = 5. * 2.;
+	}
 
-	constexpr auto bacteries = [](double x, double y) -> std::complex<double> {
-		using namespace std::complex_literals;
+	namespace constants
+	{
 		constexpr double pi = 3.14159265358979323846;
-		constexpr double A = 8.;
-		constexpr double B = 0.8;
-		constexpr double C = 8.;
-		return std::exp(1.i * B * pi * std::sin(A * x) * std::sin(C * y));
-		};
+		constexpr double twopi = 6.28318530718;
+		constexpr double halfpi = 1.57079632679;
+	};
 
-	constexpr auto gauss = [](double x, double y) -> std::complex<double> {
-		return std::exp(-x * x - y * y);
-		};
+	namespace fields
+	{
+		constexpr auto sinphase = [](double freqX, double freqY, double phaseFactor) {
+			return [freqX, freqY, phaseFactor](double x, double y) -> std::complex<double> {
+				using constants::pi;
+				const double amp = 1.;
+				const double phase = phaseFactor * pi * std::sin(freqX * x) * std::sin(freqY * y);
+				return std::polar(amp, phase);
+				};
+			};
 
-	constexpr auto ones = [](double x, double y) -> std::complex<double> {
-		return 1.;
-		};
+		constexpr auto sinamp = [](double freqX, double freqY, double ampFactor) {
+			return [freqX, freqY, ampFactor](double x, double y) -> std::complex<double> {
+				using constants::pi;
+				const double amp = std::abs(ampFactor * pi * std::sin(freqX * x) * std::sin(freqY * y));
+				const double phase = 1.;
+				return std::polar(amp, phase);
+				};
+			};
+
+		constexpr auto gauss = [](double x, double y) -> std::complex<double> {
+			return std::exp(-x * x - y * y);
+			};
+
+		constexpr auto ones = [](double x, double y) -> std::complex<double> {
+			return 1.;
+			};
+
+		constexpr auto bacteries = [](double width, double height, double stepX, double stepY, double amp, double phase) {
+			using constants::pi;
+			const double gridSize = std::max({ width, height, stepX, stepY });
+			const std::random_device::result_type baseSeed = std::random_device{}();
+
+			return [=](double x, double y) ->std::complex<double> {
+				const int64_t i = static_cast<int64_t>(x / gridSize);
+				const int64_t j = static_cast<int64_t>(y / gridSize);
+				const double x0 = gridSize * i;
+				const double y0 = gridSize * j;
+
+				const std::random_device::result_type seed = baseSeed ^ i ^ j;
+				std::mt19937 gridGen(seed);
+				std::uniform_real_distribution<double> phiDis(0., pi);
+				const double phi = phiDis(gridGen);
+
+				const double fitX = (x - x0) * std::cos(-phi) - (y - y0) * std::sin(-phi);
+				const double fitY = (x - x0) * std::sin(-phi) + (y - y0) * std::cos(-phi);
+
+				const bool isInside = (fitX * fitX / (width * width)) + (fitY * fitY / (height * height)) <= 4.;
+
+				return std::polar(amp * static_cast<double>(isInside), phase);
+				};
+			};
+	}
+
+	namespace filters
+	{
+		constexpr auto darkfield = [](double size) {
+			return [size](double x, double y)->std::complex<double> {
+				const bool isOutside = std::abs(x) > size && std::abs(y) > size;
+				return { static_cast<double>(isOutside), 0. };
+				};
+			};
+
+		constexpr auto zernick = [](double shift) {
+			const std::complex<double> multiplier = std::polar(1., shift);
+			return [multiplier](double x, double y) -> std::complex<double> {
+				return multiplier;
+				};
+			};
+
+		constexpr auto derivative = [](int varPos) {
+			return	[varPos](double x, double y) {
+				using constants::pi;
+				using namespace std::complex_literals;
+				const double var = varPos == 0 ? x : y;
+				return 2.i * pi * var;
+				};
+			};
+	}
+
+	namespace app
+	{
+		void plotField(LightField field, const std::string& label)
+		{
+			matplot::figure();
+
+			matplot::subplot(1, 2, 0);
+			matplot::imagesc(field.angle());
+			matplot::colorbar();
+			matplot::title("Phase of " + label);
+
+			matplot::subplot(1, 2, 1);
+			matplot::imagesc(field.abs());
+			matplot::colorbar();
+			matplot::title("Amplitude of " + label);
+		}
+
+		template<typename FieldType, typename FilterType>
+		void demostrateFiltration(FieldType field, FilterType filter,
+			double fieldSize = imageParams::size, size_t fieldRes = imageParams::res)
+		{
+			LightField inputField{ fieldSize, fieldRes };
+			inputField.populate(field);
+
+			LightField spectrum = inputField.fft();
+			spectrum.applyFilter(filter);
+
+			LightField outputField = spectrum.ifft();
+
+			plotField(inputField, "Input Field");
+
+			plotField(spectrum, "Spectrum after filter applying");
+
+			plotField(outputField, "Output Field");
+
+			matplot::show();
+		}
+	};
 }
