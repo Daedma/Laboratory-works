@@ -14,7 +14,7 @@ namespace
 {
 	namespace imageParams
 	{
-		constexpr size_t res = 100;
+		constexpr size_t res = 1000;
 		constexpr double size = 5. * 2.;
 	}
 
@@ -59,12 +59,12 @@ namespace
 			const std::random_device::result_type baseSeed = std::random_device{}();
 
 			return [=](double x, double y) ->std::complex<double> {
-				const int64_t i = static_cast<int64_t>(x / gridSize);
-				const int64_t j = static_cast<int64_t>(y / gridSize);
-				const double x0 = gridSize * i;
-				const double y0 = gridSize * j;
+				const int16_t i = static_cast<int16_t>(std::floor(x / gridSize));
+				const int16_t j = static_cast<int16_t>(std::floor(y / gridSize));
+				const double x0 = gridSize * (i + 0.5);
+				const double y0 = gridSize * (j + 0.5);
 
-				const std::random_device::result_type seed = baseSeed ^ i ^ j;
+				const std::random_device::result_type seed = baseSeed ^ (i << 16) ^ j;
 				std::mt19937 gridGen(seed);
 				std::uniform_real_distribution<double> phiDis(0., pi);
 				const double phi = phiDis(gridGen);
@@ -72,7 +72,7 @@ namespace
 				const double fitX = (x - x0) * std::cos(-phi) - (y - y0) * std::sin(-phi);
 				const double fitY = (x - x0) * std::sin(-phi) + (y - y0) * std::cos(-phi);
 
-				const bool isInside = (fitX * fitX / (width * width)) + (fitY * fitY / (height * height)) <= 4.;
+				const bool isInside = (fitX * fitX / (width * width)) + (fitY * fitY / (height * height)) <= 0.25;
 
 				return std::polar(amp * static_cast<double>(isInside), phase);
 				};
@@ -81,27 +81,38 @@ namespace
 
 	namespace filters
 	{
-		constexpr auto darkfield = [](double size) {
-			return [size](double x, double y)->std::complex<double> {
-				const bool isOutside = std::abs(x) > size && std::abs(y) > size;
+		constexpr auto darkfield = [](double area) {
+			return [area](double x, double y)->std::complex<double> {
+				const bool isOutside = std::abs(x) > area || std::abs(y) > area;
 				return { static_cast<double>(isOutside), 0. };
 				};
 			};
 
-		constexpr auto zernick = [](double shift) {
-			const std::complex<double> multiplier = std::polar(1., shift);
-			return [multiplier](double x, double y) -> std::complex<double> {
-				return multiplier;
+		constexpr auto zernick = [](double area) {
+			return [area](double x, double y) -> std::complex<double> {
+				const bool isOutside = std::abs(x) > area || std::abs(y) > area;
+				if(isOutside)
+				{
+					return {1., 0.};
+				}
+				else
+				{
+					return {0., 1.};
+				}
 				};
 			};
 
 		constexpr auto derivative = [](int varPos) {
-			return	[varPos](double x, double y) {
+			return	[varPos](double x, double y) -> std::complex<double> {
 				using constants::pi;
 				using namespace std::complex_literals;
 				const double var = varPos == 0 ? x : y;
 				return 2.i * pi * var;
 				};
+			};
+
+		constexpr auto identity = [](double x, double y) -> std::complex<double> {
+			return 1.;
 			};
 	}
 
@@ -122,8 +133,8 @@ namespace
 			matplot::title("Amplitude of " + label);
 		}
 
-		template<typename FieldType, typename FilterType>
-		void demostrateFiltration(FieldType field, FilterType filter,
+		void demostrateFiltration(std::function<std::complex<double>(double, double)> field,
+			std::function<std::complex<double>(double, double)> filter,
 			double fieldSize = imageParams::size, size_t fieldRes = imageParams::res)
 		{
 			LightField inputField{ fieldSize, fieldRes };

@@ -28,20 +28,19 @@ static size_t nextPowerOf2(size_t n)
 }
 
 LightField LightField::fft_Impl(int dftDirection) const
-{	
-
+{
 	size_t N = res;
-	size_t M = nextPowerOf2(res) << 1;
+	size_t M = nextPowerOf2(res) << 2;
 
 	size_t bufferSize = M * N;
 
 	// Выделение памяти для FFT
 	fftw_complex* buffer = fftw_alloc_complex(bufferSize);
+	fftw_plan p = fftw_plan_dft_1d(M, buffer, buffer, dftDirection, FFTW_MEASURE);
 
 	// Rows
 	shift(get(), N, N, buffer, M, M);
 
-	fftw_plan p = fftw_plan_dft_1d(M, buffer, buffer, dftDirection, FFTW_MEASURE);
 	for (size_t i = 0; i != N; ++i)
 	{
 		fftw_execute_dft(p, buffer + i * M, buffer + i * M);
@@ -63,9 +62,9 @@ LightField LightField::fft_Impl(int dftDirection) const
 
 	transpose(buffer + (M - N) / 2, N, M);
 
-	const double newSize = N * N / (2. * size * M);
+	const double newSize = N * N / (size * M);
 
-	LightField result{ newSize, N};
+	LightField result{ newSize, N };
 	for (size_t i = 0; i != N; ++i)
 	{
 		fftw_complex* dst = result.get(0, i);
@@ -73,21 +72,21 @@ LightField LightField::fft_Impl(int dftDirection) const
 		std::memcpy(dst, src, N * sizeof(fftw_complex));
 	}
 
-	double hh = res * res / (size * size);
-	for(auto& i : result.field)
+	double hh = size * size / (res * res);
+	for (auto& i : result.field)
 	{
 		i *= hh;
 	}
 
-	fftw_free(buffer);
 	fftw_destroy_plan(p);
+	fftw_free(buffer);
 
 	return result;
 }
 
 
-void LightField::shift(const fftw_complex* src, size_t srcSize, 
-	size_t srcStep,  fftw_complex* dst, size_t dstSize, size_t dstStep) const
+void LightField::shift(const fftw_complex* src, size_t srcSize,
+	size_t srcStep, fftw_complex* dst, size_t dstSize, size_t dstStep) const
 {
 	size_t nNulls = dstSize - srcSize;
 	for (size_t i = 0; i != srcSize; ++i)
@@ -101,8 +100,8 @@ void LightField::shift(const fftw_complex* src, size_t srcSize,
 	}
 }
 
-void LightField::fit(const fftw_complex* src, size_t srcSize, 
-	size_t srcStep,  fftw_complex* dst, size_t dstSize, size_t dstStep) const
+void LightField::fit(const fftw_complex* src, size_t srcSize,
+	size_t srcStep, fftw_complex* dst, size_t dstSize, size_t dstStep) const
 {
 	for (size_t i = 0; i != srcSize; ++i)
 	{
