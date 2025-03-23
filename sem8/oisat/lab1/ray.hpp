@@ -46,8 +46,9 @@ public:
 	{
 		auto origin_res = glm::vec<vec_t::length() + 1, vec_t::value_type>{ m_origin, 1 };
 		auto direction_res = glm::vec<vec_t::length() + 1, vec_t::value_type>{ m_direction, 0 };
-		origin_res *= transform;
-		direction_res *= transform;
+		origin_res = transform * origin_res;
+		direction_res = transform * direction_res;
 		return { { origin_res }, { direction_res } };
 	}
+
 };

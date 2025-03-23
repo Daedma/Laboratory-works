@@ -68,7 +68,7 @@ IF(NOT MYPROJ_RAN_ONCE)
 
   SET(
     CMAKE_INSTALL_PREFIX
-    "${CMAKE_SOURCE_DIR}/out/"
+    "${PROJECT_SOURCE_DIR}/out/"
     CACHE
     FILEPATH
     "Install path prefix, prepended onto install directories."
@@ -77,7 +77,7 @@ IF(NOT MYPROJ_RAN_ONCE)
 
   SET(
     EXECUTABLE_OUTPUT_PATH
-    "${CMAKE_SOURCE_DIR}/bin/"
+    "${PROJECT_SOURCE_DIR}/bin/"
     CACHE
     FILEPATH
     "Single output directory for building all executables."
@@ -86,7 +86,7 @@ IF(NOT MYPROJ_RAN_ONCE)
 
   SET(
     LIBRARY_OUTPUT_PATH
-    "${CMAKE_SOURCE_DIR}/lib/"
+    "${CPROJECT_SOURCE_DIR}/lib/"
     CACHE
     FILEPATH
     "Single output directory for building all libraries."
@@ -187,21 +187,3 @@ install(DIRECTORY examples/ DESTINATION share/libboard/examples FILES_MATCHING P
 install(FILES README.md LICENSE AUTHORS DESTINATION share/libboard )
 
 FILE(GLOB EXAMPLES examples/*.cpp)
-
-FOREACH( EXAMPLE_SRC_PATH ${EXAMPLES} )
-  get_filename_component(EXAMPLE_EXE ${EXAMPLE_SRC_PATH} NAME_WE)
-  ADD_EXECUTABLE(
-    ${EXAMPLE_EXE}
-    examples/${EXAMPLE_EXE}.cpp
-    )
-  TARGET_LINK_LIBRARIES(
-    ${EXAMPLE_EXE}
-    debug board_d
-    optimized board
-    )
-  TARGET_LINK_LIBRARIES(
-   ${EXAMPLE_EXE}
-   ${ImageMagick_LIBRARIES}
-  )
-  SET_TARGET_PROPERTIES(${EXAMPLE_EXE} PROPERTIES DEBUG_POSTFIX _d)
-ENDFOREACH(EXAMPLE_SRC_PATH)

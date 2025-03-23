@@ -12,24 +12,32 @@ set(CMAKE_DISABLE_FIND_PACKAGE_ImageMagick)
 
 add_subdirectory(libboard)
 
+set(LIBBOARD_ROOT ${CMAKE_SOURCE_DIR}/libboards)
+
 add_subdirectory(glm)
 
-add_executable(intersection intersection.cpp)
+set(CLASSES_SRC 
+	plane.cpp
+	shape.cpp
+	sphere.cpp
+	ellipse.cpp)
+
+add_executable(intersection intersection.cpp ${CLASSES_SRC})
 
 target_include_directories(intersection PRIVATE ${SOURCE_DIR})
 
 
-add_executable(reflection reflection.cpp)
+add_executable(reflection reflection.cpp ${CLASSES_SRC})
 
 target_include_directories(reflection PRIVATE ${SOURCE_DIR})
 
 
-add_executable(refraction refraction.cpp)
+add_executable(refraction refraction.cpp ${CLASSES_SRC})
 
 target_include_directories(refraction PRIVATE ${SOURCE_DIR})
 
 
-add_executable(demonstration demonstration.cpp)
+add_executable(demonstration demonstration.cpp ${CLASSES_SRC})
 
 target_link_libraries(demonstration PUBLIC board)
 

@@ -12,8 +12,6 @@ class shape
 
 	vec_t m_rotation = vec_t{ 0, 0, 0 };
 
-	vec_t m_scale = vec_t{ 1, 1, 1 };
-
 	mat_t m_transform = (mat_t(1));
 
 public:
@@ -41,22 +39,16 @@ public:
 		return m_rotation;
 	}
 
-	void scale(const vec_t& new_scale_) noexcept
-	{
-		m_scale = new_scale_;
-	}
-
-	const vec_t& scale() const noexcept
-	{
-		return m_scale;
-	}
-
 	const mat_t& transform() const noexcept
 	{
 		return m_transform;
 	}
 
 	std::vector<vec_t> intersection_points(const ray& ray_) const;
+
+	std::vector<ray> reflect_ray(const ray& ray_) const;
+	
+	std::vector<ray> refract_ray(const ray& ray_, double refr_ind_out, double refr_ind_in) const;
 
 	virtual vec_t normal(const vec_t& point) const = 0;
 
