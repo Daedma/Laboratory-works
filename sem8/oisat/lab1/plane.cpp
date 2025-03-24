@@ -1,3 +1,4 @@
+#include <Board.h>
 
 #include "ray.hpp"
 #include "plane.hpp"
@@ -18,4 +19,10 @@ vec_t plane::normal(const vec_t& point) const
 {
 	vec_t result(transform()[0].z, transform()[1].z, transform()[2].z);
 	return glm::normalize(result);
+}
+
+void plane::draw(LibBoard::Board& board, const LibBoard::Color &color) const
+{
+	board.setPenColor(color);
+	board.drawLine(-1000, shift().y, 1000, shift().y);
 }

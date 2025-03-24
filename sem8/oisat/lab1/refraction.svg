@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="190mm" height="10.5mm" 
+     viewBox="0 0 538.583 29.7638" 
+     xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" >
+<desc>Drawing created with the Board library (v0.9.6) Copyright Sebastien Fourey</desc>
+<ellipse cx="269.291" cy="14.8819" rx="14.1732" ry="14.1732" fill="none" stroke="rgb(0,0,0)" stroke-width="0.5mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<line x1="289.134" y1="14.8819" x2="5.66929" y2="14.8819" fill="none" stroke="rgb(0,0,255)" stroke-width="0.5mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<line x1="255.118" y1="14.8819" x2="538.583" y2="14.8819" fill="none" stroke="rgb(255,0,0)" stroke-width="0.5mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<line x1="283.465" y1="14.8819" x2="0" y2="14.8819" fill="none" stroke="rgb(255,0,0)" stroke-width="0.5mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+</svg>

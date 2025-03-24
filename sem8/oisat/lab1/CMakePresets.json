@@ -12,7 +12,9 @@
 			"binaryDir": "${sourceDir}/build",
 			"cacheVariables": {
 				"CMAKE_C_COMPILER": "clang",
-				"CMAKE_CXX_COMPILER": "clang++"
+				"CMAKE_CXX_COMPILER": "clang++",
+				"CMAKE_CXX_FLAGS": "-Wdeprecated-declarations -D_CRT_SECURE_NO_WARNINGS",
+				"CMAKE_C_FLAGS": "-Wdeprecated-declarations -D_CRT_SECURE_NO_WARNINGS"
 			}
 		}
 	],

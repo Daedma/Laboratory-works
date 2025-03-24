@@ -1,4 +1,5 @@
 #include <cmath>
+#include <Board.h>
 
 #include "ray.hpp"
 #include "ellipse.hpp"
@@ -28,8 +29,8 @@ std::vector<vec_t::value_type> ellipse::intersection_points_Impl(const ray& ray_
 	else if (disc > 0)
 	{
 		vec_t::value_type disc_root = std::sqrt(disc);
-		points.emplace_back((-b + disc_root) / (2 * a));
 		points.emplace_back((-b - disc_root) / (2 * a));
+		points.emplace_back((-b + disc_root) / (2 * a));
 	}
 
 	return points;
@@ -42,5 +43,11 @@ vec_t ellipse::normal(const vec_t& point) const
 	normal.y = 2 * point.y / (m_y_radius * m_y_radius);
 	normal.z = 2 * point.z / (m_z_radius * m_z_radius);
 	return glm::normalize(normal);
+}
+
+void ellipse::draw(LibBoard::Board& board, const LibBoard::Color &color) const
+{
+	board.setPenColor(color);
+	board.drawEllipse(shift().x, shift().y, m_x_radius, m_y_radius);
 }
 

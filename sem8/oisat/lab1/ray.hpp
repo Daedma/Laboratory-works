@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdexcept>
+#include <Board.h>
 
 #include "types.hpp"
 
@@ -51,4 +52,9 @@ public:
 		return { { origin_res }, { direction_res } };
 	}
 
+    void draw(LibBoard::Board& board, const LibBoard::Color& color, const vec_t& end) const
+    {
+        board.setPenColor(color);
+        board.drawArrow(m_origin.x, m_origin.y, end.x, end.y, 2.0);
+    }
 };

@@ -174,12 +174,12 @@ bool solveQuadratic(double a, double b, double c, double & x1, double & x2);
 
 inline double rad2deg(double angle)
 {
-  return (angle / M_PI) * 180;
+  return (angle / 3.14159265359) * 180;
 }
 
 inline double deg2rad(double angle)
 {
-  return (angle / 180) * M_PI;
+  return (angle / 180) * 3.14159265359;
 }
 
 } // namespace Tools
