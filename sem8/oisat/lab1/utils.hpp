@@ -26,7 +26,7 @@ namespace
 		{
 			auto plane_ = std::make_unique<plane>();
 			plane_->rotation({glm::radians(90.), 0. ,0.});
-			return std::make_unique<plane>();
+			return plane_;
 		}
 		else if (shape_type == "ellipse")
 		{

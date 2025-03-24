@@ -25,9 +25,9 @@ int main()
 	get_ray_input(origin, direction);
 
 	double refr_ind_out, refr_ind_in;
-	std::cout << "Enter the refractive index outside the surface: ";
+	std::cout << "Enter the refractive index 1 (before refraction): ";
 	std::cin >> refr_ind_out;
-	std::cout << "Enter the refractive index inside the surface: ";
+	std::cout << "Enter the refractive index 2 (after refraction): ";
 	std::cin >> refr_ind_in;
 
 	try

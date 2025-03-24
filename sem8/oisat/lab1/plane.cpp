@@ -9,7 +9,7 @@ std::vector<vec_t::value_type> plane::intersection_points_Impl(const ray& ray_) 
 
 	if (ray_.direction().z != 0)
 	{
-		points.emplace_back(ray_.origin().z / ray_.direction().z);
+		points.emplace_back(-ray_.origin().z / ray_.direction().z);
 	}
 
 	return points;

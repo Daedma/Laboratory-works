@@ -64,7 +64,7 @@ std::optional<ray> shape::refract_ray(const ray& ray_, double refr_ind_out, doub
 		else
 		{
 			double cos_t = std::sqrt(sub_root);
-			vec_t direction = refr_ratio * incident - refr_ratio * cos_i * normal_ * (1. - cos_t);
+			vec_t direction = refr_ratio * incident + refr_ratio * cos_i * normal_ * (1. - cos_t);
 			return ray(closest_origin, direction);
 		}
 
