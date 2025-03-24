@@ -6,35 +6,35 @@
      xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" >
 <desc>Drawing created with the Board library (v0.9.6) Copyright Sebastien Fourey</desc>
 <rect x="0" y="0" width="5669.29" height="5669.29" fill="rgb(255,255,255)" stroke="none" stroke-width="0" style="stroke-linecap:round;stroke-linejoin:round;" />
-<ellipse cx="2834.65" cy="2834.65" rx="850.394" ry="850.394" fill="rgb(255,255,255)" stroke="rgb(0,0,0)" stroke-width="10mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<ellipse cx="2834.65" cy="2834.65" rx="1417.32" ry="283.465" fill="rgb(255,255,255)" stroke="rgb(0,0,0)" stroke-width="10mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
 <g>
-<line x1="3677.23" y1="2719.7" x2="4941.8" y2="2079.63" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="1mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<line x1="1424.81" y1="2805.55" x2="722.403" y2="1574.52" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="1mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
 <polyline fill="none" stroke="rgb(255,0,0)" stroke-width="1mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          points="4921.42,2099.33 4941.8,2079.63 4913.85,2084.38" />
+          points="743.1,1593.89 722.403,1574.52 728.548,1602.19" />
 </g>
 <g>
-<line x1="4251.97" y1="2834.65" x2="3677.23" y2="2719.7" fill="rgb(255,255,255)" stroke="rgb(0,0,255)" stroke-width="1mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<line x1="1133.86" y1="2834.65" x2="1424.81" y2="2805.55" fill="rgb(255,255,255)" stroke="rgb(0,0,255)" stroke-width="1mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
 <polyline fill="none" stroke="rgb(0,0,255)" stroke-width="1mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          points="3705.43,2716.8 3677.23,2719.7 3702.15,2733.22" />
+          points="1398.7,2816.58 1424.81,2805.55 1397.03,2799.91" />
 </g>
 <g>
-<line x1="3677.23" y1="2719.7" x2="3677.23" y2="2719.7" fill="rgb(255,255,255)" stroke="rgb(0,0,255)" stroke-width="1mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<line x1="1424.81" y1="2805.55" x2="2957.53" y2="3117.04" fill="rgb(255,255,255)" stroke="rgb(0,0,255)" stroke-width="1mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
 <polyline fill="none" stroke="rgb(0,0,255)" stroke-width="1mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          points="3704.32,2711.32 3677.23,2719.7 3704.32,2728.08" />
+          points="2929.32,3119.86 2957.53,3117.04 2932.66,3103.44" />
 </g>
 <g>
-<line x1="3677.23" y1="2719.7" x2="2101.08" y2="2404.47" fill="rgb(255,255,255)" stroke="rgb(0,0,255)" stroke-width="1mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<line x1="2957.53" y1="3117.04" x2="4245.78" y2="2808.19" fill="rgb(255,255,255)" stroke="rgb(0,0,255)" stroke-width="1mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
 <polyline fill="none" stroke="rgb(0,0,255)" stroke-width="1mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          points="2129.28,2401.56 2101.08,2404.47 2125.99,2417.99" />
+          points="4221.4,2822.65 4245.78,2808.19 4217.49,2806.36" />
 </g>
 <g>
-<line x1="2101.08" y1="2404.47" x2="2101.08" y2="2404.47" fill="rgb(255,255,255)" stroke="rgb(0,0,255)" stroke-width="1mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<line x1="4245.78" y1="2808.19" x2="4245.78" y2="2808.19" fill="rgb(255,255,255)" stroke="rgb(0,0,255)" stroke-width="1mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
 <polyline fill="none" stroke="rgb(0,0,255)" stroke-width="1mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          points="2129.05,2409.09 2101.08,2404.47 2121.56,2424.07" />
+          points="4254.16,2835.27 4245.78,2808.19 4237.4,2835.27" />
 </g>
 <g>
-<line x1="2101.08" y1="2404.47" x2="711.282" y2="2126.51" fill="rgb(255,255,255)" stroke="rgb(0,0,255)" stroke-width="1mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<line x1="4245.78" y1="2808.19" x2="5624.05" y2="2477.75" fill="rgb(255,255,255)" stroke="rgb(0,0,255)" stroke-width="1mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
 <polyline fill="none" stroke="rgb(0,0,255)" stroke-width="1mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          points="739.479,2123.6 711.282,2126.51 736.193,2140.03" />
+          points="5599.67,2492.21 5624.05,2477.75 5595.76,2475.92" />
 </g>
 </svg>
