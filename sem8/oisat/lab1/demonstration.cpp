@@ -33,26 +33,35 @@ int main()
 	try
 	{
 		ray r(origin, direction);
-		auto refracted_ray = surface->refract_ray(r, refr_ind_out, refr_ind_in);
-
 		LibBoard::Board board;
-		board.setFillColor("white");
+		board.setFillColor(LibBoard::Color::White);
+		board.setPenColor(LibBoard::Color::White);
+		board.setLineWidth(10.);
 		board.fillRectangle(-1000, -1000, 2000, 2000);
-		surface->draw(board, LibBoard::Color::Black); // Draw the shape
+		board.moveCenter({ 0., 0. });
+		surface->draw(board, LibBoard::Color::Black);
 
-		if (refracted_ray)
-		{
-			// Draw the incident ray up to the intersection point
-			vec_t intersection_point = refracted_ray->origin();
-			r.draw(board, LibBoard::Color::Blue, intersection_point);
+		board.setLineWidth(1.);
 
-			// Draw the refracted ray from the intersection point
-			refracted_ray->draw(board, LibBoard::Color::Red, intersection_point + refracted_ray->direction() * 100.0f); // Extend the refracted ray for visualization
-		}
-		else
+		const int max_iterations = 10;
+
+		for (int i = 0; i != max_iterations; ++i)
 		{
-			// If no intersection, draw the incident ray fully
-			r.draw(board, LibBoard::Color::Blue, r.origin() + r.direction() * 1000.0f); // Extend the incident ray for visualization
+			auto refracted_ray = surface->refract_ray(r, refr_ind_out, refr_ind_in);
+
+			if (refracted_ray)
+			{
+				vec_t intersection_point = refracted_ray->origin();
+				r.draw(board, LibBoard::Color::Blue, intersection_point);
+
+				r = *refracted_ray;
+				std::swap(refr_ind_in, refr_ind_out);
+			}
+			else
+			{
+				r.draw(board, LibBoard::Color::Blue, r.origin() + r.direction() * 500.);
+				break;
+			}
 		}
 
 		board.saveSVG("refraction.svg");

@@ -24,5 +24,6 @@ vec_t plane::normal(const vec_t& point) const
 void plane::draw(LibBoard::Board& board, const LibBoard::Color &color) const
 {
 	board.setPenColor(color);
-	board.drawLine(-1000, shift().y, 1000, shift().y);
+	auto aabb = board.boundingBox(LibBoard::LineWidthFlag::UseLineWidth);
+	board.drawLine(aabb.left, shift().y, aabb.right(), shift().y);
 }

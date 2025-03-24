@@ -55,6 +55,6 @@ public:
     void draw(LibBoard::Board& board, const LibBoard::Color& color, const vec_t& end) const
     {
         board.setPenColor(color);
-        board.drawArrow(m_origin.x, m_origin.y, end.x, end.y, 2.0);
+        board.drawArrow(m_origin.x, m_origin.y, end.x, end.y, LibBoard::Arrow::ExtremityType::Stick);
     }
 };

@@ -10,7 +10,7 @@ std::vector<vec_t> shape::intersection_points(const ray& ray_) const
 	std::vector<vec_t> result;
 	for (const auto& lenght : lenghts)
 	{
-		if (lenght >= 0)
+		if (lenght > 0)
 		{
 			result.emplace_back(ray_.origin() + ray_.direction() * lenght);
 		}
