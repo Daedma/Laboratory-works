@@ -4,6 +4,8 @@
 #include <memory>
 #include <string>
 
+#include <glm/trigonometric.hpp>
+
 #include "shape.hpp"
 #include "sphere.hpp"
 #include "plane.hpp"
@@ -22,6 +24,8 @@ namespace
 		}
 		else if (shape_type == "plane")
 		{
+			auto plane_ = std::make_unique<plane>();
+			plane_->rotation({glm::radians(90.), 0. ,0.});
 			return std::make_unique<plane>();
 		}
 		else if (shape_type == "ellipse")

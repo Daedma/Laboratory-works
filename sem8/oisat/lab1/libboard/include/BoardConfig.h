@@ -28,7 +28,7 @@
 
 #define BOARD_HAVE_MAGICKPLUSPLUS 0
 
-#define BOARD_WIN32 1
+#define BOARD_WIN32 0
 
 #define BOARD_VERSION 0.9.6
 

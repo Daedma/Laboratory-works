@@ -45,6 +45,13 @@ int main()
 
 		const int max_iterations = 10;
 
+		auto reflected_ray = surface->reflect_ray(r);
+		if(reflected_ray)
+		{
+			reflected_ray->draw(board, LibBoard::Color::Red, 
+				reflected_ray->origin() + reflected_ray->direction() * 500.);
+		}
+
 		for (int i = 0; i != max_iterations; ++i)
 		{
 			auto refracted_ray = surface->refract_ray(r, refr_ind_out, refr_ind_in);
@@ -54,8 +61,11 @@ int main()
 				vec_t intersection_point = refracted_ray->origin();
 				r.draw(board, LibBoard::Color::Blue, intersection_point);
 
+				if (glm::dot(r.direction(), refracted_ray->direction()) > 0.)
+				{
+					std::swap(refr_ind_in, refr_ind_out);
+				}
 				r = *refracted_ray;
-				std::swap(refr_ind_in, refr_ind_out);
 			}
 			else
 			{

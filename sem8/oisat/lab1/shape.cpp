@@ -1,5 +1,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <algorithm>
+
 #include "ray.hpp"
 #include "shape.hpp"
 
@@ -47,20 +49,22 @@ std::optional<ray> shape::refract_ray(const ray& ray_, double refr_ind_out, doub
 			});
 
 		vec_t normal_ = normal(closest_origin);
-		double refr_ratio = refr_ind_out / refr_ind_in;
 		vec_t incident = ray_.direction();
+		double n1 = refr_ind_out;
+		double n2 = refr_ind_in;
+		double refr_ratio = n1 / n2;
 		double cos_i = -glm::dot(incident, normal_);
-		double sin_t2 = refr_ratio * refr_ratio * (1.0 - cos_i * cos_i);
+		double sub_root = (n2*n2 - n1*n1) / (cos_i * cos_i * n1 * n1) + 1.;
 
-		if (sin_t2 > 1.0)
+		if (sub_root < 0.)
 		{
 			vec_t direction = incident + 2 * cos_i * normal_;
 			return ray(closest_origin, direction);
 		}
 		else
 		{
-			double cos_t = std::sqrt(1.0 - sin_t2);
-			vec_t direction = refr_ratio * incident + (refr_ratio * cos_i - cos_t) * normal_;
+			double cos_t = std::sqrt(sub_root);
+			vec_t direction = refr_ratio * incident - refr_ratio * cos_i * normal_ * (1. - cos_t);
 			return ray(closest_origin, direction);
 		}
 
