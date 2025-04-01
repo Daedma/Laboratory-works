@@ -1,0 +1,45 @@
+{
+	"version": 3,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 26
+	},
+	"configurePresets": [
+		{
+			"name": "default",
+			"hidden": false,
+			"generator": "Ninja Multi-Config",
+			"binaryDir": "${sourceDir}/build",
+			"cacheVariables": {
+				"CMAKE_C_COMPILER": "clang",
+				"CMAKE_CXX_COMPILER": "clang++",
+				"CMAKE_CXX_FLAGS": "-Wdeprecated-declarations -D_CRT_SECURE_NO_WARNINGS",
+				"CMAKE_C_FLAGS": "-Wdeprecated-declarations -D_CRT_SECURE_NO_WARNINGS"
+			}
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "Debug",
+			"configuration": "Debug",
+			"configurePreset": "default"
+		},
+		{
+			"name": "Release",
+			"configuration": "Release",
+			"configurePreset": "default"
+		},
+		{
+			"name": "Debug (clean)",
+			"configuration": "Debug",
+			"configurePreset": "default",
+			"cleanFirst": true
+		},
+		{
+			"name": "Release (clean)",
+			"configuration": "Release",
+			"configurePreset": "default",
+			"cleanFirst": true
+		}
+	]
+}
