@@ -48,6 +48,6 @@ vec_t ellipse::normal(const vec_t& point) const
 void ellipse::draw(LibBoard::Board& board, const LibBoard::Color &color) const
 {
 	board.setPenColor(color);
-	board.drawEllipse(shift().x, shift().y, m_x_radius, m_y_radius);
+	board.drawEllipse(shift().z, shift().y, m_z_radius, m_y_radius);
 }
 

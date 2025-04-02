@@ -20,31 +20,18 @@ set(CLASSES_SRC
 	plane.cpp
 	shape.cpp
 	sphere.cpp
-	ellipse.cpp)
+	ellipse.cpp
+	biconvex_lens.cpp)
 
-add_executable(intersection intersection.cpp ${CLASSES_SRC})
+add_executable(focus focus.cpp ${CLASSES_SRC})
 
-target_link_libraries(intersection PUBLIC board)
+target_link_libraries(focus PUBLIC board)
 
-target_include_directories(intersection PRIVATE ${SOURCE_DIR} libboard/include)
-
-
-add_executable(reflection reflection.cpp ${CLASSES_SRC})
-
-target_link_libraries(reflection PUBLIC board)
-
-target_include_directories(reflection PRIVATE ${SOURCE_DIR} libboard/include)
+target_include_directories(focus PRIVATE ${SOURCE_DIR} libboard/include)
 
 
-add_executable(refraction refraction.cpp ${CLASSES_SRC})
+add_executable(lens lens.cpp ${CLASSES_SRC})
 
-target_link_libraries(refraction PUBLIC board)
+target_link_libraries(lens PUBLIC board)
 
-target_include_directories(refraction PRIVATE ${SOURCE_DIR} libboard/include)
-
-
-add_executable(demonstration demonstration.cpp ${CLASSES_SRC})
-
-target_link_libraries(demonstration PUBLIC board)
-
-target_include_directories(demonstration PRIVATE  ${SOURCE_DIR} libboard/include)
+target_include_directories(lens PRIVATE ${SOURCE_DIR} libboard/include)
