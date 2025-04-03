@@ -13,7 +13,7 @@ std::vector<vec_t> shape::intersection_points(const ray& ray_) const
 	std::vector<vec_t> result;
 	for (const auto& length : lengths)
 	{
-		if (length > 0)
+		if (length > tolerance)
 		{
 			result.emplace_back(ray_.origin() + ray_.direction() * length);
 		}

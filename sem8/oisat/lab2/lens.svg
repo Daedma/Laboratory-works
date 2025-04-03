@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="2053.38mm" height="2000mm" 
-     viewBox="0 0 5820.62 5669.29" 
+<svg width="2000mm" height="2000mm" 
+     viewBox="0 0 5669.29 5669.29" 
      xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" >
 <desc>Drawing created with the Board library (v0.9.6) Copyright Sebastien Fourey</desc>
 <rect x="0" y="0" width="5669.29" height="5669.29" fill="rgb(255,255,255)" stroke="none" stroke-width="0" style="stroke-linecap:round;stroke-linejoin:round;" />
@@ -19,14 +19,14 @@ M 2687.24 2072.86 L 2982.05 2072.86 L 2982.05 3596.43 L 2687.24 3596.43 Z
           points="2724.52,3460.83 2778.68,3444.08 2724.52,3427.32" />
 </g>
 <g>
-<line x1="2778.68" y1="3444.08" x2="2857.49" y2="3436.09" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
-<polygon fill="rgb(255,0,0)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
+<line x1="2778.68" y1="3444.08" x2="2857.49" y2="3436.09" fill="rgb(255,255,255)" stroke="rgb(0,128,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<polygon fill="rgb(0,128,0)" stroke="rgb(0,128,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
           points="2859.18,3452.75 2911.37,3430.62 2855.8,3419.42" />
 </g>
 <g>
-<line x1="2911.37" y1="3430.62" x2="5549.28" y2="2551.7" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
-<polygon fill="rgb(255,0,0)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          points="5554.58,2567.59 5600.67,2534.58 5543.99,2535.8" />
+<line x1="2911.37" y1="3430.62" x2="4204.64" y2="2999.72" fill="rgb(255,255,255)" stroke="rgb(0,255,255)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<polygon fill="rgb(0,255,255)" stroke="rgb(0,255,255)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
+          points="4209.93,3015.61 4256.02,2982.6 4199.34,2983.82" />
 </g>
 <g>
 <line x1="1842.52" y1="3291.72" x2="2683.18" y2="3291.72" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
@@ -34,14 +34,14 @@ M 2687.24 2072.86 L 2982.05 2072.86 L 2982.05 3596.43 L 2687.24 3596.43 Z
           points="2683.18,3308.47 2737.34,3291.72 2683.18,3274.96" />
 </g>
 <g>
-<line x1="2737.34" y1="3291.72" x2="2683.18" y2="3291.72" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
-<polygon fill="rgb(255,0,0)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          points="2683.18,3308.47 2737.34,3291.72 2683.18,3274.96" />
+<line x1="2737.34" y1="3291.72" x2="2888.8" y2="3282.75" fill="rgb(255,255,255)" stroke="rgb(0,128,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<polygon fill="rgb(0,128,0)" stroke="rgb(0,128,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
+          points="2889.79,3299.48 2942.87,3279.55 2887.81,3266.03" />
 </g>
 <g>
-<line x1="2737.34" y1="3291.72" x2="5517.82" y2="3291.72" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
-<polygon fill="rgb(255,0,0)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          points="5517.82,3308.47 5571.99,3291.72 5517.82,3274.96" />
+<line x1="2942.87" y1="3279.55" x2="4281.03" y2="3019.66" fill="rgb(255,255,255)" stroke="rgb(0,255,255)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<polygon fill="rgb(0,255,255)" stroke="rgb(0,255,255)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
+          points="4284.22,3036.11 4334.19,3009.33 4277.83,3003.21" />
 </g>
 <g>
 <line x1="1842.52" y1="3139.36" x2="2657.58" y2="3139.36" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
@@ -49,14 +49,14 @@ M 2687.24 2072.86 L 2982.05 2072.86 L 2982.05 3596.43 L 2687.24 3596.43 Z
           points="2657.58,3156.11 2711.74,3139.36 2657.58,3122.61" />
 </g>
 <g>
-<line x1="2711.74" y1="3139.36" x2="2657.58" y2="3139.36" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
-<polygon fill="rgb(255,0,0)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          points="2657.58,3156.11 2711.74,3139.36 2657.58,3122.61" />
+<line x1="2711.74" y1="3139.36" x2="2908.07" y2="3132.55" fill="rgb(255,255,255)" stroke="rgb(0,128,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<polygon fill="rgb(0,128,0)" stroke="rgb(0,128,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
+          points="2908.65,3149.29 2962.19,3130.67 2907.49,3115.81" />
 </g>
 <g>
-<line x1="2711.74" y1="3139.36" x2="5492.22" y2="3139.36" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
-<polygon fill="rgb(255,0,0)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          points="5492.22,3156.11 5546.38,3139.36 5492.22,3122.61" />
+<line x1="2962.19" y1="3130.67" x2="4316.51" y2="2975.59" fill="rgb(255,255,255)" stroke="rgb(0,255,255)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<polygon fill="rgb(0,255,255)" stroke="rgb(0,255,255)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
+          points="4318.41,2992.24 4370.32,2969.43 4314.6,2958.95" />
 </g>
 <g>
 <line x1="1842.52" y1="2987" x2="2643.34" y2="2987" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
@@ -64,14 +64,14 @@ M 2687.24 2072.86 L 2982.05 2072.86 L 2982.05 3596.43 L 2687.24 3596.43 Z
           points="2643.34,3003.76 2697.5,2987 2643.34,2970.25" />
 </g>
 <g>
-<line x1="2697.5" y1="2987" x2="2918.77" y2="2983.41" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
-<polygon fill="rgb(255,0,0)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
+<line x1="2697.5" y1="2987" x2="2918.77" y2="2983.41" fill="rgb(255,255,255)" stroke="rgb(0,128,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<polygon fill="rgb(0,128,0)" stroke="rgb(0,128,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
           points="2919.04,3000.16 2972.92,2982.53 2918.5,2966.66" />
 </g>
 <g>
-<line x1="2972.92" y1="2982.53" x2="5749.38" y2="2832.98" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
-<polygon fill="rgb(255,0,0)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          points="5750.28,2849.71 5803.47,2830.06 5748.48,2816.25" />
+<line x1="2972.92" y1="2982.53" x2="4334.11" y2="2909.21" fill="rgb(255,255,255)" stroke="rgb(0,255,255)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<polygon fill="rgb(0,255,255)" stroke="rgb(0,255,255)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
+          points="4335.01,2925.94 4388.19,2906.3 4333.21,2892.48" />
 </g>
 <g>
 <line x1="1842.52" y1="2834.65" x2="2638.75" y2="2834.65" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
@@ -79,14 +79,14 @@ M 2687.24 2072.86 L 2982.05 2072.86 L 2982.05 3596.43 L 2687.24 3596.43 Z
           points="2638.75,2851.4 2692.91,2834.65 2638.75,2817.89" />
 </g>
 <g>
-<line x1="2692.91" y1="2834.65" x2="2922.22" y2="2834.65" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
-<polygon fill="rgb(255,0,0)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
+<line x1="2692.91" y1="2834.65" x2="2922.22" y2="2834.65" fill="rgb(255,255,255)" stroke="rgb(0,128,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<polygon fill="rgb(0,128,0)" stroke="rgb(0,128,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
           points="2922.22,2851.4 2976.38,2834.65 2922.22,2817.89" />
 </g>
 <g>
-<line x1="2976.38" y1="2834.65" x2="5756.86" y2="2834.65" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
-<polygon fill="rgb(255,0,0)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          points="5756.86,2851.4 5811.02,2834.65 5756.86,2817.89" />
+<line x1="2976.38" y1="2834.65" x2="4339.54" y2="2834.65" fill="rgb(255,255,255)" stroke="rgb(0,255,255)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<polygon fill="rgb(0,255,255)" stroke="rgb(0,255,255)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
+          points="4339.54,2851.4 4393.7,2834.65 4339.54,2817.89" />
 </g>
 <g>
 <line x1="1842.52" y1="2682.29" x2="2643.34" y2="2682.29" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
@@ -94,14 +94,14 @@ M 2687.24 2072.86 L 2982.05 2072.86 L 2982.05 3596.43 L 2687.24 3596.43 Z
           points="2643.34,2699.04 2697.5,2682.29 2643.34,2665.53" />
 </g>
 <g>
-<line x1="2697.5" y1="2682.29" x2="2918.77" y2="2685.88" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
-<polygon fill="rgb(255,0,0)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
+<line x1="2697.5" y1="2682.29" x2="2918.77" y2="2685.88" fill="rgb(255,255,255)" stroke="rgb(0,128,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<polygon fill="rgb(0,128,0)" stroke="rgb(0,128,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
           points="2918.5,2702.64 2972.92,2686.76 2919.04,2669.13" />
 </g>
 <g>
-<line x1="2972.92" y1="2686.76" x2="5749.38" y2="2836.31" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
-<polygon fill="rgb(255,0,0)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          points="5748.48,2853.04 5803.47,2839.23 5750.28,2819.58" />
+<line x1="2972.92" y1="2686.76" x2="4334.11" y2="2760.08" fill="rgb(255,255,255)" stroke="rgb(0,255,255)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<polygon fill="rgb(0,255,255)" stroke="rgb(0,255,255)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
+          points="4333.21,2776.81 4388.19,2763 4335.01,2743.35" />
 </g>
 <g>
 <line x1="1842.52" y1="2529.93" x2="2657.58" y2="2529.93" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
@@ -109,14 +109,14 @@ M 2687.24 2072.86 L 2982.05 2072.86 L 2982.05 3596.43 L 2687.24 3596.43 Z
           points="2657.58,2546.68 2711.74,2529.93 2657.58,2513.18" />
 </g>
 <g>
-<line x1="2711.74" y1="2529.93" x2="2657.58" y2="2529.93" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
-<polygon fill="rgb(255,0,0)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          points="2657.58,2546.68 2711.74,2529.93 2657.58,2513.18" />
+<line x1="2711.74" y1="2529.93" x2="2908.07" y2="2536.74" fill="rgb(255,255,255)" stroke="rgb(0,128,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<polygon fill="rgb(0,128,0)" stroke="rgb(0,128,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
+          points="2907.49,2553.49 2962.19,2538.62 2908.65,2520" />
 </g>
 <g>
-<line x1="2711.74" y1="2529.93" x2="5492.22" y2="2529.93" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
-<polygon fill="rgb(255,0,0)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          points="5492.22,2546.68 5546.38,2529.93 5492.22,2513.18" />
+<line x1="2962.19" y1="2538.62" x2="4316.51" y2="2693.7" fill="rgb(255,255,255)" stroke="rgb(0,255,255)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<polygon fill="rgb(0,255,255)" stroke="rgb(0,255,255)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
+          points="4314.6,2710.34 4370.32,2699.86 4318.41,2677.05" />
 </g>
 <g>
 <line x1="1842.52" y1="2377.57" x2="2683.18" y2="2377.57" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
@@ -124,14 +124,14 @@ M 2687.24 2072.86 L 2982.05 2072.86 L 2982.05 3596.43 L 2687.24 3596.43 Z
           points="2683.18,2394.33 2737.34,2377.57 2683.18,2360.82" />
 </g>
 <g>
-<line x1="2737.34" y1="2377.57" x2="2683.18" y2="2377.57" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
-<polygon fill="rgb(255,0,0)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          points="2683.18,2394.33 2737.34,2377.57 2683.18,2360.82" />
+<line x1="2737.34" y1="2377.57" x2="2888.8" y2="2386.54" fill="rgb(255,255,255)" stroke="rgb(0,128,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<polygon fill="rgb(0,128,0)" stroke="rgb(0,128,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
+          points="2887.81,2403.27 2942.87,2389.74 2889.79,2369.82" />
 </g>
 <g>
-<line x1="2737.34" y1="2377.57" x2="5517.82" y2="2377.57" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
-<polygon fill="rgb(255,0,0)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          points="5517.82,2394.33 5571.99,2377.57 5517.82,2360.82" />
+<line x1="2942.87" y1="2389.74" x2="4281.03" y2="2649.63" fill="rgb(255,255,255)" stroke="rgb(0,255,255)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<polygon fill="rgb(0,255,255)" stroke="rgb(0,255,255)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
+          points="4277.83,2666.08 4334.19,2659.96 4284.22,2633.18" />
 </g>
 <g>
 <line x1="1842.52" y1="2225.22" x2="2724.52" y2="2225.22" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
@@ -139,13 +139,13 @@ M 2687.24 2072.86 L 2982.05 2072.86 L 2982.05 3596.43 L 2687.24 3596.43 Z
           points="2724.52,2241.97 2778.68,2225.22 2724.52,2208.46" />
 </g>
 <g>
-<line x1="2778.68" y1="2225.22" x2="2857.49" y2="2233.21" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
-<polygon fill="rgb(255,0,0)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
+<line x1="2778.68" y1="2225.22" x2="2857.49" y2="2233.21" fill="rgb(255,255,255)" stroke="rgb(0,128,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<polygon fill="rgb(0,128,0)" stroke="rgb(0,128,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
           points="2855.8,2249.87 2911.37,2238.67 2859.18,2216.54" />
 </g>
 <g>
-<line x1="2911.37" y1="2238.67" x2="5549.28" y2="3117.6" fill="rgb(255,255,255)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
-<polygon fill="rgb(255,0,0)" stroke="rgb(255,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          points="5543.99,3133.49 5600.67,3134.72 5554.58,3101.7" />
+<line x1="2911.37" y1="2238.67" x2="4204.64" y2="2669.57" fill="rgb(255,255,255)" stroke="rgb(0,255,255)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<polygon fill="rgb(0,255,255)" stroke="rgb(0,255,255)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"
+          points="4199.34,2685.47 4256.02,2686.69 4209.93,2653.68" />
 </g>
 </svg>

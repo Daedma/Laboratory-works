@@ -2,6 +2,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <array>
+
 #include <Board.h>
 
 #include "ray.hpp"
@@ -24,14 +26,21 @@ int main()
 
 	auto raytraces = trace_rays_through_lens(lens, 1., 1.5, 9, 300, 2);
 
+	std::array<LibBoard::Color, 3> colors = {
+		LibBoard::Color::Red,
+		LibBoard::Color::Green,
+		LibBoard::Color::Blue
+	};
+
 	for (const auto& raytrace : raytraces)
 	{
 		for (size_t i = 0; i != raytrace.size() - 1; ++i)
 		{
+			LibBoard::Color color = colors[i % colors.size()];
 			vec_t end = raytrace[i + 1].origin();
-			raytrace[i].draw(board, LibBoard::Color::Red, end);
+			raytrace[i].draw(board, color, end);
 		}
-		raytrace.back().draw(board, LibBoard::Color::Red, 1000);
+		raytrace.back().draw(board, LibBoard::Color::Cyan, 500);
 	}
 
 	board.saveSVG("lens.svg");
