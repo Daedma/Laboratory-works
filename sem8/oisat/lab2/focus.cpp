@@ -22,6 +22,18 @@ int main()
 
 	lens.draw(board, LibBoard::Color::Black);
 
+	auto raytraces = trace_rays_through_lens(lens, 1., 1.5, 9, 300, 2);
+
+	for (const auto& raytrace : raytraces)
+	{
+		for (size_t i = 0; i != raytrace.size() - 1; ++i)
+		{
+			vec_t end = raytrace[i + 1].origin();
+			raytrace[i].draw(board, LibBoard::Color::Red, end);
+		}
+		raytrace.back().draw(board, LibBoard::Color::Red, 1000);
+	}
+
 	board.saveSVG("lens.svg");
 	std::cout << "Lens illustration saved as lens.svg" << std::endl;
 

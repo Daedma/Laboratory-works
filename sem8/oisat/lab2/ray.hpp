@@ -52,9 +52,14 @@ public:
 		return { { origin_res }, { direction_res } };
 	}
 
-    void draw(LibBoard::Board& board, const LibBoard::Color& color, const vec_t& end) const
-    {
-        board.setPenColor(color);
-        board.drawArrow(m_origin.x, m_origin.y, end.x, end.y, LibBoard::Arrow::ExtremityType::Stick);
-    }
+	void draw(LibBoard::Board& board, const LibBoard::Color& color, double length) const
+	{
+		draw(board, color, m_origin + length * m_direction);
+	}
+
+	void draw(LibBoard::Board& board, const LibBoard::Color& color, const vec_t& end) const
+	{
+		board.setPenColor(color);
+		board.drawArrow(m_origin.z, m_origin.y, end.z, end.y, LibBoard::Arrow::ExtremityType::Plain);
+	}
 };

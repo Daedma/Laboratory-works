@@ -81,76 +81,70 @@ std::vector<vec_t::value_type> biconvex_lens::intersection_points_Impl(const ray
 	auto points1 = m_surface_1.intersection_points(ray_);
 	for (const auto& point : points1)
 	{
-		if (point.z < m_cuts.first)
+		if (point.z >= m_cuts.first)
 		{
-			lengths.emplace_back(glm::length(point));
+			lengths.emplace_back(glm::distance(point, ray_.origin()));
 		}
 	}
 
 	auto points2 = m_surface_2.intersection_points(ray_);
 	for (const auto& point : points2)
 	{
-		if (point.z >= m_cuts.second)
+		if (point.z <= m_cuts.second)
 		{
-			lengths.emplace_back(glm::length(point));
+			lengths.emplace_back(glm::distance(point, ray_.origin()));
 		}
 	}
 
 	return lengths;
 }
 
-std::vector<std::vector<ray>> trace_rays_through_lens(const biconvex_lens& lens_, double refr_ind_in,
-	double refr_ind_out, const std::vector<ray>& input_rays_, size_t max_refractions_)
+std::vector<std::vector<ray>> trace_rays_through_lens(const biconvex_lens& lens_, double refr_ind_out_,
+	double refr_ind_in_, const std::vector<ray>& input_rays_, size_t max_refractions_)
 {
-	std::vector<std::vector<ray>> rays;
-	rays.emplace_back(input_rays_);
-
-	std::vector<std::pair<double, double>> refr_indexes(input_rays_.size(), std::make_pair(refr_ind_in, refr_ind_out));
-	for (auto i = rays.begin(); i != rays.end() && max_refractions_; --max_refractions_)
+	std::vector<std::vector<ray>> raytraces(input_rays_.size());
+	for (size_t i = 0; i != input_rays_.size(); ++i)
 	{
-		std::vector<ray>& falling_rays = *i;
-		std::vector<ray> refracted_rays;
+		raytraces[i].emplace_back(input_rays_[i]);
+	}
 
-		for (size_t i = 0; i != falling_rays.size(); ++i)
+	for (auto& raytrace : raytraces)
+	{
+		double refr_ind_in = refr_ind_in_;
+		double refr_ind_out = refr_ind_out_;
+		for (size_t i = 0; i != raytrace.size() && i != max_refractions_; ++i)
 		{
-			const ray& falling_ray = falling_rays[i];
-			auto& [refr_ind_in, refr_ind_out] = refr_indexes[i];
+			const ray& falling_ray = raytrace[i];
+			auto refracted_ray = lens_.refract_ray(falling_ray, refr_ind_out, refr_ind_in);
 
-			auto refracted_ray = lens_.refract_ray(falling_ray, refr_ind_in, refr_ind_out);
 			if (refracted_ray.has_value())
 			{
-				refracted_rays.emplace_back(refracted_ray.value());
+				raytrace.emplace_back(refracted_ray.value());
 
-				bool is_reflected = glm::dot(refracted_ray->direction(), falling_ray.direction()) < 0;
+				bool is_reflected = glm::dot(refracted_ray->direction(), falling_ray.direction()) >= 0;
 				if (!is_reflected)
 				{
 					std::swap(refr_ind_in, refr_ind_out);
 				}
 			}
 		}
-
-		++i;
-		if (!refracted_rays.empty())
-		{
-			i = rays.emplace(i, std::move(refracted_rays));
-		}
 	}
 
-	return rays;
+	return raytraces;
 }
 
 std::vector<std::vector<ray>> trace_rays_through_lens(const biconvex_lens& lens_, double refr_ind_in,
-	double refr_ind_out, size_t num_rays_, double distance_, size_t max_refractions_ = 10)
+	double refr_ind_out, size_t num_rays_, double distance_, size_t max_refractions_)
 {
 	std::vector<ray> input_rays;
 
 	const double z = lens_.minmax_z().first - distance_;
 	const double x = 0.;
 
-	const double step = (lens_.minmax_y().second - lens_.minmax_y().first) / (num_rays_ - 1);
+	const double step = (lens_.minmax_y().second - lens_.minmax_y().first) / (num_rays_ + 1);
 	for (size_t i = 0; i != num_rays_; ++i)
 	{
-		double y = lens_.minmax_y().first + i * step;
+		double y = lens_.minmax_y().first + (i + 1) * step;
 		input_rays.emplace_back(vec_t{ x, y, z }, vec_t{ 0., 0., 1. });
 	}
 
