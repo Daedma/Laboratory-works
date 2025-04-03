@@ -18,7 +18,7 @@ int main()
 	board.fillRectangle(-1000, -1000, 2000, 2000);
 	board.moveCenter({ 0., 0. });
 
-	biconvex_lens lens(100, 400, 50, 100, 200, 50);
+	biconvex_lens lens(80, 300, 50, 100, 300, 50);
 
 	lens.draw(board, LibBoard::Color::Black);
 

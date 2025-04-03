@@ -6,11 +6,11 @@
      xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" >
 <desc>Drawing created with the Board library (v0.9.6) Copyright Sebastien Fourey</desc>
 <rect x="0" y="0" width="5669.29" height="5669.29" fill="rgb(255,255,255)" stroke="none" stroke-width="0" style="stroke-linecap:round;stroke-linejoin:round;" />
-<ellipse cx="2976.38" cy="2834.65" rx="283.465" ry="1133.86" fill="rgb(255,255,255)" stroke="rgb(0,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"  fill-opacity="0.000000" />
-<ellipse cx="2692.91" cy="2834.65" rx="283.465" ry="566.929" fill="rgb(255,255,255)" stroke="rgb(0,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"  fill-opacity="0.000000" />
-<rect x="2730.18" y="2272.64" width="0" height="1124.01" fill="rgb(255,255,255)" stroke="rgb(0,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<ellipse cx="2919.69" cy="2834.65" rx="226.772" ry="850.394" fill="rgb(255,255,255)" stroke="rgb(0,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"  fill-opacity="0.000000" />
+<ellipse cx="2692.91" cy="2834.65" rx="283.465" ry="850.394" fill="rgb(255,255,255)" stroke="rgb(0,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter"  fill-opacity="0.000000" />
+<rect x="2818.9" y="2072.86" width="0" height="1523.58" fill="rgb(255,255,255)" stroke="rgb(0,0,0)" stroke-width="2mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
 <path fill="rgb(255,255,255)" stroke="rgb(0,0,0)" stroke-width="0mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          d="M 2403.78 3974.17 L 3265.51 3974.17 L 3265.51 1695.12 L 2403.78 1695.12 Z
-M 2687.24 2272.64 L 2982.05 2272.64 L 2982.05 3396.65 L 2687.24 3396.65 Z
+          d="M 2403.78 3690.71 L 3152.13 3690.71 L 3152.13 1978.58 L 2403.78 1978.58 Z
+M 2687.24 2072.86 L 2982.05 2072.86 L 2982.05 3596.43 L 2687.24 3596.43 Z
 " />
 </svg>

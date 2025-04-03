@@ -3,6 +3,7 @@
 #include <cmath>
 #include <array>
 
+#include "ray.hpp"
 #include "biconvex_lens.hpp"
 
 vec_t biconvex_lens::normal(const vec_t& point) const
@@ -60,19 +61,6 @@ void biconvex_lens::draw(LibBoard::Board& board, const LibBoard::Color& color) c
 		{ left, -max_radius }
 		} };
 
-	// board.setPenColor(LibBoard::Color::Red);
-	// board.drawRectangle(
-	// 	outer_frame[0].x, outer_frame[0].y,
-	// 	abs(outer_frame[1].x - outer_frame[0].x),
-	// 	abs(outer_frame[3].y - outer_frame[0].y)
-	// );
-
-	// board.setPenColor(LibBoard::Color::Blue);
-	// board.drawRectangle(
-	// 	inner_frame[0].x, inner_frame[0].y,
-	// 	abs(inner_frame[1].x - inner_frame[0].x),
-	// 	abs(inner_frame[3].y - inner_frame[0].y)
-	// );
 	LibBoard::Polyline frame(LibBoard::Path::Closed, board.style());
 	frame.setLineWidth(0.);
 	frame << outer_frame[0] << outer_frame[1] << outer_frame[2] << outer_frame[3];
@@ -109,4 +97,62 @@ std::vector<vec_t::value_type> biconvex_lens::intersection_points_Impl(const ray
 	}
 
 	return lengths;
+}
+
+std::vector<std::vector<ray>> trace_rays_through_lens(const biconvex_lens& lens_, double refr_ind_in,
+	double refr_ind_out, const std::vector<ray>& input_rays_, size_t max_refractions_)
+{
+	std::vector<std::vector<ray>> rays;
+	rays.emplace_back(input_rays_);
+
+	std::vector<std::pair<double, double>> refr_indexes(input_rays_.size(), std::make_pair(refr_ind_in, refr_ind_out));
+	for (auto i = rays.begin(); i != rays.end() && max_refractions_; --max_refractions_)
+	{
+		std::vector<ray>& falling_rays = *i;
+		std::vector<ray> refracted_rays;
+
+		for (size_t i = 0; i != falling_rays.size(); ++i)
+		{
+			const ray& falling_ray = falling_rays[i];
+			auto& [refr_ind_in, refr_ind_out] = refr_indexes[i];
+
+			auto refracted_ray = lens_.refract_ray(falling_ray, refr_ind_in, refr_ind_out);
+			if (refracted_ray.has_value())
+			{
+				refracted_rays.emplace_back(refracted_ray.value());
+
+				bool is_reflected = glm::dot(refracted_ray->direction(), falling_ray.direction()) < 0;
+				if (!is_reflected)
+				{
+					std::swap(refr_ind_in, refr_ind_out);
+				}
+			}
+		}
+
+		++i;
+		if (!refracted_rays.empty())
+		{
+			i = rays.emplace(i, std::move(refracted_rays));
+		}
+	}
+
+	return rays;
+}
+
+std::vector<std::vector<ray>> trace_rays_through_lens(const biconvex_lens& lens_, double refr_ind_in,
+	double refr_ind_out, size_t num_rays_, double distance_, size_t max_refractions_ = 10)
+{
+	std::vector<ray> input_rays;
+
+	const double z = lens_.minmax_z().first - distance_;
+	const double x = 0.;
+
+	const double step = (lens_.minmax_y().second - lens_.minmax_y().first) / (num_rays_ - 1);
+	for (size_t i = 0; i != num_rays_; ++i)
+	{
+		double y = lens_.minmax_y().first + i * step;
+		input_rays.emplace_back(vec_t{ x, y, z }, vec_t{ 0., 0., 1. });
+	}
+
+	return trace_rays_through_lens(lens_, refr_ind_in, refr_ind_out, input_rays, max_refractions_);
 }

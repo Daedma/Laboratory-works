@@ -33,6 +33,30 @@ public:
 		biconvex_lens({ radius1_, radius1_, depth1_ }, center1_, { radius2_, radius2_, depth2_ }, center2_)
 	{}
 
+	std::pair<double, double> minmax_z() const noexcept
+	{
+		return {
+			m_surface_1.shift().z - m_surface_1.z_radius(),
+			m_surface_2.shift().z + m_surface_2.z_radius(),
+		};
+	}
+
+	std::pair<double, double> minmax_y() const noexcept
+	{
+		return {
+			-m_radius,
+			m_radius
+		};
+	}
+
+	std::pair<double, double> minmax_x() const noexcept
+	{
+		return {
+			-m_radius,
+			m_radius
+		};
+	}
+
 	vec_t normal(const vec_t& point) const override;
 
 	void draw(LibBoard::Board& board, const LibBoard::Color& color) const override;
@@ -102,3 +126,7 @@ private:
 		return std::minmax(z1, z2);
 	}
 };
+
+std::vector<std::vector<ray>> trace_rays_through_lens(const biconvex_lens& lens_, double refr_ind_in, double refr_ind_out, const std::vector<ray>& input_rays_, size_t max_refractions_ = 10);
+
+std::vector<std::vector<ray>> trace_rays_through_lens(const biconvex_lens& lens_, double refr_ind_in, double refr_ind_out, size_t num_rays_, double distance_, size_t max_refractions_ = 10);
