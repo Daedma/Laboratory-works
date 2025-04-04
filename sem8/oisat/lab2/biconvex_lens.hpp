@@ -6,7 +6,7 @@
 
 #include "ellipse.hpp"
 
-class biconvex_lens : public shape
+class biconvex_lens
 {
 	ellipse m_surface_1;
 
@@ -57,12 +57,15 @@ public:
 		};
 	}
 
-	vec_t normal(const vec_t& point) const override;
+	vec_t normal(const vec_t& point) const;
 
-	void draw(LibBoard::Board& board, const LibBoard::Color& color) const override;
+	void draw(LibBoard::Board& board, const LibBoard::Color& color) const;
 
-protected:
-	std::vector<vec_t::value_type> intersection_points_Impl(const ray& ray_) const override;
+	std::vector<vec_t> intersection_points(const ray& ray_) const;
+
+	std::optional<ray> reflect_ray(const ray& ray_) const;
+
+	std::optional<ray> refract_ray(const ray& ray_, double refr_ind_out, double refr_ind_in) const;
 
 private:
 	double calc_radius() const noexcept

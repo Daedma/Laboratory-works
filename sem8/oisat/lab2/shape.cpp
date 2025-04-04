@@ -70,7 +70,7 @@ std::optional<ray> shape::refract_ray(const ray& ray_, double refr_ind_out, doub
 void shape::update_transform() noexcept
 {
 	m_transform = mat_t(1);
-	m_transform = glm::translate(m_transform, m_offset);
+	m_transform = glm::translate(m_transform, -m_offset);
 	m_transform = glm::rotate(m_transform, m_rotation.z, { 0, 0, 1 });
 	m_transform = glm::rotate(m_transform, m_rotation.y, { 0, 1, 0 });
 	m_transform = glm::rotate(m_transform, m_rotation.x, { 1, 0, 0 });

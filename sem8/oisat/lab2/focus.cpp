@@ -20,16 +20,15 @@ int main()
 	board.fillRectangle(-1000, -1000, 2000, 2000);
 	board.moveCenter({ 0., 0. });
 
-	biconvex_lens lens(80, 300, 50, 100, 300, 50);
+	biconvex_lens lens(200, 300, 400, 100, 300, 400);
 
-	lens.draw(board, LibBoard::Color::Black);
+	lens.draw(board, LibBoard::Color::DarkCyan);
 
-	auto raytraces = trace_rays_through_lens(lens, 1., 1.5, 9, 300, 2);
+	auto raytraces = trace_rays_through_lens(lens, 1., 1.5, 9, 500, 2);
 
-	std::array<LibBoard::Color, 3> colors = {
+	std::array<LibBoard::Color, 2> colors = {
 		LibBoard::Color::Red,
-		LibBoard::Color::Green,
-		LibBoard::Color::Blue
+		LibBoard::Color::Green
 	};
 
 	for (const auto& raytrace : raytraces)
@@ -40,7 +39,7 @@ int main()
 			vec_t end = raytrace[i + 1].origin();
 			raytrace[i].draw(board, color, end);
 		}
-		raytrace.back().draw(board, LibBoard::Color::Cyan, 500);
+		raytrace.back().draw(board, LibBoard::Color::Blue, 500);
 	}
 
 	board.saveSVG("lens.svg");
