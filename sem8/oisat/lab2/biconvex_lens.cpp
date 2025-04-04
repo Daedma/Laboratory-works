@@ -75,75 +75,29 @@ void biconvex_lens::draw(LibBoard::Board& board, const LibBoard::Color& color) c
 	board.drawRectangle(m_cuts.first, m_radius, m_cuts.second - m_cuts.first, 2 * m_radius);
 }
 
-std::vector<vec_t> biconvex_lens::intersection_points(const ray& ray_) const
+std::vector<vec_t::value_type> biconvex_lens::intersection_points_Impl(const ray& ray_) const
 {
-	std::vector<vec_t> points;
+	std::vector<vec_t::value_type> lengths;
 
 	auto points1 = m_surface_1.intersection_points(ray_);
 	for (const auto& point : points1)
 	{
 		if (point.z < m_cuts.first)
 		{
-			points.emplace_back(point);
+			lengths.emplace_back(glm::distance(point, ray_.origin()));
 		}
 	}
-
+	
 	auto points2 = m_surface_2.intersection_points(ray_);
 	for (const auto& point : points2)
 	{
 		if (point.z >= m_cuts.second)
 		{
-			points.emplace_back(point);
+			lengths.emplace_back(glm::distance(point, ray_.origin()));
 		}
 	}
 
-	return points;
-}
-
-std::optional<ray> biconvex_lens::reflect_ray(const ray& ray_) const
-{
-	std::vector<vec_t> origins = intersection_points(ray_);
-	if (!origins.empty())
-	{
-		const auto& closest_origin = origins.front();
-		vec_t normal_ = normal(closest_origin);
-		vec_t direction = ray_.direction() - 2 * glm::dot(ray_.direction(), normal_) * normal_;
-		return ray(closest_origin, direction);
-	}
-	return std::nullopt;
-}
-
-std::optional<ray> biconvex_lens::refract_ray(const ray& ray_, double refr_ind_out, double refr_ind_in) const
-{
-	std::vector<vec_t> origins = intersection_points(ray_);
-
-	if (!origins.empty())
-	{
-		auto closest_origin = origins.front();
-
-		vec_t normal_ = normal(closest_origin);
-		vec_t incident = ray_.direction();
-		double n1 = refr_ind_out;
-		double n2 = refr_ind_in;
-		double refr_ratio = n1 / n2;
-		double cos_i = -glm::dot(incident, normal_);
-		double sub_root = (n2 * n2 - n1 * n1) / (cos_i * cos_i * n1 * n1) + 1.;
-
-		if (sub_root < 0.)
-		{
-			vec_t direction = incident + 2 * cos_i * normal_;
-			return ray(closest_origin, direction);
-		}
-		else
-		{
-			double cos_t = std::sqrt(sub_root);
-			vec_t direction = refr_ratio * incident + refr_ratio * cos_i * normal_ * (1. - cos_t);
-			return ray(closest_origin, direction);
-		}
-
-	}
-
-	return std::nullopt;
+	return lengths;
 }
 
 std::vector<std::vector<ray>> trace_rays_through_lens(const biconvex_lens& lens_, double refr_ind_out_,

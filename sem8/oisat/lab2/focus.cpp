@@ -20,7 +20,8 @@ int main()
 	board.fillRectangle(-1000, -1000, 2000, 2000);
 	board.moveCenter({ 0., 0. });
 
-	biconvex_lens lens(200, 300, 400, 100, 300, 400);
+	double lens_offset = 80;
+	biconvex_lens lens(200, 300, lens_offset, 100, 300, lens_offset);
 
 	lens.draw(board, LibBoard::Color::DarkCyan);
 
