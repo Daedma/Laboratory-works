@@ -18,14 +18,10 @@ namespace
 {
 	constexpr size_t RAYS_COUNT = 9;
 
-	constexpr size_t ANGLES_COUNT = 100;
-
 	constexpr double PRECISION = 1.e-6;
-
-	constexpr size_t ITER_MAX = 1000;
 }
 
-std::pair<size_t, size_t> getFibonacciPairAbove(double val)
+std::pair<size_t, size_t> fibonacci_pair_above(double val)
 {
 	size_t cur = 1, prev = 0;
 	while (cur <= val)
@@ -36,9 +32,9 @@ std::pair<size_t, size_t> getFibonacciPairAbove(double val)
 	return { cur, prev };
 }
 
-double find_minimum(std::function<double(double)> func, double left, double right, double eps)
+double minimum(std::function<double(double)> func, double left, double right, double eps)
 {
-	auto [fn, fnm1] = getFibonacciPairAbove((right - left) / eps);
+	auto [fn, fnm1] = fibonacci_pair_above((right - left) / eps);
 	size_t fnm2 = fn - fnm1;
 	double dx = right - left;
 	double x1 = left + (fnm2 * dx) / fn;
@@ -75,13 +71,13 @@ double find_minimum(std::function<double(double)> func, double left, double righ
 	return (x1 + x2) * .5;
 }
 
-double calc_optical_path_length(const std::vector<vec_t>& points, const std::vector<double>& indeces)
+double opl(const std::vector<vec_t>& points, const std::vector<double>& indices)
 {
 	double sum = 0.;
 	for (size_t i = 0; i != points.size() - 1; ++i)
 	{
 		vec_t delta = points[i + 1] - points[i];
-		sum += glm::length(delta) * indeces[i];
+		sum += glm::length(delta) * indices[i];
 	}
 	return sum;
 }
@@ -111,21 +107,21 @@ double sd(const std::vector<vec_t>& points)
 	return sd(points, mean(points));
 }
 
-
-double calc_focus_distance_sdxy(const biconvex_lens& lens_, double refr_ind_, double max_z_)
+// Find focus of a lens using sco of intersection points minimization
+double focus_ps(const biconvex_lens& lens_, double refr_ind_, double max_z_)
 {
-	auto raytraces = trace_rays_through_lens(lens_, 1., refr_ind_, RAYS_COUNT, 300, 2);
+	auto ray_traces = trace_rays_through_lens(lens_, 1., refr_ind_, RAYS_COUNT, 300, 2);
 
-	auto func = [&raytraces](double z_) {
+	auto intersection_points_sd = [&ray_traces](double z_) {
 		std::vector<vec_t> intersections;
-		intersections.reserve(raytraces.size());
+		intersections.reserve(ray_traces.size());
 
 		plane p;
 		p.shift({ 0., 0., z_ });
 
-		for (const auto& raytrace : raytraces)
+		for (const auto& ray_trace : ray_traces)
 		{
-			intersections.emplace_back(p.intersection_points(raytrace.back()).front());
+			intersections.emplace_back(p.intersection_points(ray_trace.back()).front());
 		}
 
 		return sd(intersections, { 0., 0., z_ });
@@ -135,35 +131,36 @@ double calc_focus_distance_sdxy(const biconvex_lens& lens_, double refr_ind_, do
 	double min_z = lens_.minmax_z().first;
 	double max_z = lens_.minmax_z().second + max_z_;
 
-	return find_minimum(func, min_z, max_z, PRECISION);
+	return minimum(intersection_points_sd, min_z, max_z, PRECISION);
 }
 
-double calc_focus_distance_sdxyopl(const biconvex_lens& lens_, double refr_ind_, double max_z_)
+// Find focus of a lens using sco of intersection points with optical path length minimization
+double focus_popls(const biconvex_lens& lens_, double refr_ind_, double max_z_)
 {
-	auto raytraces = trace_rays_through_lens(lens_, 1., refr_ind_, RAYS_COUNT, 300, 2);
+	auto ray_traces = trace_rays_through_lens(lens_, 1., refr_ind_, RAYS_COUNT, 300, 2);
 
-	auto func = [&raytraces, refr_ind_](double z_) {
+	auto popl_sd = [&ray_traces, refr_ind_](double z_) {
 		std::vector<vec_t> intersections;
-		intersections.reserve(raytraces.size());
+		intersections.reserve(ray_traces.size());
 
-		std::vector<double> indieces = { 1., refr_ind_, 1. };
+		std::vector<double> indices = { 1., refr_ind_, 1. };
 
 		plane p;
 		p.shift({ 0., 0., z_ });
 
-		for (const auto& raytrace : raytraces)
+		for (const auto& ray_trace : ray_traces)
 		{
-			vec_t intersection = p.intersection_points(raytrace.back()).front();
+			vec_t intersection = p.intersection_points(ray_trace.back()).front();
 
 			std::vector<vec_t> points;
-			points.reserve(raytrace.size() + 1);
-			for (const auto& ray : raytrace)
+			points.reserve(ray_trace.size() + 1);
+			for (const auto& ray : ray_trace)
 			{
 				points.emplace_back(ray.origin());
 			}
 			points.emplace_back(intersection);
 
-			double optical_path_length = calc_optical_path_length(points, indieces);
+			double optical_path_length = opl(points, indices);
 
 			intersection.z = optical_path_length;
 			intersections.emplace_back(intersection);
@@ -176,42 +173,43 @@ double calc_focus_distance_sdxyopl(const biconvex_lens& lens_, double refr_ind_,
 	double min_z = lens_.minmax_z().first;
 	double max_z = lens_.minmax_z().second + max_z_;
 
-	return find_minimum(func, min_z, max_z, PRECISION);
+	return minimum(popl_sd, min_z, max_z, PRECISION);
 }
 
-double calc_focus_distance_sdopl(const biconvex_lens& lens_, double refr_ind_, double max_z_)
+// Find focus of a lens using sco of consistent optical path length minimization
+double focus_copls(const biconvex_lens& lens_, double refr_ind_, double max_z_)
 {
-	auto raytraces = trace_rays_through_lens(lens_, 1., refr_ind_, RAYS_COUNT, 300, 2);
+	auto ray_traces = trace_rays_through_lens(lens_, 1., refr_ind_, RAYS_COUNT, 300, 2);
 
-	auto get_equal_opl_points = [&raytraces, refr_ind_](double h_) {
+	auto copl_points = [&ray_traces, refr_ind_](double h_) {
 		std::vector<vec_t> points;
-		points.reserve(raytraces.size());
+		points.reserve(ray_traces.size());
 
-		std::vector<double> indieces = { 1., refr_ind_ };
+		std::vector<double> indices = { 1., refr_ind_ };
 
-		for (const auto& raytrace : raytraces)
+		for (const auto& ray_trace : ray_traces)
 		{
-			double opl1 = glm::distance(raytrace[0].origin(), raytrace[1].origin());
-			double opl2 = glm::distance(raytrace[1].origin(), raytrace[2].origin()) * refr_ind_;
+			double opl1 = glm::distance(ray_trace[0].origin(), ray_trace[1].origin());
+			double opl2 = glm::distance(ray_trace[1].origin(), ray_trace[2].origin()) * refr_ind_;
 			double l3 = h_ - opl1 - opl2;
-			vec_t r = raytrace[2].origin() + raytrace[2].direction() * l3;
+			vec_t r = ray_trace[2].origin() + ray_trace[2].direction() * l3;
 			points.emplace_back(r);
 		}
 
 		return points;
 		};
 
-	auto func = [&get_equal_opl_points](double h_) {
-		return sd(get_equal_opl_points(h_));
+	auto func = [&copl_points](double h_) {
+		return sd(copl_points(h_));
 		};
 
 
 	double min_h = lens_.minmax_z().first;
 	double max_h = lens_.minmax_z().second + max_z_;
 
-	double h = find_minimum(func, min_h, max_h, PRECISION);
+	double h = minimum(func, min_h, max_h, PRECISION);
 
-	return mean(get_equal_opl_points(h)).z;
+	return mean(copl_points(h)).z;
 }
 
 int main()
@@ -226,40 +224,40 @@ int main()
 	double lens_offset = 50;
 	biconvex_lens lens(80, 300, lens_offset, 100, 300, lens_offset);
 
-	double focus_sd = calc_focus_distance_sdxy(lens, 1.5, 1000);
-	double focus_sdxyopl = calc_focus_distance_sdxyopl(lens, 1.5, 1000);
-	double focus_sdopl = calc_focus_distance_sdopl(lens, 1.5, 1000);
+	double fps = focus_ps(lens, 1.5, 1000);
+	double fpopls = focus_popls(lens, 1.5, 1000);
+	double fcopls = focus_copls(lens, 1.5, 1000);
 
 	lens.draw(board, LibBoard::Color::DarkCyan);
 
-	auto raytraces = trace_rays_through_lens(lens, 1., 1.5, 9, 500, 2);
+	auto ray_traces = trace_rays_through_lens(lens, 1., 1.5, 9, 500, 2);
 
 	std::array<LibBoard::Color, 2> colors = {
 		LibBoard::Color::Red,
 		LibBoard::Color::Green
 	};
 
-	for (const auto& raytrace : raytraces)
+	for (const auto& ray_trace : ray_traces)
 	{
-		for (size_t i = 0; i != raytrace.size() - 1; ++i)
+		for (size_t i = 0; i != ray_trace.size() - 1; ++i)
 		{
 			LibBoard::Color color = colors[i % colors.size()];
-			vec_t end = raytrace[i + 1].origin();
-			raytrace[i].draw(board, color, end);
+			vec_t end = ray_trace[i + 1].origin();
+			ray_trace[i].draw(board, color, end);
 		}
-		raytrace.back().draw(board, LibBoard::Color::Blue, 500);
+		ray_trace.back().draw(board, LibBoard::Color::Blue, 500);
 	}
 
 	board.setLineWidth(10.);
 
 	board.setPenColor(LibBoard::Color::Red);
-	board.drawDot(focus_sd, 0);
+	board.drawDot(fps, 0);
 
 	board.setPenColor(LibBoard::Color::Green);
-	board.drawDot(focus_sdxyopl, 0);
+	board.drawDot(fpopls, 0);
 
 	board.setPenColor(LibBoard::Color::Blue);
-	board.drawDot(focus_sdopl, 0);
+	board.drawDot(fcopls, 0);
 
 	board.saveSVG("lens.svg");
 	std::cout << "Lens illustration saved as lens.svg" << std::endl;
