@@ -25,22 +25,54 @@ namespace
 	constexpr size_t ITER_MAX = 1000;
 }
 
-double find_minimum(std::function<double(double)> func, double left_, double right_, double eps_, size_t iter_max_)
+std::pair<size_t, size_t> getFibonacciPairAbove(double val)
 {
-	double middle;
-	for (size_t i = 0; i != iter_max_ && (right_ - left_) >= eps_; ++i)
+	size_t cur = 1, prev = 0;
+	while (cur <= val)
 	{
-		middle = (right_ + left_) * .5;
-		if (func(middle - eps_) > func(middle + eps_))
+		cur += prev;
+		prev = cur - prev;
+	}
+	return { cur, prev };
+}
+
+double find_minimum(std::function<double(double)> func, double left, double right, double eps)
+{
+	auto [fn, fnm1] = getFibonacciPairAbove((right - left) / eps);
+	size_t fnm2 = fn - fnm1;
+	double dx = right - left;
+	double x1 = left + (fnm2 * dx) / fn;
+	double x2 = left + (fnm1 * dx) / fn;
+	double fx1 = func(x1);
+	double fx2 = func(x2);
+	fn = fnm1;
+	fnm1 = fnm2;
+	fnm2 = fn - fnm1;
+	while (fn != fnm1)
+	{
+		if (fx1 < fx2)
 		{
-			left_ = middle;
+			right = x2;
+			dx = right - left;
+			x2 = x1;
+			x1 = left + (fnm2 * dx) / fn;
+			fx2 = fx1;
+			fx1 = func(x1);
 		}
 		else
 		{
-			right_ = middle;
+			left = x1;
+			dx = right - left;
+			x1 = x2;
+			x2 = left + (fnm1 * dx) / fn;
+			fx1 = fx2;
+			fx2 = func(x2);
 		}
+		fn = fnm1;
+		fnm1 = fnm2;
+		fnm2 = fn - fnm1;
 	}
-	return middle;
+	return (x1 + x2) * .5;
 }
 
 double calc_optical_path_length(const std::vector<vec_t>& points, const std::vector<double>& indeces)
@@ -103,7 +135,7 @@ double calc_focus_distance_sdxy(const biconvex_lens& lens_, double refr_ind_, do
 	double min_z = lens_.minmax_z().first;
 	double max_z = lens_.minmax_z().second + max_z_;
 
-	return find_minimum(func, min_z, max_z_, PRECISION, ITER_MAX);
+	return find_minimum(func, min_z, max_z, PRECISION);
 }
 
 double calc_focus_distance_sdxyopl(const biconvex_lens& lens_, double refr_ind_, double max_z_)
@@ -144,34 +176,42 @@ double calc_focus_distance_sdxyopl(const biconvex_lens& lens_, double refr_ind_,
 	double min_z = lens_.minmax_z().first;
 	double max_z = lens_.minmax_z().second + max_z_;
 
-	return find_minimum(func, min_z, max_z_, PRECISION, ITER_MAX);
+	return find_minimum(func, min_z, max_z, PRECISION);
 }
 
 double calc_focus_distance_sdopl(const biconvex_lens& lens_, double refr_ind_, double max_z_)
 {
 	auto raytraces = trace_rays_through_lens(lens_, 1., refr_ind_, RAYS_COUNT, 300, 2);
 
-	auto func = [&raytraces, refr_ind_](double z_) {
+	auto get_equal_opl_points = [&raytraces, refr_ind_](double h_) {
 		std::vector<vec_t> points;
 		points.reserve(raytraces.size());
 
-		std::vector<double> indieces = { 1., refr_ind_, 1. };
-
-		plane p;
-		p.shift({ 0., 0., z_ });
+		std::vector<double> indieces = { 1., refr_ind_ };
 
 		for (const auto& raytrace : raytraces)
 		{
-			
+			double opl1 = glm::distance(raytrace[0].origin(), raytrace[1].origin());
+			double opl2 = glm::distance(raytrace[1].origin(), raytrace[2].origin()) * refr_ind_;
+			double l3 = h_ - opl1 - opl2;
+			vec_t r = raytrace[2].origin() + raytrace[2].direction() * l3;
+			points.emplace_back(r);
 		}
 
+		return points;
+		};
+
+	auto func = [&get_equal_opl_points](double h_) {
+		return sd(get_equal_opl_points(h_));
 		};
 
 
-	double min_z = lens_.minmax_z().first;
-	double max_z = lens_.minmax_z().second + max_z_;
+	double min_h = lens_.minmax_z().first;
+	double max_h = lens_.minmax_z().second + max_z_;
 
-	return find_minimum(func, min_z, max_z_, PRECISION, ITER_MAX);
+	double h = find_minimum(func, min_h, max_h, PRECISION);
+
+	return mean(get_equal_opl_points(h)).z;
 }
 
 int main()
@@ -187,7 +227,8 @@ int main()
 	biconvex_lens lens(80, 300, lens_offset, 100, 300, lens_offset);
 
 	double focus_sd = calc_focus_distance_sdxy(lens, 1.5, 1000);
-	double focus_sdxyol = calc_focus_distance_sdxyopl(lens, 1.5, 1000);
+	double focus_sdxyopl = calc_focus_distance_sdxyopl(lens, 1.5, 1000);
+	double focus_sdopl = calc_focus_distance_sdopl(lens, 1.5, 1000);
 
 	lens.draw(board, LibBoard::Color::DarkCyan);
 
@@ -215,7 +256,10 @@ int main()
 	board.drawDot(focus_sd, 0);
 
 	board.setPenColor(LibBoard::Color::Green);
-	board.drawDot(focus_sdxyol, 0);
+	board.drawDot(focus_sdxyopl, 0);
+
+	board.setPenColor(LibBoard::Color::Blue);
+	board.drawDot(focus_sdopl, 0);
 
 	board.saveSVG("lens.svg");
 	std::cout << "Lens illustration saved as lens.svg" << std::endl;

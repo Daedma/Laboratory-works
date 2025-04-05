@@ -150,4 +150,5 @@ M 2687.24 2072.86 L 2982.05 2072.86 L 2982.05 3596.43 L 2687.24 3596.43 Z
 </g>
 <line x1="4906.78" y1="2834.65" x2="4906.78" y2="2834.65" fill="none" stroke="rgb(255,0,0)" stroke-width="10mm" style="stroke-linecap:round;stroke-linejoin:miter" />
 <line x1="4899.27" y1="2834.65" x2="4899.27" y2="2834.65" fill="none" stroke="rgb(0,128,0)" stroke-width="10mm" style="stroke-linecap:round;stroke-linejoin:miter" />
+<line x1="4675.44" y1="2834.65" x2="4675.44" y2="2834.65" fill="none" stroke="rgb(0,0,255)" stroke-width="10mm" style="stroke-linecap:round;stroke-linejoin:miter" />
 </svg>
