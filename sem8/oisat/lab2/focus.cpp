@@ -21,56 +21,40 @@ namespace
 	constexpr double PRECISION = 1.e-6;
 
 	constexpr double RAYS_DISTANCE = 1.;
+
+	constexpr size_t MAX_ITERATIONS = 100;
 }
 
-std::pair<size_t, size_t> fibonacci_pair_above(double val)
+double minimum(std::function<double(double)> func, double left, double right, double eps, size_t iterMax = MAX_ITERATIONS)
 {
-	size_t cur = 1, prev = 0;
-	while (cur <= val)
-	{
-		cur += prev;
-		prev = cur - prev;
-	}
-	return { cur, prev };
-}
-
-double minimum(std::function<double(double)> func, double left, double right, double eps)
-{
-	auto [fn, fnm1] = fibonacci_pair_above((right - left) / eps);
-	size_t fnm2 = fn - fnm1;
+	constexpr double REVERSE_PHI = 0.6180339887498948;
 	double dx = right - left;
-	double x1 = left + (fnm2 * dx) / fn;
-	double x2 = left + (fnm1 * dx) / fn;
+	double x1 = right - dx * REVERSE_PHI, x2 = left + dx * REVERSE_PHI;
 	double fx1 = func(x1);
 	double fx2 = func(x2);
-	fn = fnm1;
-	fnm1 = fnm2;
-	fnm2 = fn - fnm1;
-	while (fn != fnm1)
+
+	for (size_t i = 0; i != iterMax && (x2 - x1) >= eps; ++i)
 	{
-		if (fx1 < fx2)
-		{
-			right = x2;
-			dx = right - left;
-			x2 = x1;
-			x1 = left + (fnm2 * dx) / fn;
-			fx2 = fx1;
-			fx1 = func(x1);
-		}
-		else
+		if (fx1 >= fx2)
 		{
 			left = x1;
 			dx = right - left;
 			x1 = x2;
-			x2 = left + (fnm1 * dx) / fn;
+			x2 = left + dx * REVERSE_PHI;
 			fx1 = fx2;
 			fx2 = func(x2);
 		}
-		fn = fnm1;
-		fnm1 = fnm2;
-		fnm2 = fn - fnm1;
+		else
+		{
+			right = x2;
+			dx = right - left;
+			x2 = x1;
+			x1 = right - dx * REVERSE_PHI;
+			fx2 = fx1;
+			fx1 = func(x1);
+		}
 	}
-	return (x1 + x2) * .5;
+	return (x2 + x1) * 0.5;
 }
 
 double opl(const std::vector<vec_t>& points, const std::vector<double>& indices)
@@ -125,7 +109,6 @@ double focus_ps(const biconvex_lens& lens_, double refr_ind_, double max_z_)
 		{
 			intersections.emplace_back(p.intersection_points(ray_trace.back()).front());
 		}
-
 		return sd(intersections, { 0., 0., z_ });
 		};
 
