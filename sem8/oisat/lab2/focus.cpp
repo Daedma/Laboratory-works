@@ -4,6 +4,7 @@
 #include <vector>
 #include <array>
 #include <functional>
+#include <limits>
 
 #include <Board.h>
 #include <glm/gtc/constants.hpp>
@@ -20,7 +21,7 @@ namespace
 
 	constexpr double PRECISION = 1.e-6;
 
-	constexpr double RAYS_DISTANCE = 1.;
+	constexpr double RAYS_DISTANCE = 2.;
 
 	constexpr size_t MAX_ITERATIONS = 100;
 }
@@ -85,6 +86,11 @@ double sd(const std::vector<vec_t>& points_, const vec_t& center_)
 	{
 		sum += glm::dot(point - center_, point - center_);
 	}
+	if (points_.empty())
+	{
+		return std::numeric_limits<double>::max();
+	}
+
 	return std::sqrt(sum / points_.size());
 }
 
@@ -107,13 +113,17 @@ double focus_ps(const biconvex_lens& lens_, double refr_ind_, double max_z_)
 
 		for (const auto& ray_trace : ray_traces)
 		{
-			intersections.emplace_back(p.intersection_points(ray_trace.back()).front());
+			std::vector<vec_t> intersection = p.intersection_points(ray_trace.back());
+			if(!intersection.empty())
+			{
+				intersections.emplace_back(p.intersection_points(ray_trace.back()).front());
+			}
 		}
 		return sd(intersections, { 0., 0., z_ });
 		};
 
 
-	double min_z = lens_.minmax_z().first;
+	double min_z = lens_.minmax_z().second;
 	double max_z = lens_.minmax_z().second + max_z_;
 
 	return minimum(intersection_points_sd, min_z, max_z, PRECISION);
@@ -155,7 +165,7 @@ double focus_popls(const biconvex_lens& lens_, double refr_ind_, double max_z_)
 		};
 
 
-	double min_z = lens_.minmax_z().first;
+	double min_z = lens_.minmax_z().second;
 	double max_z = lens_.minmax_z().second + max_z_;
 
 	return minimum(popl_sd, min_z, max_z, PRECISION);
@@ -189,7 +199,7 @@ double focus_copls(const biconvex_lens& lens_, double refr_ind_, double max_z_)
 		};
 
 
-	double min_h = lens_.minmax_z().first;
+	double min_h = lens_.minmax_z().second;
 	double max_h = lens_.minmax_z().second + max_z_;
 
 	double h = minimum(func, min_h, max_h, PRECISION);
@@ -223,9 +233,9 @@ int main()
 
 	biconvex_lens lens(a1, b1, center_1, a2, b2, center_2);
 
-	double fps = focus_ps(lens, refr_ind, 10);
-	double fpopls = focus_popls(lens, refr_ind, 10);
-	double fcopls = focus_copls(lens, refr_ind, 10);
+	double fps = focus_ps(lens, refr_ind, 20);
+	double fpopls = focus_popls(lens, refr_ind, 20);
+	double fcopls = focus_copls(lens, refr_ind, 20);
 
 	std::cout << "Focus (sd of points) : " << fps << " (red dot)" << std::endl;
 	std::cout << "Focus (sd of points and optical path length) : " << fpopls << " (green dot)" << std::endl;
@@ -233,7 +243,7 @@ int main()
 
 	lens.draw(board, LibBoard::Color::DarkCyan);
 
-	auto ray_traces = trace_rays_through_lens(lens, 1., 1.5, 9, RAYS_DISTANCE, 2);
+	auto ray_traces = trace_rays_through_lens(lens, 1., refr_ind, 9, RAYS_DISTANCE, 2);
 
 	std::array<LibBoard::Color, 2> colors = {
 		LibBoard::Color::Red,
@@ -248,7 +258,7 @@ int main()
 			vec_t end = ray_trace[i + 1].origin();
 			ray_trace[i].draw(board, color, end);
 		}
-		ray_trace.back().draw(board, LibBoard::Color::Blue, 3);
+		ray_trace.back().draw(board, LibBoard::Color::Blue, 15);
 	}
 
 	board.setLineWidth(0.1);

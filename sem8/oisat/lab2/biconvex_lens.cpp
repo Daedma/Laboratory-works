@@ -122,7 +122,7 @@ std::vector<std::vector<ray>> trace_rays_through_lens(const biconvex_lens& lens_
 			{
 				raytrace.emplace_back(refracted_ray.value());
 
-				bool is_reflected = glm::dot(refracted_ray->direction(), falling_ray.direction()) >= 0;
+				bool is_reflected = glm::dot(refracted_ray->direction(), falling_ray.direction()) < 0;
 				if (!is_reflected)
 				{
 					std::swap(refr_ind_in, refr_ind_out);
@@ -142,10 +142,12 @@ std::vector<std::vector<ray>> trace_rays_through_lens(const biconvex_lens& lens_
 	const double z = lens_.minmax_z().first - distance_;
 	const double x = 0.;
 
-	const double step = (lens_.minmax_y().second - lens_.minmax_y().first) / (num_rays_ + 1);
+	double min_y = lens_.minmax_y().first / 4;
+	double max_y = lens_.minmax_y().second / 4;
+	const double step = (max_y - min_y) / (num_rays_ + 1);
 	for (size_t i = 0; i != num_rays_; ++i)
 	{
-		double y = lens_.minmax_y().first + (i + 1) * step;
+		double y = min_y + (i + 1) * step;
 		input_rays.emplace_back(vec_t{ x, y, z }, vec_t{ 0., 0., 1. });
 	}
 

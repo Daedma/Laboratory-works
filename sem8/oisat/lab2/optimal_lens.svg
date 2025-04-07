@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="5.74mm" height="8.04mm" 
-     viewBox="0 0 16.2709 22.7906" 
+<svg width="7.44mm" height="8.04mm" 
+     viewBox="0 0 21.0898 22.7906" 
      xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" >
 <desc>Drawing created with the Board library (v0.9.6) Copyright Sebastien Fourey</desc>
-<ellipse cx="13.3795" cy="11.3953" rx="2.83465" ry="11.3386" fill="rgb(255,255,255)" stroke="rgb(0,139,139)" stroke-width="0.02mm" style="stroke-linecap:butt;stroke-linejoin:miter"  fill-opacity="0.000000" />
-<ellipse cx="5.72598" cy="11.3953" rx="5.66929" ry="11.3386" fill="rgb(255,255,255)" stroke="rgb(0,139,139)" stroke-width="0.02mm" style="stroke-linecap:butt;stroke-linejoin:miter"  fill-opacity="0.000000" />
+<ellipse cx="18.1984" cy="11.3953" rx="2.83465" ry="5.66929" fill="rgb(255,255,255)" stroke="rgb(0,139,139)" stroke-width="0.02mm" style="stroke-linecap:butt;stroke-linejoin:miter"  fill-opacity="0.000000" />
+<ellipse cx="8.56063" cy="11.3953" rx="8.50394" ry="11.3386" fill="rgb(255,255,255)" stroke="rgb(0,139,139)" stroke-width="0.02mm" style="stroke-linecap:butt;stroke-linejoin:miter"  fill-opacity="0.000000" />
 <path fill="rgb(255,255,255)" stroke="rgb(0,139,139)" stroke-width="0mm" style="stroke-linecap:butt;stroke-linejoin:miter"
-          d="M 0 22.7905 L 16.2709 22.7905 L 16.2709 0 L 0 0 Z
-M 10.4882 6.4529 L 11.452 6.4529 L 11.452 16.3377 L 10.4882 16.3377 Z
+          d="M 0 22.7905 L 21.0898 22.7905 L 21.0898 0 L 0 0 Z
+M 15.3071 7.00901 L 17.1213 7.00901 L 17.1213 15.7815 L 15.3071 15.7815 Z
 " />
-<rect x="10.8284" y="6.4529" width="0" height="9.88475" fill="rgb(255,255,255)" stroke="rgb(0,139,139)" stroke-width="0.02mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
+<rect x="16.4025" y="7.00901" width="0" height="8.77254" fill="rgb(255,255,255)" stroke="rgb(0,139,139)" stroke-width="0.02mm" style="stroke-linecap:butt;stroke-linejoin:miter" />
 </svg>
